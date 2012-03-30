@@ -10,10 +10,11 @@ import java.io.Serializable;
  * A base class for Api Call resolvers
  *
  * @author evelio
- * @version 1.0
+ * @author cristian
+ * @version 1.1
  */
 public abstract class CallResolver {
-    private final Context mContext;
+    private Context mContext;
     private int mResultCode;
     private Bundle mResultData;
     private Bundle mParameters;
@@ -21,13 +22,10 @@ public abstract class CallResolver {
 
     /**
      * Creates a CallResolver composed of
-     *
-     * @param context
      */
-    public CallResolver(Context context) {
-        mContext = context;
+    public CallResolver() {
         //Pessimistic by default
-        setResultCode(GroundyConstants.RESULT_FAIL);
+        setResultCode(Groundy.STATUS_ERROR);
         setResultData(new Bundle());
     }
 
@@ -65,7 +63,11 @@ public abstract class CallResolver {
      * @param result
      */
     protected void setResult(Serializable result) {
-        mResultData.putSerializable(GroundyConstants.KEY_RESULT, result);
+        mResultData.putSerializable(Groundy.KEY_RESULT, result);
+    }
+
+    final void setContext(Context context) {
+        mContext = context;
     }
 
     /**
@@ -83,8 +85,9 @@ public abstract class CallResolver {
             try {
                 updateData();
             } catch (Exception e) {
-                setResultCode(GroundyConstants.RESULT_FAIL);
-                mResultData.putSerializable(GroundyConstants.KEY_RESULT, e.getMessage());
+                e.printStackTrace();
+                setResultCode(Groundy.STATUS_ERROR);
+                mResultData.putSerializable(Groundy.KEY_RESULT, e.getMessage());
                 return;
             }
         }
@@ -136,7 +139,17 @@ public abstract class CallResolver {
         return mReceiver;
     }
 
-    protected boolean requiresWifi() {
+    protected boolean keepWifiOn() {
+        return false;
+    }
+
+    /**
+     * Override this if you want to cache the CallResolver instance. Do it only if you are
+     * sure that {@link CallResolver#updateData()} and {@link CallResolver#prepareResult()}
+     * methods won't need a fresh instance each time they are executed.
+     * @return true if this instance must be cached
+     */
+    protected boolean canBeCached() {
         return false;
     }
 

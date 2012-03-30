@@ -1,12 +1,11 @@
 package com.codeslap.groundy;
 
-import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
-public class GroundyService extends IntentService {
+public class GroundyService extends GroundyIntentService {
     /**
      * Log tag
      */
@@ -29,21 +28,26 @@ public class GroundyService extends IntentService {
         extras = (extras == null) ? Bundle.EMPTY : extras;
 
         // Pessimistic by default
-        int resultCode = GroundyConstants.RESULT_FAIL;
+        int resultCode = Groundy.STATUS_ERROR;
         Bundle resultData = Bundle.EMPTY;
 
-        ResultReceiver receiver = (ResultReceiver) extras.get(GroundyConstants.KEY_RECEIVER);
+        ResultReceiver receiver = (ResultReceiver) extras.get(Groundy.KEY_RECEIVER);
         if (receiver != null) {
-            receiver.send(GroundyConstants.STATUS_RUNNING, Bundle.EMPTY);
+            receiver.send(Groundy.STATUS_RUNNING, Bundle.EMPTY);
         }
 
         //This should be be the most common action
-        CallResolver resolver = CallResolverFactory.get(action, this);
-        L.d(TAG, "resolver is " + resolver);
+        CallResolver resolver;
+        try {
+            resolver = CallResolverFactory.get((Class<? extends CallResolver>) Class.forName(action), this);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
         if (resolver != null) {
+            L.d(TAG, "Executing resolver: " + resolver);
             resolver.setReceiver(receiver);
-            resolver.setParameters(extras.getBundle(GroundyConstants.KEY_PARAMETERS));
-            boolean requiresWifi = resolver.requiresWifi();
+            resolver.setParameters(extras.getBundle(Groundy.KEY_PARAMETERS));
+            boolean requiresWifi = resolver.keepWifiOn();
             if (requiresWifi) {
                 mWakeLockHelper.adquire();
             }

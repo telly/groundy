@@ -15,7 +15,7 @@ import android.os.PowerManager.WakeLock;
  * @author evelio
  * @version 1.0
  */
-public final class DeviceStatus {
+class DeviceStatus {
     private static final String TAG = "TV.DeviceStatus";
 
     /**
