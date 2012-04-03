@@ -2,6 +2,7 @@ package com.codeslap.groundy;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.ResultReceiver;
 import android.support.v4.app.Fragment;
 
 /**
@@ -47,6 +48,10 @@ public abstract class ReceiverFragment extends Fragment implements DetachableRes
             }
         }
         onProgressChanged(mSyncing);
+    }
+
+    public ResultReceiver getReceiver() {
+        return mReceiver;
     }
 
     protected void onRunning(Bundle resultData) {
