@@ -10,27 +10,17 @@ import java.util.List;
  * @param <T>
  */
 public abstract class ListLoader<T> extends AsyncTaskLoader<List<T>> {
-    public static final String TAG = ListLoader.class.getSimpleName();
     private List<T> mList;
-    private final List<T> mCache;
-    private final String mQuery;
 
-    public ListLoader(Context context, String query, List<T> cache) {
+    public ListLoader(Context context) {
         super(context);
-        mQuery = query;
-        mCache = cache;
     }
 
     /* Runs on a worker thread */
     @Override
     public List<T> loadInBackground() {
-        if (getQuery() == null && getCache() != null && getCache().size() > 0) {
-            return getCache();
-        }
         return getData();
     }
-
-    abstract List<T> getData();
 
     /* Runs on the UI thread */
     @Override
@@ -71,7 +61,6 @@ public abstract class ListLoader<T> extends AsyncTaskLoader<List<T>> {
         }
     }
 
-
     /**
      * Must be called from the UI thread
      */
@@ -80,6 +69,7 @@ public abstract class ListLoader<T> extends AsyncTaskLoader<List<T>> {
         // Attempt to cancel the current load task if possible.
         cancelLoad();
     }
+
 
     @Override
     public void onCanceled(List<T> list) {
@@ -101,34 +91,8 @@ public abstract class ListLoader<T> extends AsyncTaskLoader<List<T>> {
         mList = null;
     }
 
-    String getQuery() {
-        return mQuery;
-    }
-
-    List<T> getCache() {
-        return mCache;
-    }
-
-    boolean loadCacheIfPossible(List<T> items) {
-        // there is no query and the initial collection already exist. load existent one.
-        if (getQuery() == null && mCache != null && mCache.size() > 0) {
-            L.d(TAG, "No query and the initial collection already exist. Loading existent one.");
-            items.addAll(mCache);
-            return true;
-        }
-        // load the items from the initial collection
-        if (getQuery() != null && mCache != null && mCache.size() > 0) {
-            L.d(TAG, "Querying (" + getQuery() + ") and the initial collection already exist. Searching inside...");
-            for (T item : mCache) {
-                if (matchQuery(item)) {
-                    items.add(item);
-                }
-            }
-            return true;
-        }
-        L.d(TAG, "Impossible to load data from cache");
-        return false;
-    }
-
-    abstract boolean matchQuery(T item);
+    /**
+     * @return a List with the data to load
+     */
+    protected abstract List<T> getData();
 }

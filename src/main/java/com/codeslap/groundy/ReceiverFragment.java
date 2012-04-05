@@ -14,12 +14,15 @@ public abstract class ReceiverFragment extends Fragment implements DetachableRes
     private boolean mSyncing = false;
     private DetachableResultReceiver mReceiver;
 
+    public ReceiverFragment() {
+        mReceiver = new DetachableResultReceiver(new Handler());
+        mReceiver.setReceiver(this);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        mReceiver = new DetachableResultReceiver(new Handler());
-        mReceiver.setReceiver(this);
     }
 
     /**
