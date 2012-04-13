@@ -92,6 +92,9 @@ public abstract class CallResolver {
             } catch (Exception e) {
                 e.printStackTrace();
                 setResultCode(Groundy.STATUS_ERROR);
+                if (mResultData == null) {
+                    mResultData = new Bundle();
+                }
                 mResultData.putString(Groundy.KEY_ERROR, e.getMessage().toString());
                 return;
             }
