@@ -79,6 +79,8 @@ public abstract class CallResolver {
                 mResultData.putString(Groundy.KEY_ERROR, e.getMessage().toString());
                 return;
             }
+        } else {
+            setResultCode(Groundy.STATUS_CONNECTIVITY_FAILED);
         }
         prepareResult();
     }

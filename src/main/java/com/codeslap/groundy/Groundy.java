@@ -13,6 +13,7 @@ public class Groundy {
     public static final int STATUS_FINISHED = 200;
     public static final int STATUS_ERROR = 232;
     public static final int STATUS_RUNNING = 224;
+    public static final int STATUS_CONNECTIVITY_FAILED = 8433;
 
     /**
      * Queue a call resolver to be executed
