@@ -4,8 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
-import java.io.Serializable;
-
 /**
  * A base class for Api Call resolvers
  *
@@ -57,15 +55,6 @@ public abstract class CallResolver {
         mResultData = resultData;
     }
 
-    /**
-     * Set the call resolver result
-     *
-     * @param result
-     */
-    protected void setResult(Serializable result) {
-        mResultData.putSerializable(Groundy.KEY_RESULT, result);
-    }
-
     final void setContext(Context context) {
         mContext = context;
     }
@@ -87,7 +76,7 @@ public abstract class CallResolver {
             } catch (Exception e) {
                 e.printStackTrace();
                 setResultCode(Groundy.STATUS_ERROR);
-                mResultData.putSerializable(Groundy.KEY_RESULT, e.getMessage());
+                mResultData.putString(Groundy.KEY_ERROR, e.getMessage().toString());
                 return;
             }
         }
@@ -163,7 +152,7 @@ public abstract class CallResolver {
 
     /**
      * This is responsible of preparing the result. Here you will retrieve info from a persistence source,
-     * and call the {@link #setResultCode(int)} and {@link #setResult(java.io.Serializable)}
+     * and call the {@link #setResultCode(int)} and put values to the result data bundle
      */
     protected abstract void prepareResult();
 }

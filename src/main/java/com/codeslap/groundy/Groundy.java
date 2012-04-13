@@ -8,6 +8,7 @@ import android.os.ResultReceiver;
 public class Groundy {
     public static final String KEY_PARAMETERS = "com.codeslap.groundy.key.paramaters";
     public static final String KEY_RESULT = "com.codeslap.groundy.key.result";
+    public static final String KEY_ERROR = "com.codeslap.groundy.key.error";
     public static final String KEY_RECEIVER = "com.codeslap.groundy.key.receiver";
     public static final int STATUS_FINISHED = 200;
     public static final int STATUS_ERROR = 232;
