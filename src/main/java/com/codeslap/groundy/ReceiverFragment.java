@@ -48,6 +48,9 @@ public abstract class ReceiverFragment extends Fragment implements DetachableRes
         if (getActivity() == null) {
             return;
         }
+        if (!validateResultState(resultCode, resultData)) {
+            return;
+        }
 
         switch (resultCode) {
             case Groundy.STATUS_RUNNING: {
@@ -67,6 +70,14 @@ public abstract class ReceiverFragment extends Fragment implements DetachableRes
             }
         }
         onProgressChanged(mSyncing);
+    }
+
+    /**
+     * Override this to determine whether on result methods should be called.
+     * @return true if they must be called; false otherwise
+     */
+    protected boolean validateResultState(int resultCode, Bundle resultData) {
+        return true;
     }
 
     public ResultReceiver getReceiver() {

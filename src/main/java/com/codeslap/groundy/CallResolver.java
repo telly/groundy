@@ -95,7 +95,7 @@ public abstract class CallResolver {
                 if (mResultData == null) {
                     mResultData = new Bundle();
                 }
-                mResultData.putString(Groundy.KEY_ERROR, e.getMessage().toString());
+                mResultData.putString(Groundy.KEY_ERROR, String.valueOf(e.getMessage()));
                 return;
             }
         } else {
