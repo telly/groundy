@@ -30,7 +30,7 @@ import android.os.ResultReceiver;
 public abstract class CallResolver {
     private Context mContext;
     private int mResultCode;
-    private Bundle mResultData;
+    private final Bundle mResultData = new Bundle();
     private Bundle mParameters;
     private ResultReceiver mReceiver;
 
@@ -40,7 +40,6 @@ public abstract class CallResolver {
     public CallResolver() {
         //Pessimistic by default
         setResultCode(Groundy.STATUS_ERROR);
-        setResultData(new Bundle());
     }
 
     /**
@@ -64,13 +63,6 @@ public abstract class CallResolver {
         return mResultData;
     }
 
-    /**
-     * @param resultData the resultData to set
-     */
-    protected void setResultData(Bundle resultData) {
-        mResultData = resultData;
-    }
-
     final void setContext(Context context) {
         mContext = context;
     }
@@ -92,9 +84,6 @@ public abstract class CallResolver {
             } catch (Exception e) {
                 e.printStackTrace();
                 setResultCode(Groundy.STATUS_ERROR);
-                if (mResultData == null) {
-                    mResultData = new Bundle();
-                }
                 mResultData.putString(Groundy.KEY_ERROR, String.valueOf(e.getMessage()));
                 return;
             }
