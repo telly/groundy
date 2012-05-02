@@ -86,7 +86,6 @@ public abstract class ListLoader<T> extends AsyncTaskLoader<List<T>> {
         cancelLoad();
     }
 
-
     @Override
     public void onCanceled(List<T> list) {
         if (list != null && list.size() > 0) {
@@ -105,6 +104,10 @@ public abstract class ListLoader<T> extends AsyncTaskLoader<List<T>> {
             mList.clear();
         }
         mList = null;
+    }
+
+    protected List<T> getList() {
+        return mList;
     }
 
     /**

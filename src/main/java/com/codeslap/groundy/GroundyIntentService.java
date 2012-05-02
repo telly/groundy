@@ -66,7 +66,7 @@ abstract class GroundyIntentService extends Service {
     @Override
     public void onStart(Intent intent, int startId) {
         ServiceHandler serviceHandler;
-        if (intent.getBooleanExtra(EXTRA_ASYNC, false)) {
+        if (intent != null && intent.getBooleanExtra(EXTRA_ASYNC, false)) {
             HandlerThread thread = new HandlerThread("IntentService[" + mName + "]");
             thread.start();
             Looper looper = thread.getLooper();

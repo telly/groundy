@@ -65,9 +65,9 @@ class IOUtils {
 	 */
 	public static File getCacheDirectory(Context context) {
 		File cacheDir = context.getCacheDir();
-		if(!cacheDir.exists()) {
-			cacheDir.mkdirs();
-		}
+		if(!cacheDir.exists() && !cacheDir.mkdirs()) {
+            throw new RuntimeException("Could not create cache directory");
+        }
 		return cacheDir;
 	}
 
