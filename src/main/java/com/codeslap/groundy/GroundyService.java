@@ -39,45 +39,47 @@ public class GroundyService extends GroundyIntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        String action = intent.getAction();
-        Bundle extras = intent.getExtras();
-        extras = (extras == null) ? Bundle.EMPTY : extras;
+        if (intent != null) {
+            String action = intent.getAction();
+            Bundle extras = intent.getExtras();
+            extras = (extras == null) ? Bundle.EMPTY : extras;
 
-        // Pessimistic by default
-        int resultCode = Groundy.STATUS_ERROR;
-        Bundle resultData = Bundle.EMPTY;
+            // Pessimistic by default
+            int resultCode = Groundy.STATUS_ERROR;
+            Bundle resultData = Bundle.EMPTY;
 
-        ResultReceiver receiver = (ResultReceiver) extras.get(Groundy.KEY_RECEIVER);
-        if (receiver != null) {
-            receiver.send(Groundy.STATUS_RUNNING, Bundle.EMPTY);
-        }
-
-        //This should be be the most common action
-        CallResolver resolver;
-        try {
-            resolver = CallResolverFactory.get((Class<? extends CallResolver>) Class.forName(action), this);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException(e);
-        }
-        if (resolver != null) {
-            L.d(TAG, "Executing resolver: " + resolver);
-            resolver.setReceiver(receiver);
-            resolver.setParameters(extras.getBundle(Groundy.KEY_PARAMETERS));
-            boolean requiresWifi = resolver.keepWifiOn();
-            if (requiresWifi) {
-                mWakeLockHelper.adquire();
+            ResultReceiver receiver = (ResultReceiver) extras.get(Groundy.KEY_RECEIVER);
+            if (receiver != null) {
+                receiver.send(Groundy.STATUS_RUNNING, Bundle.EMPTY);
             }
-            resolver.execute();
-            if (requiresWifi) {
-                mWakeLockHelper.release();
-            }
-            resultCode = resolver.getResultCode();
-            resultData = resolver.getResultData();
-        }
 
-        //Lets try to send back the response
-        if (receiver != null) {
-            receiver.send(resultCode, resultData);
+            //This should be be the most common action
+            CallResolver resolver;
+            try {
+                resolver = CallResolverFactory.get((Class<? extends CallResolver>) Class.forName(action), this);
+            } catch (ClassNotFoundException e) {
+                throw new IllegalStateException(e);
+            }
+            if (resolver != null) {
+                L.d(TAG, "Executing resolver: " + resolver);
+                resolver.setReceiver(receiver);
+                resolver.setParameters(extras.getBundle(Groundy.KEY_PARAMETERS));
+                boolean requiresWifi = resolver.keepWifiOn();
+                if (requiresWifi) {
+                    mWakeLockHelper.adquire();
+                }
+                resolver.execute();
+                if (requiresWifi) {
+                    mWakeLockHelper.release();
+                }
+                resultCode = resolver.getResultCode();
+                resultData = resolver.getResultData();
+            }
+
+            //Lets try to send back the response
+            if (receiver != null) {
+                receiver.send(resultCode, resultData);
+            }
         }
     }
 
