@@ -1,9 +1,9 @@
 Groundy library for Android
 ===========================
 
-A bunch of boilerplate code that is used when creating apps that must call external services (such
-REST APIs). This will basically offer a service that will take care of create background threads
-to execute that kind of code (right away or queue it).
+A bunch of boilerplate code that is used when creating apps that must call external
+services (such REST APIs). This will basically offer a service that will take care
+of create background threads to execute that kind of code (right away or queue it).
 
 License
 =======
