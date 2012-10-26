@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.codeslap.groundy;
+package com.codeslap.groundy.activity;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
