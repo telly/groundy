@@ -35,7 +35,7 @@ public class ActivityHelper {
      * helper or Honeycomb-specific helper will be returned.
      */
     public static ActivityHelper createInstance(Activity activity) {
-        return AndroidDevice.isHoneycombOrHigher() ? new ActivityHelperHoneycomb(activity) : new ActivityHelper(activity);
+        return Topy.isHoneycombOrHigher() ? new ActivityHelperHoneycomb(activity) : new ActivityHelper(activity);
     }
 
     protected ActivityHelper(Activity activity) {

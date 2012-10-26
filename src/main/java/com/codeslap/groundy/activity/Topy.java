@@ -20,7 +20,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
 
-public class AndroidDevice {
+public class Topy {
     public static boolean isHoneycombOrHigher() {
         // Can use static final constants like HONEYCOMB, declared in later versions
         // of the OS since they are inlined at compile time. This is guaranteed behavior.
