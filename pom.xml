@@ -57,8 +57,14 @@
         <dependency>
             <groupId>com.google.android</groupId>
             <artifactId>android</artifactId>
-            <version>1.6_r2</version>
+            <version>4.0.1.2</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>support-v4</artifactId>
+            <version>r7</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.actionbarsherlock</groupId>
@@ -68,16 +74,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.google.android</groupId>
-            <artifactId>android</artifactId>
-            <version>4.0.1.2</version>
+            <groupId>com.github.rtyley</groupId>
+            <artifactId>roboguice-sherlock</artifactId>
+            <version>1.5</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.android</groupId>
-            <artifactId>support-v4</artifactId>
-            <version>r7</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 
