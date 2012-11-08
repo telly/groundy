@@ -138,6 +138,22 @@ public abstract class CallResolver {
         return mReceiver;
     }
 
+    /**
+     * Prepare and sends a progress update to the current receiver.
+     * Result code used is {@link Groundy#STATUS_PROGRESS} and it
+     * will contain a bundle with an integer extra called {@link Groundy#KEY_PROGRESS}
+     *
+     * @param progress percentage to send to receiver
+     */
+    protected void updateProgress(int progress) {
+        if (mReceiver == null) {
+            return;
+        }
+        Bundle resultData = new Bundle();
+        resultData.putInt(Groundy.KEY_PROGRESS, progress);
+        mReceiver.send(Groundy.STATUS_PROGRESS, resultData);
+    }
+
     protected boolean keepWifiOn() {
         return false;
     }
@@ -146,6 +162,7 @@ public abstract class CallResolver {
      * Override this if you want to cache the CallResolver instance. Do it only if you are
      * sure that {@link CallResolver#updateData()} and {@link CallResolver#prepareResult()}
      * methods won't need a fresh instance each time they are executed.
+     *
      * @return true if this instance must be cached
      */
     protected boolean canBeCached() {

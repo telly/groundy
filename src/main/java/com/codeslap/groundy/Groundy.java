@@ -26,9 +26,12 @@ public class Groundy {
     public static final String KEY_RESULT = "com.codeslap.groundy.key.result";
     public static final String KEY_ERROR = "com.codeslap.groundy.key.error";
     public static final String KEY_RECEIVER = "com.codeslap.groundy.key.receiver";
+    public static final String KEY_PROGRESS = "com.codeslap.groundy.key.progress";
+
     public static final int STATUS_FINISHED = 200;
     public static final int STATUS_ERROR = 232;
     public static final int STATUS_RUNNING = 224;
+    public static final int STATUS_PROGRESS = 225;
     public static final int STATUS_CONNECTIVITY_FAILED = 8433;
 
     /**
