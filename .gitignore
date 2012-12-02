@@ -1,0 +1,14 @@
+.DS_Store
+gen
+out
+bin
+*.iml
+*.ipr
+*.iws
+target
+tmp
+~apklib*
+gen-external-apklibs
+.classpath
+.project
+atlassian-ide-plugin.xml
