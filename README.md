@@ -5,6 +5,85 @@ A bunch of boilerplate code that is used when creating apps that must call exter
 services (such REST APIs). This will basically offer a service that will take care
 of create background threads to execute that kind of code (right away or queue it).
 
+###Maven integration
+
+In order to use this library from you Android project using maven your pom should look like this:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project ...>
+    <dependencies>
+        <dependency>
+            <groupId>com.codeslap</groupId>
+            <artifactId>groundy</artifactId>
+            <version>0.5</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+</project>
+```
+###Basic usage
+
+First of all add the `GroundyService` to the `AndroidManifest.xml` file:
+
+```xml
+<service android:name="com.codeslap.groundy.GroundyService"/>
+```
+
+Then, create a subclass of `CallResolver`:
+
+```java
+import android.os.Bundle;
+import com.codeslap.groundy.CallResolver;
+import com.codeslap.groundy.Groundy;
+
+public class ExampleResolver extends CallResolver {
+    public static final String PARAM_EXAMPLE = "com.example.param.EXAMPLE";
+    public static final String RESULT_EXAMPLE = "com.example.result.EXAMPLE";
+
+    @Override
+    protected void updateData() {
+        Bundle parameters = getParameters();
+        String exampleParam = parameters.getString(PARAM_EXAMPLE);
+
+        // do something with the param
+    }
+
+    @Override
+    protected void prepareResult() {
+        if (mSuccess) {
+            Bundle resultData = getResultData();
+            resultData.putString(RESULT_EXAMPLE, "some result");
+            setResultCode(Groundy.STATUS_FINISHED);
+        } else {
+            setResultCode(Groundy.STATUS_ERROR);
+        }
+    }
+}
+```
+
+Whenever you want to execute the resolver, just do this:
+
+```java
+// this is usually perform from within an Activity
+Bundle params = new Bundle();
+params.putString(ExampleResolver.PARAM_EXAMPLE, "some parameter");
+Groundy.queue(this, ExampleResolver.class, mResultReceiver, params);
+```
+
+You will get results in your result receiver (in the main thread):
+
+```java
+private final ResultReceiver receiver = new ResultReceiver(new Handler()){
+    @Override
+    protected void onReceiveResult(int resultCode, Bundle resultData) {
+        super.onReceiveResult(resultCode, resultData);
+        String result = resultData.getString(ExampleResolver.RESULT_EXAMPLE);
+        // do something
+    }
+};
+```
+
 License
 =======
 
