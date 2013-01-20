@@ -92,7 +92,9 @@ public abstract class ListBaseAdapter<I, H> extends BaseAdapter {
     }
 
     @Override
-    public abstract long getItemId(int position);
+    public long getItemId(int position) {
+        return getItem(position).hashCode();
+    }
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
