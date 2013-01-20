@@ -21,13 +21,13 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 
 /**
- * A base class for Api Call resolvers
+ * Implementation of this class get executed by the {@link GroundyService}
  *
  * @author evelio
  * @author cristian
  * @version 1.1
  */
-public abstract class CallResolver {
+public abstract class GroundyTask {
     private Context mContext;
     private int mResultCode;
     private final Bundle mResultData = new Bundle();
@@ -35,9 +35,9 @@ public abstract class CallResolver {
     private ResultReceiver mReceiver;
 
     /**
-     * Creates a CallResolver composed of
+     * Creates a GroundyTask composed of
      */
-    public CallResolver() {
+    public GroundyTask() {
         //Pessimistic by default
         setResultCode(Groundy.STATUS_ERROR);
     }
@@ -78,19 +78,14 @@ public abstract class CallResolver {
      * Does its magic
      */
     protected final void execute() {
-        if (requiresUpdate() && isOnline()) {
-            try {
-                updateData();
-            } catch (Exception e) {
-                e.printStackTrace();
-                setResultCode(Groundy.STATUS_ERROR);
-                mResultData.putString(Groundy.KEY_ERROR, String.valueOf(e.getMessage()));
-                return;
-            }
-        } else {
-            setResultCode(Groundy.STATUS_CONNECTIVITY_FAILED);
+        try {
+            doInBackground();
+        } catch (Exception e) {
+            e.printStackTrace();
+            setResultCode(Groundy.STATUS_ERROR);
+            mResultData.putString(Groundy.KEY_ERROR, String.valueOf(e.getMessage()));
+            return;
         }
-        prepareResult();
     }
 
     /**
@@ -115,6 +110,54 @@ public abstract class CallResolver {
      */
     protected Bundle getParameters() {
         return mParameters;
+    }
+
+    /**
+     * Adds a string to the result bundle
+     *
+     * @param key   param key
+     * @param value param value
+     * @return object itself
+     */
+    protected GroundyTask addStringResult(String key, String value) {
+        mResultData.putString(key, value);
+        return this;
+    }
+
+    /**
+     * Adds a long to the result bundle
+     *
+     * @param key   param key
+     * @param value param value
+     * @return object itself
+     */
+    protected GroundyTask addLongResult(String key, long value) {
+        mResultData.putLong(key, value);
+        return this;
+    }
+
+    /**
+     * Adds an int to the result bundle
+     *
+     * @param key   param key
+     * @param value param value
+     * @return object itself
+     */
+    protected GroundyTask addIntResult(String key, int value) {
+        mResultData.putInt(key, value);
+        return this;
+    }
+
+    /**
+     * Adds a boolean to the result bundle
+     *
+     * @param key   param key
+     * @param value param value
+     * @return object itself
+     */
+    protected GroundyTask addIntResult(String key, boolean value) {
+        mResultData.putBoolean(key, value);
+        return this;
     }
 
     /**
@@ -145,7 +188,7 @@ public abstract class CallResolver {
      *
      * @param progress percentage to send to receiver
      */
-    protected void updateProgress(int progress) {
+    public void updateProgress(int progress) {
         if (mReceiver == null) {
             return;
         }
@@ -159,9 +202,9 @@ public abstract class CallResolver {
     }
 
     /**
-     * Override this if you want to cache the CallResolver instance. Do it only if you are
-     * sure that {@link CallResolver#updateData()} and {@link CallResolver#prepareResult()}
-     * methods won't need a fresh instance each time they are executed.
+     * Override this if you want to cache the GroundyTask instance. Do it only if you are
+     * sure that {@link GroundyTask#doInBackground()} method won't need a fresh instance each
+     * time they are executed.
      *
      * @return true if this instance must be cached
      */
@@ -175,11 +218,5 @@ public abstract class CallResolver {
      *
      * @throws Exception
      */
-    protected abstract void updateData();
-
-    /**
-     * This is responsible of preparing the result. Here you will retrieve info from a persistence source,
-     * and call the {@link #setResultCode(int)} and put values to the result data bundle
-     */
-    protected abstract void prepareResult();
+    protected abstract void doInBackground();
 }

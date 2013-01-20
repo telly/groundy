@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.codeslap.groundy;
+package com.codeslap.groundy.util;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
+import com.codeslap.groundy.GroundyTask;
 
 import java.io.*;
 import java.net.URL;
@@ -30,13 +31,13 @@ import java.net.URLConnection;
  * @author cristian
  * @version 1.1
  */
-public class GroundyUtils {
+public class DownloadUtils {
     private static boolean alreadyCheckedInternetPermission = false;
 
     /**
      * Non instance constants class
      */
-    private GroundyUtils() {
+    private DownloadUtils() {
     }
 
     /**
@@ -53,7 +54,7 @@ public class GroundyUtils {
     public static File getCacheDirectory(Context context) {
         File cacheDir = context.getCacheDir();
         if (!cacheDir.exists() && cacheDir.mkdirs()) {
-            Log.d(GroundyUtils.class.getSimpleName(), "Cache directory created");
+            Log.d(DownloadUtils.class.getSimpleName(), "Cache directory created");
         }
         return cacheDir;
     }
@@ -65,25 +66,25 @@ public class GroundyUtils {
      * @param toFile  File to save to, if existent will be overwrite
      * @throws java.io.IOException If fromUrl is invalid or there is any IO issue.
      */
-    public static void downloadFile(Context context, String fromUrl, File toFile, ProgressListener listener) throws IOException {
+    public static void downloadFile(Context context, String fromUrl, File toFile, DownloadProgressListener listener) throws IOException {
         downloadFileHandleRedirect(context, fromUrl, toFile, 0, listener);
     }
 
-    public interface ProgressListener {
+    public interface DownloadProgressListener {
         void onProgress(String url, int progress);
     }
 
     /**
-     * Returns a progress listener that will post progress to the specified resolver
+     * Returns a progress listener that will post progress to the specified groundyTask
      *
-     * @param callResolver the resolver to post progress to. Cannot be null.
+     * @param groundyTask the groundyTask to post progress to. Cannot be null.
      * @return a progress listener
      */
-    public static ProgressListener fromResolver(final CallResolver callResolver) {
-        return new ProgressListener() {
+    public static DownloadProgressListener getDownloadListenerForTask(final GroundyTask groundyTask) {
+        return new DownloadProgressListener() {
             @Override
             public void onProgress(String url, int progress) {
-                callResolver.updateProgress(progress);
+                groundyTask.updateProgress(progress);
             }
         };
     }
@@ -96,7 +97,7 @@ public class GroundyUtils {
     private static final int MAX_REDIRECTS = 5;
 
     /**
-     * Internal version of {@link #downloadFile(Context, String, java.io.File, ProgressListener}
+     * Internal version of {@link #downloadFile(Context, String, java.io.File, DownloadUtils.DownloadProgressListener }
      *
      * @param fromUrl  the url to download from
      * @param toFile   the file to download to
@@ -104,7 +105,7 @@ public class GroundyUtils {
      * @param listener used to report result back
      * @throws java.io.IOException
      */
-    private static void downloadFileHandleRedirect(Context context, String fromUrl, File toFile, int redirect, ProgressListener listener) throws IOException {
+    private static void downloadFileHandleRedirect(Context context, String fromUrl, File toFile, int redirect, DownloadProgressListener listener) throws IOException {
         if (context == null) {
             throw new RuntimeException("Context shall not be null");
         }

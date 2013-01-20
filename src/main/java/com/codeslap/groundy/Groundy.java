@@ -32,41 +32,62 @@ public class Groundy {
     public static final int STATUS_ERROR = 232;
     public static final int STATUS_RUNNING = 224;
     public static final int STATUS_PROGRESS = 225;
-    public static final int STATUS_CONNECTIVITY_FAILED = 8433;
 
     /**
-     * Queue a call resolver to be executed
+     * Queue a call task to be executed with no params
      *
      * @param context  needed to start the service
-     * @param resolver call resolver implementation
+     * @param taskClass groundy task implementation
      * @param receiver result receiver to report results back
-     * @param extras   the application code
      */
-    public static void queue(Context context, Class<? extends CallResolver> resolver, ResultReceiver receiver,
-                             Bundle extras) {
-        startApiService(context, receiver, resolver, extras, false);
+    public static void queue(Context context, Class<? extends GroundyTask> taskClass, ResultReceiver receiver) {
+        queue(context, taskClass, receiver, null);
     }
 
     /**
-     * Execute this call resolver asynchronously
+     * Queue a call task to be executed
      *
      * @param context  needed to start the service
-     * @param resolver call resolver implementation
+     * @param taskClass groundy task implementation
      * @param receiver result receiver to report results back
      * @param extras   the application code
      */
-    public static void execute(Context context, Class<? extends CallResolver> resolver, ResultReceiver receiver,
+    public static void queue(Context context, Class<? extends GroundyTask> taskClass, ResultReceiver receiver,
+                             Bundle extras) {
+        startApiService(context, receiver, taskClass, extras, false);
+    }
+
+    /**
+     * Execute this groundy task asynchronously
+     *
+     * @param context  needed to start the service
+     * @param taskClass groundy task implementation
+     * @param receiver result receiver to report results back
+     */
+    public static void execute(Context context, Class<? extends GroundyTask> taskClass, ResultReceiver receiver) {
+        execute(context, taskClass, receiver, null);
+    }
+
+    /**
+     * Execute this groundy task asynchronously
+     *
+     * @param context  needed to start the service
+     * @param taskClass groundy task implementation
+     * @param receiver result receiver to report results back
+     * @param extras   the application code
+     */
+    public static void execute(Context context, Class<? extends GroundyTask> taskClass, ResultReceiver receiver,
                                Bundle extras) {
-        startApiService(context, receiver, resolver, extras, true);
+        startApiService(context, receiver, taskClass, extras, true);
     }
 
     private static void startApiService(Context context, ResultReceiver receiver,
-                                        Class<? extends CallResolver> resolver, Bundle params, boolean async) {
+                                        Class<? extends GroundyTask> taskClass, Bundle params, boolean async) {
         Intent intent = new Intent(context, GroundyService.class);
         if (async) {
             intent.putExtra(GroundyIntentService.EXTRA_ASYNC, async);
         }
-        intent.setAction(resolver.getName());
+        intent.setAction(taskClass.getName());
         if (params != null) {
             intent.putExtra(KEY_PARAMETERS, params);
         }

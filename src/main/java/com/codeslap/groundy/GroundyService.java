@@ -54,26 +54,26 @@ public class GroundyService extends GroundyIntentService {
             }
 
             //This should be be the most common action
-            CallResolver resolver;
+            GroundyTask groundyTask;
             try {
-                resolver = CallResolverFactory.get((Class<? extends CallResolver>) Class.forName(action), this);
+                groundyTask = GroundyTaskFactory.get((Class<? extends GroundyTask>) Class.forName(action), this);
             } catch (ClassNotFoundException e) {
                 throw new IllegalStateException(e);
             }
-            if (resolver != null) {
-                L.d(TAG, "Executing resolver: " + resolver);
-                resolver.setReceiver(receiver);
-                resolver.setParameters(extras.getBundle(Groundy.KEY_PARAMETERS));
-                boolean requiresWifi = resolver.keepWifiOn();
+            if (groundyTask != null) {
+                L.d(TAG, "Executing task: " + groundyTask);
+                groundyTask.setReceiver(receiver);
+                groundyTask.setParameters(extras.getBundle(Groundy.KEY_PARAMETERS));
+                boolean requiresWifi = groundyTask.keepWifiOn();
                 if (requiresWifi) {
                     mWakeLockHelper.adquire();
                 }
-                resolver.execute();
+                groundyTask.execute();
                 if (requiresWifi) {
                     mWakeLockHelper.release();
                 }
-                resultCode = resolver.getResultCode();
-                resultData = resolver.getResultData();
+                resultCode = groundyTask.getResultCode();
+                resultData = groundyTask.getResultData();
             }
 
             //Lets try to send back the response
