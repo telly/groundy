@@ -66,19 +66,6 @@
             <version>r7</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>com.actionbarsherlock</groupId>
-            <artifactId>library</artifactId>
-            <version>4.1.0</version>
-            <type>jar</type>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.rtyley</groupId>
-            <artifactId>roboguice-sherlock</artifactId>
-            <version>1.5</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>

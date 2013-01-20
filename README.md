@@ -30,27 +30,26 @@ First of all add the `GroundyService` to the `AndroidManifest.xml` file:
 <service android:name="com.codeslap.groundy.GroundyService"/>
 ```
 
-Then, create a subclass of `CallResolver`:
+Then, create a subclass of `GroundyTask`:
 
 ```java
 import android.os.Bundle;
-import com.codeslap.groundy.CallResolver;
+import com.codeslap.groundy.GroundyTask;
 import com.codeslap.groundy.Groundy;
 
-public class ExampleResolver extends CallResolver {
+public class ExampleTask extends GroundyTask {
     public static final String PARAM_EXAMPLE = "com.example.param.EXAMPLE";
     public static final String RESULT_EXAMPLE = "com.example.result.EXAMPLE";
 
     @Override
     protected void updateData() {
+        // use params
         Bundle parameters = getParameters();
         String exampleParam = parameters.getString(PARAM_EXAMPLE);
 
-        // do something with the param
-    }
+        // lots of code
 
-    @Override
-    protected void prepareResult() {
+        // set the result
         if (mSuccess) {
             Bundle resultData = getResultData();
             resultData.putString(RESULT_EXAMPLE, "some result");
@@ -62,13 +61,13 @@ public class ExampleResolver extends CallResolver {
 }
 ```
 
-Whenever you want to execute the resolver, just do this:
+Whenever you want to execute the task, just do this:
 
 ```java
 // this is usually perform from within an Activity
 Bundle params = new Bundle();
-params.putString(ExampleResolver.PARAM_EXAMPLE, "some parameter");
-Groundy.queue(this, ExampleResolver.class, mResultReceiver, params);
+params.putString(ExampleTask.PARAM_EXAMPLE, "some parameter");
+Groundy.queue(this, ExampleTask.class, mResultReceiver, params);
 ```
 
 You will get results in your result receiver (in the main thread):
@@ -78,7 +77,7 @@ private final ResultReceiver receiver = new ResultReceiver(new Handler()){
     @Override
     protected void onReceiveResult(int resultCode, Bundle resultData) {
         super.onReceiveResult(resultCode, resultData);
-        String result = resultData.getString(ExampleResolver.RESULT_EXAMPLE);
+        String result = resultData.getString(ExampleTask.RESULT_EXAMPLE);
         // do something
     }
 };
