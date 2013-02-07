@@ -39,7 +39,7 @@ public class ExampleTask extends GroundyTask {
     public static final String RESULT_EXAMPLE = "com.example.result.EXAMPLE";
 
     @Override
-    protected void updateData() {
+    protected void doInBackground() {
         // use params
         Bundle parameters = getParameters();
         String exampleParam = parameters.getString(PARAM_EXAMPLE);
@@ -47,7 +47,7 @@ public class ExampleTask extends GroundyTask {
         // lots of code
 
         // set the result
-        if (mSuccess) {
+        if (success) {
             Bundle resultData = getResultData();
             resultData.putString(RESULT_EXAMPLE, "some result");
             setResultCode(Groundy.STATUS_FINISHED);
