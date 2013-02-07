@@ -30,10 +30,6 @@ First of all add the `GroundyService` to the `AndroidManifest.xml` file:
 Then, create a subclass of `GroundyTask`:
 
 ```java
-import android.os.Bundle;
-import com.codeslap.groundy.GroundyTask;
-import com.codeslap.groundy.Groundy;
-
 public class ExampleTask extends GroundyTask {
     public static final String PARAM_EXAMPLE = "com.example.param.EXAMPLE";
     public static final String RESULT_EXAMPLE = "com.example.result.EXAMPLE";
