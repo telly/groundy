@@ -1,11 +1,14 @@
 /*
- * Copyright 2012 CodeSlap
+ * Copyright 2013 CodeSlap
+ *
+ *   Authors: Cristian C. <cristian@elhacker.net>
+ *            Evelio T.   <eveliotc@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,6 +36,12 @@ import java.net.URLConnection;
  */
 public class DownloadUtils {
     private static boolean alreadyCheckedInternetPermission = false;
+    /**
+     * Amount of maximum allowed redirects
+     * number by:
+     * http://www.google.com/support/forum/p/Webmasters/thread?tid=3760b68fb305088a&hl=en
+     */
+    private static final int MAX_REDIRECTS = 5;
 
     /**
      * Non instance constants class
@@ -90,13 +99,6 @@ public class DownloadUtils {
     }
 
     /**
-     * Amount of maximum allowed redirects
-     * number by:
-     * http://www.google.com/support/forum/p/Webmasters/thread?tid=3760b68fb305088a&hl=en
-     */
-    private static final int MAX_REDIRECTS = 5;
-
-    /**
      * Internal version of {@link #downloadFile(Context, String, java.io.File, DownloadUtils.DownloadProgressListener }
      *
      * @param fromUrl  the url to download from
@@ -110,26 +112,7 @@ public class DownloadUtils {
             throw new RuntimeException("Context shall not be null");
         }
         if (!alreadyCheckedInternetPermission) {
-            try {
-                PackageManager pm = context.getPackageManager();
-                PackageInfo packageInfo = pm.getPackageInfo(context.getPackageName(), PackageManager.GET_PERMISSIONS);
-                String[] requestedPermissions = packageInfo.requestedPermissions;
-                if (requestedPermissions == null) {
-                    throw new RuntimeException("You must add android.permission.INTERNET to your app");
-                }
-                boolean found = false;
-                for (String requestedPermission : requestedPermissions) {
-                    if ("android.permission.INTERNET".equals(requestedPermission)) {
-                        found = true;
-                    }
-                }
-                if (!found) {
-                    throw new RuntimeException("You must add android.permission.INTERNET to your app");
-                } else {
-                    alreadyCheckedInternetPermission = true;
-                }
-            } catch (PackageManager.NameNotFoundException ignored) {
-            }
+            checkForInternetPermissions(context);
         }
 
         if (redirect > MAX_REDIRECTS) {
@@ -142,7 +125,7 @@ public class DownloadUtils {
         int contentLength = urlConnection.getContentLength();
         if (contentLength == -1) {
             fromUrl = urlConnection.getHeaderField("Location");
-            if (fromUrl == null) { /* I'd love to leave it as "Que Dios se apiade de nosotros" XD */
+            if (fromUrl == null) {
                 throw new IOException("No content or redirect found for URL " + url + " with " + redirect + " redirects.");
             }
             downloadFileHandleRedirect(context, fromUrl, toFile, redirect + 1, listener);
@@ -163,5 +146,28 @@ public class DownloadUtils {
         }
         output.close();
         input.close();
+    }
+
+    private static void checkForInternetPermissions(Context context) {
+        try {
+            PackageManager pm = context.getPackageManager();
+            PackageInfo packageInfo = pm.getPackageInfo(context.getPackageName(), PackageManager.GET_PERMISSIONS);
+            String[] requestedPermissions = packageInfo.requestedPermissions;
+            if (requestedPermissions == null) {
+                throw new RuntimeException("You must add android.permission.INTERNET to your app");
+            }
+            boolean found = false;
+            for (String requestedPermission : requestedPermissions) {
+                if ("android.permission.INTERNET".equals(requestedPermission)) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                throw new RuntimeException("You must add android.permission.INTERNET to your app");
+            } else {
+                alreadyCheckedInternetPermission = true;
+            }
+        } catch (PackageManager.NameNotFoundException ignored) {
+        }
     }
 }

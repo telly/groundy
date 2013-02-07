@@ -30,30 +30,22 @@ First of all add the `GroundyService` to the `AndroidManifest.xml` file:
 Then, create a subclass of `GroundyTask`:
 
 ```java
-import android.os.Bundle;
-import com.codeslap.groundy.GroundyTask;
-import com.codeslap.groundy.Groundy;
-
 public class ExampleTask extends GroundyTask {
     public static final String PARAM_EXAMPLE = "com.example.param.EXAMPLE";
     public static final String RESULT_EXAMPLE = "com.example.result.EXAMPLE";
 
     @Override
-    protected void updateData() {
+    protected boolean doInBackground() {
         // use params
-        Bundle parameters = getParameters();
-        String exampleParam = parameters.getString(PARAM_EXAMPLE);
+        String exampleParam = getStringParam(PARAM_EXAMPLE);
 
         // lots of code
 
-        // set the result
-        if (mSuccess) {
-            Bundle resultData = getResultData();
-            resultData.putString(RESULT_EXAMPLE, "some result");
-            setResultCode(Groundy.STATUS_FINISHED);
-        } else {
-            setResultCode(Groundy.STATUS_ERROR);
-        }
+        // add results... this will be sent back to the activity
+        // through the ResultReceiver once this method has returned
+        addStringResult(RESULT_EXAMPLE, "some result");
+
+        return success; // true if task was executed successfully
     }
 }
 ```
@@ -62,8 +54,7 @@ Whenever you want to execute the task, just do this:
 
 ```java
 // this is usually perform from within an Activity
-Bundle params = new Bundle();
-params.putString(ExampleTask.PARAM_EXAMPLE, "some parameter");
+Bundle params = new Bundler().add(ExampleTask.PARAM_EXAMPLE, "foo").build();
 Groundy.queue(this, ExampleTask.class, mResultReceiver, params);
 ```
 
