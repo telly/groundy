@@ -184,7 +184,7 @@ public final class GroundyService extends Service {
             receiver.send(Groundy.STATUS_RUNNING, Bundle.EMPTY);
         }
 
-        Class<?> taskName = (Class<?>) extras.getSerializable(Groundy.KEY_TASK_NAME);
+        Class<?> taskName = (Class<?>) extras.getSerializable(Groundy.KEY_TASK);
         //noinspection unchecked
         GroundyTask groundyTask = GroundyTaskFactory.get((Class<? extends GroundyTask>) taskName, this);
         if (groundyTask == null) {
