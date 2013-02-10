@@ -29,8 +29,8 @@ public final class GroundyService extends Service {
 
     static final String ACTION_QUEUE = "com.codeslap.groundy.action.QUEUE";
     static final String ACTION_EXECUTE = "com.codeslap.groundy.action.EXECUTE";
-    static final String ACTION_CANCEL_ALL = "com.codeslap.groundy.action.ACTION_CANCEL_ALL";
-    static final String ACTION_CANCEL_TASK = "com.codeslap.groundy.action.ACTION_CANCEL_TASK";
+    static final String ACTION_CANCEL_ALL = "com.codeslap.groundy.action.CANCEL_ALL";
+    static final String ACTION_CANCEL_TASK = "com.codeslap.groundy.action.CANCEL_TASK";
     static final String EXTRA_TASK = "com.codeslap.groundy.extra.TASK";
     static final String EXTRA_CANCEL_REASON = "com.codeslap.groundy.extra.CANCEL_REASON";
     private static final String TAG = GroundyService.class.getSimpleName();
