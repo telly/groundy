@@ -29,7 +29,7 @@ class L {
     /**
      * Turns on of the enabled flag
      */
-    public static final boolean logEnabled = true;
+    public static boolean logEnabled = true;
 
     /**
      * Non instanceable constant class

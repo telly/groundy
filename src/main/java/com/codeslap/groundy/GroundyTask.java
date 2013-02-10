@@ -31,11 +31,15 @@ import android.os.ResultReceiver;
  * @version 1.1
  */
 public abstract class GroundyTask {
+    public static final int CANCEL_ALL = -1;
+    public static final int SERVICE_DESTROYED = -2;
+    public static final int CANCEL_INDIVIDUAL = -3;
     private Context mContext;
-    private int mResultCode;
+    private int mResultCode = Groundy.STATUS_ERROR; // Pessimistic by default
     private final Bundle mResultData = new Bundle();
-    private Bundle mParameters;
+    private final Bundle mParameters = new Bundle();
     private ResultReceiver mReceiver;
+    private volatile int mQuittingReason = 0;
 
     /**
      * Creates a GroundyTask composed of
@@ -70,9 +74,6 @@ public abstract class GroundyTask {
         mContext = context;
     }
 
-    /**
-     * @return Context instance to use
-     */
     protected final Context getContext() {
         return mContext;
     }
@@ -109,13 +110,12 @@ public abstract class GroundyTask {
     /**
      * @param parameters the parameters to set
      */
-    void setParameters(Bundle parameters) {
-        this.mParameters = parameters;
+    void addParameters(Bundle parameters) {
+        if (parameters != null) {
+            mParameters.putAll(parameters);
+        }
     }
 
-    /**
-     * @return the parameters
-     */
     protected Bundle getParameters() {
         return mParameters;
     }
@@ -125,9 +125,6 @@ public abstract class GroundyTask {
     }
 
     protected String getStringParam(String key, String defValue) {
-        if (mParameters == null) {
-            return defValue;
-        }
         String value = mParameters.getString(key);
         return value != null ? value : defValue;
     }
@@ -137,9 +134,6 @@ public abstract class GroundyTask {
     }
 
     protected CharSequence getCharSequenceParam(String key, String defValue) {
-        if (mParameters == null) {
-            return defValue;
-        }
         CharSequence value = mParameters.getCharSequence(key);
         return value != null ? value : defValue;
     }
@@ -149,9 +143,6 @@ public abstract class GroundyTask {
     }
 
     protected int getIntParam(String key, int defValue) {
-        if (mParameters == null) {
-            return defValue;
-        }
         return mParameters.getInt(key, defValue);
     }
 
@@ -160,9 +151,6 @@ public abstract class GroundyTask {
     }
 
     protected float getFloatParam(String key, float defValue) {
-        if (mParameters == null) {
-            return defValue;
-        }
         return mParameters.getFloat(key, defValue);
     }
 
@@ -171,9 +159,6 @@ public abstract class GroundyTask {
     }
 
     protected double getDoubleParam(String key, double defValue) {
-        if (mParameters == null) {
-            return defValue;
-        }
         return mParameters.getDouble(key, defValue);
     }
 
@@ -182,9 +167,6 @@ public abstract class GroundyTask {
     }
 
     protected boolean getBooleanParam(String key, boolean defValue) {
-        if (mParameters == null) {
-            return defValue;
-        }
         return mParameters.getBoolean(key, defValue);
     }
 
@@ -258,6 +240,38 @@ public abstract class GroundyTask {
     }
 
     /**
+     * This must be checked every time you want to check whether
+     * the task is in quitting state. In such cases you must make
+     * sure the task is stopped immediately. To know the reason
+     * causing the task to be quited use the
+     * {@link GroundyTask#getQuittingReason()} method.
+     *
+     * @return true if the groundy task is in quitting state
+     */
+    protected boolean isQuitting() {
+        return mQuittingReason != 0;
+    }
+
+    /**
+     * This can be either {@link GroundyTask#CANCEL_ALL} or
+     * {@link GroundyTask#SERVICE_DESTROYED} or some other custom reason
+     *
+     * @return quitting reason
+     */
+    protected int getQuittingReason() {
+        return mQuittingReason;
+    }
+
+    /**
+     * Mark this task as quitting
+     *
+     * @param reason the reason to stop this task
+     */
+    void stopTask(int reason) {
+        mQuittingReason = reason;
+    }
+
+    /**
      * Prepare and sends a progress update to the current receiver.
      * Result code used is {@link Groundy#STATUS_PROGRESS} and it
      * will contain a bundle with an integer extra called {@link Groundy#KEY_PROGRESS}
@@ -290,6 +304,7 @@ public abstract class GroundyTask {
 
     /**
      * This must do all the background work.
+     *
      * @return true if the job finished successfully; false otherwise.
      */
     protected abstract boolean doInBackground();
