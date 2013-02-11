@@ -90,20 +90,19 @@ public final class GroundyService extends Service {
             return;
         }
 
-        if (ACTION_CANCEL_ALL.equals(intent.getAction())) {
-            L.e(TAG, "Aborting all tasks");
-            mGroundyHandler.removeMessages(DEFAULT_GROUP_ID);
-            internalQuit(GroundyTask.CANCEL_ALL);
+        final String action = intent.getAction();
+        if (ACTION_CANCEL_ALL.equals(action)) {
+            cancelAllTasks();
             return;
         }
 
-        if (ACTION_CANCEL_TASKS.equals(intent.getAction())) {
+        if (ACTION_CANCEL_TASKS.equals(action)) {
             cancelTasks(intent);
             return;
         }
 
         GroundyHandler groundyHandler;
-        if (ACTION_EXECUTE.equals(intent.getAction())) {
+        if (ACTION_EXECUTE.equals(action)) {
             HandlerThread thread = new HandlerThread("AsyncGroundyService");
             thread.start();
             Looper looper = thread.getLooper();
@@ -118,6 +117,24 @@ public final class GroundyService extends Service {
         msg.obj = intent;
         msg.what = intent.getIntExtra(Groundy.KEY_GROUP_ID, DEFAULT_GROUP_ID);
         groundyHandler.sendMessage(msg);
+    }
+
+    private void cancelAllTasks() {
+        L.e(TAG, "Cancelling all tasks");
+        mGroundyHandler.removeMessages(DEFAULT_GROUP_ID);
+        // remove messages of other groups
+        synchronized (mGroundyTasks) {
+            Set<Integer> alreadyRemoved = new HashSet<Integer>();
+            for (GroundyTask groundyTask : mGroundyTasks) {
+                final int groupId = groundyTask.getGroupId();
+                if (groupId == DEFAULT_GROUP_ID || alreadyRemoved.contains(groupId)) {
+                    continue;
+                }
+                mGroundyHandler.removeMessages(groupId);
+                alreadyRemoved.add(groupId);
+            }
+        }
+        internalQuit(GroundyTask.CANCEL_ALL);
     }
 
     private void cancelTasks(Intent intent) {
