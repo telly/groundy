@@ -31,15 +31,16 @@ import android.os.ResultReceiver;
  * @version 1.1
  */
 public abstract class GroundyTask {
-    public static final int CANCEL_ALL = -1;
-    public static final int SERVICE_DESTROYED = -2;
-    public static final int CANCEL_INDIVIDUAL = -3;
+    protected static final int CANCEL_ALL = -1;
+    protected static final int SERVICE_DESTROYED = -2;
+    protected static final int CANCEL_BY_GROUP = -3;
     private Context mContext;
     private int mResultCode = Groundy.STATUS_ERROR; // Pessimistic by default
     private final Bundle mResultData = new Bundle();
     private final Bundle mParameters = new Bundle();
     private ResultReceiver mReceiver;
     private volatile int mQuittingReason = 0;
+    private int mGroupId;
 
     /**
      * Creates a GroundyTask composed of
@@ -72,6 +73,14 @@ public abstract class GroundyTask {
 
     final void setContext(Context context) {
         mContext = context;
+    }
+
+    void setGroupId(int groupId) {
+        mGroupId = groupId;
+    }
+
+    protected final int getGroupId() {
+        return mGroupId;
     }
 
     protected final Context getContext() {
@@ -308,4 +317,56 @@ public abstract class GroundyTask {
      * @return true if the job finished successfully; false otherwise.
      */
     protected abstract boolean doInBackground();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        GroundyTask that = (GroundyTask) o;
+
+        if (mGroupId != that.mGroupId) return false;
+        if (mQuittingReason != that.mQuittingReason) return false;
+        if (!mParameters.equals(that.mParameters)) return false;
+        if (mReceiver != null ? !mReceiver.equals(that.mReceiver) : that.mReceiver != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mParameters.hashCode();
+        result = 31 * result + (mReceiver != null ? mReceiver.hashCode() : 0);
+        result = 31 * result + mQuittingReason;
+        result = 31 * result + mGroupId;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        String toString = "GroundyTask{groupId=" + mGroupId;
+        if (!mParameters.isEmpty()) {
+            toString += ", parameters=" + mParameters;
+        }
+        if (mReceiver != null) {
+            toString += ", receiver=" + mReceiver;
+        }
+        if (mQuittingReason != 0) {
+            switch (mQuittingReason) {
+                case CANCEL_ALL:
+                    toString += ", quittingReason=CANCEL_ALL";
+                    break;
+                case SERVICE_DESTROYED:
+                    toString += ", quittingReason=SERVICE_DESTROYED";
+                    break;
+                case CANCEL_BY_GROUP:
+                    toString += ", quittingReason=CANCEL_BY_GROUP";
+                    break;
+                default:
+                    toString += ", quittingReason=" + mQuittingReason;
+            }
+        }
+        toString += '}';
+        return toString;
+    }
 }

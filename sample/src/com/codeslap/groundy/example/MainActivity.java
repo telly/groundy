@@ -17,13 +17,16 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Groundy.create(MainActivity.this, DummyTask.class).queue();
+                Groundy.create(MainActivity.this, DummyTask.class).execute();
+                Groundy.create(MainActivity.this, DummyTask.class).execute();
+                Groundy.create(MainActivity.this, DummyTask.class).group(2).execute();
             }
         });
 
         findViewById(R.id.stop).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Groundy.cancelAll(MainActivity.this);
+                Groundy.cancelTasks(MainActivity.this, 2);
             }
         });
     }

@@ -30,15 +30,16 @@ public final class GroundyService extends Service {
     static final String ACTION_QUEUE = "com.codeslap.groundy.action.QUEUE";
     static final String ACTION_EXECUTE = "com.codeslap.groundy.action.EXECUTE";
     static final String ACTION_CANCEL_ALL = "com.codeslap.groundy.action.CANCEL_ALL";
-    static final String ACTION_CANCEL_TASK = "com.codeslap.groundy.action.CANCEL_TASK";
-    static final String EXTRA_TASK = "com.codeslap.groundy.extra.TASK";
+    static final String ACTION_CANCEL_TASKS = "com.codeslap.groundy.action.CANCEL_TASKS";
+    static final String EXTRA_GROUP_ID = "com.codeslap.groundy.extra.GROUP_ID";
     static final String EXTRA_CANCEL_REASON = "com.codeslap.groundy.extra.CANCEL_REASON";
     private static final String TAG = GroundyService.class.getSimpleName();
+    public static final int DEFAULT_GROUP_ID = 0;
     private final WakeLockHelper mWakeLockHelper;
     private Set<GroundyTask> mGroundyTasks = Collections.synchronizedSet(new HashSet<GroundyTask>());
     private volatile List<Looper> mAsyncLoopers;
-    private volatile Looper mServiceLooper;
-    private volatile ServiceHandler mServiceHandler;
+    private volatile Looper mGroundyLooper;
+    private volatile GroundyHandler mGroundyHandler;
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -54,8 +55,8 @@ public final class GroundyService extends Service {
         HandlerThread thread = new HandlerThread("SyncGroundyService");
         thread.start();
 
-        mServiceLooper = thread.getLooper();
-        mServiceHandler = new ServiceHandler(mServiceLooper);
+        mGroundyLooper = thread.getLooper();
+        mGroundyHandler = new GroundyHandler(mGroundyLooper);
     }
 
     @Override
@@ -69,7 +70,7 @@ public final class GroundyService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mServiceLooper.quit();
+        mGroundyLooper.quit();
         internalQuit(GroundyTask.SERVICE_DESTROYED);
     }
 
@@ -91,45 +92,54 @@ public final class GroundyService extends Service {
 
         if (ACTION_CANCEL_ALL.equals(intent.getAction())) {
             L.e(TAG, "Aborting all tasks");
-            mServiceHandler.removeMessages(0);
+            mGroundyHandler.removeMessages(DEFAULT_GROUP_ID);
             internalQuit(GroundyTask.CANCEL_ALL);
             return;
         }
 
-        if (ACTION_CANCEL_TASK.equals(intent.getAction())) {
-            cancelTask(intent);
+        if (ACTION_CANCEL_TASKS.equals(intent.getAction())) {
+            cancelTasks(intent);
             return;
         }
 
-        ServiceHandler serviceHandler;
+        GroundyHandler groundyHandler;
         if (ACTION_EXECUTE.equals(intent.getAction())) {
             HandlerThread thread = new HandlerThread("AsyncGroundyService");
             thread.start();
             Looper looper = thread.getLooper();
-            serviceHandler = new ServiceHandler(looper);
+            groundyHandler = new GroundyHandler(looper);
             mAsyncLoopers.add(looper);
         } else {
-            serviceHandler = mServiceHandler;
+            groundyHandler = mGroundyHandler;
         }
 
-        Message msg = serviceHandler.obtainMessage();
+        Message msg = groundyHandler.obtainMessage();
         msg.arg1 = startId;
         msg.obj = intent;
-        msg.what = 0;
-        serviceHandler.sendMessage(msg);
+        msg.what = intent.getIntExtra(Groundy.KEY_GROUP_ID, DEFAULT_GROUP_ID);
+        groundyHandler.sendMessage(msg);
     }
 
-    private void cancelTask(Intent intent) {
-        //noinspection unchecked
-        Class<? extends GroundyTask> task = (Class<? extends GroundyTask>) intent.getSerializableExtra(EXTRA_TASK);
-        L.e(TAG, "Aborting task " + task);
+    private void cancelTasks(Intent intent) {
+        int groupId = intent.getIntExtra(EXTRA_GROUP_ID, DEFAULT_GROUP_ID);
+        if (groupId == DEFAULT_GROUP_ID) {
+            throw new IllegalStateException("Cannot use 0 when cancelling tasks by group id");
+        }
+
         synchronized (mGroundyTasks) {
+            // prevent future tasks with this group id from executing
+            mGroundyHandler.removeMessages(groupId);
+
+            // stop current tasks
+            List<GroundyTask> stoppedTasks = new ArrayList<GroundyTask>();
             for (GroundyTask groundyTask : mGroundyTasks) {
-                if (groundyTask.getClass() == task) {
-                    int reason = intent.getIntExtra(EXTRA_CANCEL_REASON, GroundyTask.CANCEL_INDIVIDUAL);
+                if (groundyTask.getGroupId() == groupId) {
+                    int reason = intent.getIntExtra(EXTRA_CANCEL_REASON, GroundyTask.CANCEL_BY_GROUP);
                     groundyTask.stopTask(reason);
+                    stoppedTasks.add(groundyTask);
                 }
             }
+            mGroundyTasks.removeAll(stoppedTasks);
         }
     }
 
@@ -148,8 +158,8 @@ public final class GroundyService extends Service {
         }
     }
 
-    private final class ServiceHandler extends Handler {
-        public ServiceHandler(Looper looper) {
+    private final class GroundyHandler extends Handler {
+        public GroundyHandler(Looper looper) {
             super(looper);
         }
 
@@ -157,7 +167,7 @@ public final class GroundyService extends Service {
         public void handleMessage(Message msg) {
             Intent intent = (Intent) msg.obj;
             if (intent != null) {
-                onHandleIntent(intent);
+                onHandleIntent(intent, msg.what);
             }
             stopSelf(msg.arg1);
         }
@@ -172,10 +182,11 @@ public final class GroundyService extends Service {
      * When all requests have been handled, the IntentService stops itself,
      * so you should not call {@link #stopSelf}.
      *
-     * @param intent The value passed to {@link
-     *               android.content.Context#startService(Intent)}.
+     * @param intent  The value passed to {@link
+     *                android.content.Context#startService(android.content.Intent)}.
+     * @param groupId group id identifying the kind of task
      */
-    private void onHandleIntent(Intent intent) {
+    private void onHandleIntent(Intent intent, int groupId) {
         Bundle extras = intent.getExtras();
         extras = (extras == null) ? Bundle.EMPTY : extras;
 
@@ -194,6 +205,7 @@ public final class GroundyService extends Service {
 
         L.d(TAG, "Executing task: " + groundyTask);
         groundyTask.setReceiver(receiver);
+        groundyTask.setGroupId(groupId);
         groundyTask.addParameters(extras.getBundle(Groundy.KEY_PARAMETERS));
         boolean requiresWifi = groundyTask.keepWifiOn();
         if (requiresWifi) {
