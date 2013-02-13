@@ -1,4 +1,3 @@
-[![Build Status](https://travis-ci.org/casidiablo/groundy.png?branch=develop)](https://travis-ci.org/casidiablo/groundy)
 Groundy library for Android
 ===========================
 
@@ -23,19 +22,16 @@ Create a subclass of `GroundyTask`:
 
 ```java
 public class ExampleTask extends GroundyTask {
-    public static final String PARAM_EXAMPLE = "com.example.param.EXAMPLE";
-    public static final String RESULT_EXAMPLE = "com.example.result.EXAMPLE";
-
     @Override
     protected boolean doInBackground() {
         // use params
-        String exampleParam = getStringParam(PARAM_EXAMPLE);
+        String exampleParam = getStringParam("key_name");
 
         // lots of code
 
         // add results... this will be sent back to the activity
         // through the ResultReceiver once this method has returned
-        addStringResult(RESULT_EXAMPLE, "some result");
+        addStringResult("the_result", "some result");
 
         return success; // true if task was executed successfully
     }
@@ -46,10 +42,10 @@ Whenever you want to execute the task, just do this:
 
 ```java
 // this is usually performed from within an Activity
-Bundle params = new Bundler().add(ExampleTask.PARAM_EXAMPLE, "foo").build();
+Bundle params = new Bundler().add("key_name", "foo").build();
 Groundy.create(this, ExampleTask.class)
-       .receiver(receiver)
-       .params(params)
+       .receiver(receiver) // optional
+       .params(params)     // optional
        .queue();
 ```
 
@@ -59,7 +55,7 @@ You will get results in your result receiver (in the main thread):
 private final ResultReceiver receiver = new ResultReceiver(new Handler()){
     @Override
     protected void onReceiveResult(int resultCode, Bundle resultData) {
-        String result = resultData.getString(ExampleTask.RESULT_EXAMPLE);
+        String result = resultData.getString("the_result");
         // do something
     }
 };
@@ -73,6 +69,8 @@ Do not forget to add `GroundyService` to the `AndroidManifest.xml` file:
 
 Maven integration
 =================
+
+[![Build Status](https://travis-ci.org/casidiablo/groundy.png?branch=develop)](https://travis-ci.org/casidiablo/groundy)
 
 In order to use this library from you Android project using maven your pom should look like this:
 

@@ -5,14 +5,13 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/queue_example"
+        android:id="@+id/btn_queue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/queue_example" />
+        android:text="@string/queue_task" />
 
-    <Button
-        android:id="@+id/execute_example"
+    <ListView
+        android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/execute_example" />
+        android:layout_height="match_parent" />
 </LinearLayout>

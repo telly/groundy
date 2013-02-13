@@ -12,6 +12,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".QueueTest" android:configChanges="orientation" android:screenOrientation="portrait"/>
+        <activity android:name=".ExecuteTest" android:configChanges="orientation" android:screenOrientation="portrait"/>
         <service android:name="com.codeslap.groundy.GroundyService"/>
+        <service android:name=".AsyncGroundyService">
+            <meta-data android:name="groundy:mode" android:value="async"/>
+        </service>
     </application>
 </manifest>

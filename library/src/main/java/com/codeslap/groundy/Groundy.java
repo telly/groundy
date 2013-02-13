@@ -19,9 +19,12 @@
 
 package com.codeslap.groundy;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.ResultReceiver;
 
 public class Groundy {
@@ -43,6 +46,7 @@ public class Groundy {
     private Bundle mParams;
     private int mGroupId;
     private boolean mAlreadyProcessed = false;
+    private Class<? extends GroundyService> mGroundyClass = GroundyService.class;
 
     private Groundy(Context context, Class<? extends GroundyTask> groundyTask) {
         mContext = context.getApplicationContext();
@@ -112,10 +116,32 @@ public class Groundy {
      * @return itself
      */
     public Groundy group(int groupId) {
+        if (groupId <= 0) {
+            throw new IllegalStateException("Group id must be greater than zero");
+        }
         if (mAlreadyProcessed) {
             throw new IllegalStateException("This method can only be called before queue() or execute() methods");
         }
         mGroupId = groupId;
+        return this;
+    }
+
+    /**
+     * This allows you to use a different GroundyService implementation.
+     * This
+     *
+     * @param groundyClass a different Groundy service implementation
+     * @return itself
+     */
+    public Groundy service(Class<? extends GroundyService> groundyClass) {
+        if (groundyClass == GroundyService.class) {
+            throw new IllegalStateException("This method is meant to set a different GroundyService implementation. " +
+                    "You cannot use GroundyService.class, http://i.imgur.com/IR23PAe.png");
+        }
+        if (mAlreadyProcessed) {
+            throw new IllegalStateException("This method can only be called before queue() or execute() methods");
+        }
+        mGroundyClass = groundyClass;
         return this;
     }
 
@@ -147,7 +173,7 @@ public class Groundy {
     }
 
     private void startApiService(boolean async) {
-        Intent intent = new Intent(mContext, GroundyService.class);
+        Intent intent = new Intent(mContext, mGroundyClass);
         intent.setAction(async ? GroundyService.ACTION_EXECUTE : GroundyService.ACTION_QUEUE);
         if (mParams != null) {
             intent.putExtra(KEY_PARAMETERS, mParams);
@@ -206,9 +232,12 @@ public class Groundy {
      * @param context used to interact with the service
      */
     public static void cancelAll(Context context) {
-        Intent intent = new Intent(context, GroundyService.class);
-        intent.setAction(GroundyService.ACTION_CANCEL_ALL);
-        context.startService(intent);
+        new GroundyServiceConnection(context) {
+            @Override
+            protected void onGroundyServiceBound(GroundyService.GroundyServiceBinder binder) {
+                binder.cancelAllTasks();
+            }
+        }.start();
     }
 
     /**
@@ -228,12 +257,49 @@ public class Groundy {
      * @param context used to interact with the service
      * @param groupId the group id to cancel
      */
-    public static void cancelTasks(Context context, int groupId, int reason) {
-        Intent intent = new Intent(context, GroundyService.class);
-        intent.setAction(GroundyService.ACTION_CANCEL_TASKS);
-        intent.putExtra(GroundyService.EXTRA_CANCEL_REASON, reason);
-        intent.putExtra(GroundyService.EXTRA_GROUP_ID, groupId);
-        context.startService(intent);
+    public static void cancelTasks(final Context context, final int groupId, final int reason) {
+        if (groupId <= 0) {
+            throw new IllegalStateException("Group id must be greater than zero");
+        }
+        new GroundyServiceConnection(context) {
+            @Override
+            protected void onGroundyServiceBound(GroundyService.GroundyServiceBinder binder) {
+                binder.cancelTasks(groupId, reason);
+            }
+        }.start();
+    }
+
+    private abstract static class GroundyServiceConnection implements ServiceConnection {
+        private Context mContext;
+        private boolean mAlreadyStarted;
+
+        private GroundyServiceConnection(Context context) {
+            mContext = context;
+        }
+
+        @Override
+        public final void onServiceConnected(ComponentName name, IBinder service) {
+            if (service instanceof GroundyService.GroundyServiceBinder) {
+                GroundyService.GroundyServiceBinder binder = (GroundyService.GroundyServiceBinder) service;
+                onGroundyServiceBound(binder);
+            }
+            mContext.unbindService(this);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+        }
+
+        void start() {
+            if (mAlreadyStarted) {
+                throw new IllegalStateException("Trying to use already started groundy service connector");
+            }
+            mAlreadyStarted = true;
+            Intent intent = new Intent(mContext, GroundyService.class);
+            mContext.bindService(intent, this, Context.BIND_AUTO_CREATE);
+        }
+
+        protected abstract void onGroundyServiceBound(GroundyService.GroundyServiceBinder binder);
     }
 
     public static void setLogEnabled(boolean enabled) {

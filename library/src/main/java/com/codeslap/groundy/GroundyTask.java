@@ -22,6 +22,7 @@ package com.codeslap.groundy;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.ResultReceiver;
+import com.codeslap.groundy.util.Bundler;
 
 /**
  * Implementation of this class get executed by the {@link GroundyService}
@@ -38,9 +39,11 @@ public abstract class GroundyTask {
     private int mResultCode = Groundy.STATUS_ERROR; // Pessimistic by default
     private final Bundle mResultData = new Bundle();
     private final Bundle mParameters = new Bundle();
+    private int mStartId;
     private ResultReceiver mReceiver;
     private volatile int mQuittingReason = 0;
     private int mGroupId;
+    private boolean mRedelivered;
 
     /**
      * Creates a GroundyTask composed of
@@ -81,6 +84,26 @@ public abstract class GroundyTask {
 
     protected final int getGroupId() {
         return mGroupId;
+    }
+
+    void setStartId(int startId) {
+        mStartId = startId;
+    }
+
+    protected final int getStartId() {
+        return mStartId;
+    }
+
+    void setRedelivered(boolean redelivered) {
+        mRedelivered = redelivered;
+    }
+
+    /**
+     * @return true if the task was run after a service was killed and
+     *         force_queue_completion was used.
+     */
+    public boolean isRedelivered() {
+        return mRedelivered;
     }
 
     protected final Context getContext() {
@@ -241,11 +264,25 @@ public abstract class GroundyTask {
     }
 
     void setReceiver(ResultReceiver receiver) {
-        this.mReceiver = receiver;
+        mReceiver = receiver;
     }
 
     protected ResultReceiver getReceiver() {
         return mReceiver;
+    }
+
+    protected void sendStringResult(int code, String key, String value) {
+        if (mReceiver == null) {
+            return;
+        }
+        mReceiver.send(code, new Bundler().add(key, value).build());
+    }
+
+    protected void sendIntResult(int code, String key, int value) {
+        if (mReceiver == null) {
+            return;
+        }
+        mReceiver.send(code, new Bundler().add(key, value).build());
     }
 
     /**
@@ -344,12 +381,16 @@ public abstract class GroundyTask {
 
     @Override
     public String toString() {
-        String toString = "GroundyTask{groupId=" + mGroupId;
+        String toString = getClass().getSimpleName() + "{groupId=" + mGroupId;
+        toString += ", startId=" + mStartId;
         if (!mParameters.isEmpty()) {
             toString += ", parameters=" + mParameters;
         }
         if (mReceiver != null) {
             toString += ", receiver=" + mReceiver;
+        }
+        if (mRedelivered) {
+            toString += ", redelivered";
         }
         if (mQuittingReason != 0) {
             switch (mQuittingReason) {

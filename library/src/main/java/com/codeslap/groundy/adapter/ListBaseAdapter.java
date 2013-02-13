@@ -36,16 +36,16 @@ import java.util.Map;
  *
  * @author cristian
  */
-public abstract class ListBaseAdapter<I, H> extends BaseAdapter {
+public abstract class ListBaseAdapter<Item, ViewHolder> extends BaseAdapter {
 
-    private final List<I> mItems = new ArrayList<I>();
+    private final List<Item> mItems = new ArrayList<Item>();
     private final LayoutInflater mInflater;
     private final Context mContext;
-    private final Class<H> mViewHolderClass;
+    private final Class<ViewHolder> mViewHolderClass;
     private final int mLayoutId;
     private final Map<Field, Integer> mFieldCache = new HashMap<Field, Integer>();
 
-    public ListBaseAdapter(Context context, Class<H> viewHolder) {
+    public ListBaseAdapter(Context context, Class<ViewHolder> viewHolder) {
         mContext = context;
         mViewHolderClass = viewHolder;
         mInflater = LayoutInflater.from(context);
@@ -90,7 +90,7 @@ public abstract class ListBaseAdapter<I, H> extends BaseAdapter {
     }
 
     @Override
-    public I getItem(int position) {
+    public Item getItem(int position) {
         return mItems.get(position);
     }
 
@@ -101,7 +101,7 @@ public abstract class ListBaseAdapter<I, H> extends BaseAdapter {
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
-        H holder;
+        ViewHolder holder;
         if (view == null) {
             // create an instance of the view holder class
             try {
@@ -124,23 +124,24 @@ public abstract class ListBaseAdapter<I, H> extends BaseAdapter {
             }
             view.setTag(holder);
         } else {
-            holder = (H) view.getTag();
+            //noinspection unchecked
+            holder = (ViewHolder) view.getTag();
         }
         populateHolder(position, view, parent, getItem(position), holder);
         return view;
     }
 
-    public abstract void populateHolder(int position, View view, ViewGroup parent, I item, H holder);
+    public abstract void populateHolder(int position, View view, ViewGroup parent, Item item, ViewHolder holder);
 
     public Context getContext() {
         return mContext;
     }
 
-    public List<I> getItems() {
+    public List<Item> getItems() {
         return mItems;
     }
 
-    public void updateItems(List<I> data) {
+    public void updateItems(List<Item> data) {
         mItems.clear();
         mItems.addAll(data);
         notifyDataSetChanged();
@@ -150,8 +151,13 @@ public abstract class ListBaseAdapter<I, H> extends BaseAdapter {
         mItems.clear();
     }
 
-    public void addItems(List<I> is) {
-        mItems.addAll(is);
+    public void addItem(Item item) {
+        mItems.add(item);
+        notifyDataSetChanged();
+    }
+
+    public void addItems(List<Item> items) {
+        mItems.addAll(items);
         notifyDataSetChanged();
     }
 }

@@ -20,38 +20,61 @@
 package com.codeslap.groundy;
 
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.os.*;
+import android.util.Log;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public final class GroundyService extends Service {
+public class GroundyService extends Service {
 
     static final String ACTION_QUEUE = "com.codeslap.groundy.action.QUEUE";
     static final String ACTION_EXECUTE = "com.codeslap.groundy.action.EXECUTE";
-    static final String ACTION_CANCEL_ALL = "com.codeslap.groundy.action.CANCEL_ALL";
-    static final String ACTION_CANCEL_TASKS = "com.codeslap.groundy.action.CANCEL_TASKS";
-    static final String EXTRA_GROUP_ID = "com.codeslap.groundy.extra.GROUP_ID";
-    static final String EXTRA_CANCEL_REASON = "com.codeslap.groundy.extra.CANCEL_REASON";
+
     private static final String TAG = GroundyService.class.getSimpleName();
+
     public static final int DEFAULT_GROUP_ID = 0;
-    private final WakeLockHelper mWakeLockHelper;
-    private Set<GroundyTask> mGroundyTasks = Collections.synchronizedSet(new HashSet<GroundyTask>());
-    private volatile List<Looper> mAsyncLoopers;
+
+    private static enum GroundyMode {QUEUE, ASYNC}
+
+    public static final String KEY_MODE = "groundy:mode";
+    public static final String KEY_FORCE_QUEUE_COMPLETION = "groundy:force_queue_completion";
+    private final Set<GroundyTask> mRunningTasks = Collections.synchronizedSet(new HashSet<GroundyTask>());
+
+    private final GroundyServiceBinder mBinder = new GroundyServiceBinder();
     private volatile Looper mGroundyLooper;
     private volatile GroundyHandler mGroundyHandler;
+
+    private volatile List<Looper> mAsyncLoopers;
+    private GroundyMode mMode = GroundyMode.QUEUE;
+    private int mStartBehavior = START_NOT_STICKY;
+    private final WakeLockHelper mWakeLockHelper;
+
+    private AtomicInteger mLastStartId = new AtomicInteger();
+    // this help us keep track of the tasks that are scheduled to be executed
+    private volatile Map<Integer, Integer> mScheduledTasks = Collections.synchronizedMap(new HashMap<Integer, Integer>());
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
      */
     public GroundyService() {
         mWakeLockHelper = new WakeLockHelper(this);
-        mAsyncLoopers = new ArrayList<Looper>();
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        updateModeFromMetadata();
+
+        // initialize async loopers only if running in async mode
+        if (mMode == GroundyMode.ASYNC) {
+            mAsyncLoopers = new ArrayList<Looper>();
+        }
+
         HandlerThread thread = new HandlerThread("SyncGroundyService");
         thread.start();
 
@@ -61,10 +84,34 @@ public final class GroundyService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        handleCommand(intent, startId);
-        // We want this service to continue running until it is explicitly
-        // stopped, so return sticky.
-        return START_STICKY;
+        mLastStartId.set(startId);
+
+        if (intent == null) {
+            // we should not have received a null intent... kill the service just in case
+            stopSelf(startId);
+            return mStartBehavior;
+        }
+
+        final String action = intent.getAction();
+        if (ACTION_EXECUTE.equals(action)) {
+            if (mMode == GroundyMode.QUEUE) {
+                // make sure we don't allow to asynchronously execute tasks while we are not in queue mode
+                throw new UnsupportedOperationException("Current mode is 'queue'. You cannot use .execute() while" +
+                        " in this mode. You must enable 'async' mode by adding metadata to the manifest.");
+            }
+            HandlerThread thread = new HandlerThread("AsyncGroundyService");
+            thread.start();
+            Looper looper = thread.getLooper();
+            GroundyHandler groundyHandler = new GroundyHandler(looper);
+            mAsyncLoopers.add(looper);
+            scheduleTask(intent, startId, groundyHandler, flags);
+        } else if (ACTION_QUEUE.equals(action)) {
+            scheduleTask(intent, startId, mGroundyHandler, flags);
+        } else {
+            throw new UnsupportedOperationException("Wrong intent received: " + intent);
+        }
+
+        return mStartBehavior;
     }
 
     @Override
@@ -74,108 +121,98 @@ public final class GroundyService extends Service {
         internalQuit(GroundyTask.SERVICE_DESTROYED);
     }
 
-    /**
-     * Unless you provide binding for your service, you don't need to implement this
-     * method, because the default implementation returns null.
-     *
-     * @see android.app.Service#onBind
-     */
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
     }
 
-    private void handleCommand(Intent intent, int startId) {
-        if (intent == null) {
-            return;
-        }
-
-        final String action = intent.getAction();
-        if (ACTION_CANCEL_ALL.equals(action)) {
-            cancelAllTasks();
-            return;
-        }
-
-        if (ACTION_CANCEL_TASKS.equals(action)) {
-            cancelTasks(intent);
-            return;
-        }
-
-        GroundyHandler groundyHandler;
-        if (ACTION_EXECUTE.equals(action)) {
-            HandlerThread thread = new HandlerThread("AsyncGroundyService");
-            thread.start();
-            Looper looper = thread.getLooper();
-            groundyHandler = new GroundyHandler(looper);
-            mAsyncLoopers.add(looper);
-        } else {
-            groundyHandler = mGroundyHandler;
-        }
-
+    private void scheduleTask(Intent intent, int startId, GroundyHandler groundyHandler, int flags) {
         Message msg = groundyHandler.obtainMessage();
         msg.arg1 = startId;
+        msg.arg2 = flags;
         msg.obj = intent;
         msg.what = intent.getIntExtra(Groundy.KEY_GROUP_ID, DEFAULT_GROUP_ID);
-        groundyHandler.sendMessage(msg);
+        mScheduledTasks.put(startId, msg.what);
+        if (!groundyHandler.sendMessage(msg)) {
+            mScheduledTasks.remove(startId);
+        }
     }
 
     private void cancelAllTasks() {
         L.e(TAG, "Cancelling all tasks");
         mGroundyHandler.removeMessages(DEFAULT_GROUP_ID);
         // remove messages of other groups
-        synchronized (mGroundyTasks) {
-            Set<Integer> alreadyRemoved = new HashSet<Integer>();
-            for (GroundyTask groundyTask : mGroundyTasks) {
+        synchronized (mRunningTasks) {
+            Set<Integer> alreadyStopped = new HashSet<Integer>();
+            for (GroundyTask groundyTask : mRunningTasks) {
                 final int groupId = groundyTask.getGroupId();
-                if (groupId == DEFAULT_GROUP_ID || alreadyRemoved.contains(groupId)) {
+                if (groupId == DEFAULT_GROUP_ID || alreadyStopped.contains(groupId)) {
                     continue;
                 }
                 mGroundyHandler.removeMessages(groupId);
-                alreadyRemoved.add(groupId);
+                alreadyStopped.add(groupId);
             }
         }
         internalQuit(GroundyTask.CANCEL_ALL);
+        mScheduledTasks.clear();
     }
 
-    private void cancelTasks(Intent intent) {
-        int groupId = intent.getIntExtra(EXTRA_GROUP_ID, DEFAULT_GROUP_ID);
+    private void cancelTasks(int groupId, int reason) {
         if (groupId == DEFAULT_GROUP_ID) {
             throw new IllegalStateException("Cannot use 0 when cancelling tasks by group id");
         }
 
-        synchronized (mGroundyTasks) {
-            // prevent future tasks with this group id from executing
+        if (mStartBehavior == START_REDELIVER_INTENT) {
+            Log.w(TAG, "Cancelling groups of tasks is not secure when using force_queue_completion. " +
+                    "If your service gets killed unpredictable behavior can happen.");
+        }
+
+        synchronized (mRunningTasks) {
+            // prevent current scheduled tasks with this group id from executing
             mGroundyHandler.removeMessages(groupId);
 
-            // stop current tasks
+            // stop current running tasks
             List<GroundyTask> stoppedTasks = new ArrayList<GroundyTask>();
-            for (GroundyTask groundyTask : mGroundyTasks) {
+            for (GroundyTask groundyTask : mRunningTasks) {
                 if (groundyTask.getGroupId() == groupId) {
-                    int reason = intent.getIntExtra(EXTRA_CANCEL_REASON, GroundyTask.CANCEL_BY_GROUP);
                     groundyTask.stopTask(reason);
                     stoppedTasks.add(groundyTask);
                 }
             }
-            mGroundyTasks.removeAll(stoppedTasks);
+            mRunningTasks.removeAll(stoppedTasks);
+
+            // remove future tasks
+            List<Integer> targetTasks = new ArrayList<Integer>();
+            for (Integer startId : mScheduledTasks.keySet()) {
+                if (mScheduledTasks.get(startId) == groupId) {
+                    targetTasks.add(startId);
+                }
+            }
+            for (Integer targetStartId : targetTasks) {
+                mScheduledTasks.remove(targetStartId);
+            }
         }
     }
 
     private void internalQuit(int quittingReason) {
-        synchronized (mAsyncLoopers) {
-            for (Looper asyncLooper : mAsyncLoopers) {
-                asyncLooper.quit();
+        if (mAsyncLoopers != null) {
+            synchronized (mAsyncLoopers) {
+                for (Looper asyncLooper : mAsyncLoopers) {
+                    asyncLooper.quit();
+                }
             }
         }
 
-        synchronized (mGroundyTasks) {
-            for (GroundyTask groundyTask : mGroundyTasks) {
+        synchronized (mRunningTasks) {
+            for (GroundyTask groundyTask : mRunningTasks) {
                 groundyTask.stopTask(quittingReason);
             }
-            mGroundyTasks.clear();
+            mRunningTasks.clear();
         }
     }
 
     private final class GroundyHandler extends Handler {
+
         public GroundyHandler(Looper looper) {
             super(looper);
         }
@@ -184,9 +221,19 @@ public final class GroundyService extends Service {
         public void handleMessage(Message msg) {
             Intent intent = (Intent) msg.obj;
             if (intent != null) {
-                onHandleIntent(intent, msg.what);
+                onHandleIntent(intent, msg.what, msg.arg1, msg.arg2 == START_FLAG_REDELIVERY);
+
+                if (mMode == GroundyMode.QUEUE) {
+                    // when in queue mode, we must stop each intent received
+                    stopSelf(msg.arg1);
+                }
+                mScheduledTasks.remove(msg.arg1);
             }
-            stopSelf(msg.arg1);
+
+            if (mScheduledTasks.isEmpty()) {
+                // stop the service by calling stopSelf with the latest startId
+                stopSelf(mLastStartId.get());
+            }
         }
     }
 
@@ -196,14 +243,14 @@ public final class GroundyService extends Service {
      * worker thread that runs independently from other application logic.
      * So, if this code takes a long time, it will hold up other requests to
      * the same IntentService, but it will not hold up anything else.
-     * When all requests have been handled, the IntentService stops itself,
-     * so you should not call {@link #stopSelf}.
      *
-     * @param intent  The value passed to {@link
-     *                android.content.Context#startService(android.content.Intent)}.
-     * @param groupId group id identifying the kind of task
+     * @param intent     The value passed to {@link
+     *                   android.content.Context#startService(android.content.Intent)}.
+     * @param groupId    group id identifying the kind of task
+     * @param startId    the service start id given when the task was schedule
+     * @param redelivery true if this intent was redelivered by the system
      */
-    private void onHandleIntent(Intent intent, int groupId) {
+    private void onHandleIntent(Intent intent, int groupId, int startId, boolean redelivery) {
         Bundle extras = intent.getExtras();
         extras = (extras == null) ? Bundle.EMPTY : extras;
 
@@ -220,17 +267,19 @@ public final class GroundyService extends Service {
             return;
         }
 
-        L.d(TAG, "Executing task: " + groundyTask);
         groundyTask.setReceiver(receiver);
+        groundyTask.setStartId(startId);
         groundyTask.setGroupId(groupId);
+        groundyTask.setRedelivered(redelivery);
         groundyTask.addParameters(extras.getBundle(Groundy.KEY_PARAMETERS));
         boolean requiresWifi = groundyTask.keepWifiOn();
         if (requiresWifi) {
             mWakeLockHelper.acquire();
         }
-        mGroundyTasks.add(groundyTask);
+        mRunningTasks.add(groundyTask);
+        L.d(TAG, "Executing task: " + groundyTask);
         groundyTask.execute();
-        mGroundyTasks.remove(groundyTask);
+        mRunningTasks.remove(groundyTask);
         if (requiresWifi) {
             mWakeLockHelper.release();
         }
@@ -239,6 +288,53 @@ public final class GroundyService extends Service {
         if (receiver != null) {
             Bundle resultData = groundyTask.getResultData();
             receiver.send(groundyTask.getResultCode(), resultData);
+        }
+    }
+
+    private void updateModeFromMetadata() {
+        ServiceInfo info = null;
+        try {
+            PackageManager pm = getPackageManager();
+            ComponentName component = new ComponentName(this, getClass());
+            info = pm.getServiceInfo(component, PackageManager.GET_META_DATA);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        if (info == null || info.metaData == null) {
+            return;
+        }
+
+        // update groundy mode
+        if (info.metaData.containsKey(KEY_MODE)) {
+            String modeData = info.metaData.getString(KEY_MODE);
+            if (GroundyMode.ASYNC.toString().equalsIgnoreCase(modeData)) {
+                mMode = GroundyMode.ASYNC;
+            } else {
+                mMode = GroundyMode.QUEUE;
+            }
+        }
+
+        // update service behavior
+        boolean forceQueueCompletion = info.metaData.getBoolean(KEY_FORCE_QUEUE_COMPLETION, false);
+        if (forceQueueCompletion) {
+            if (mMode == GroundyMode.ASYNC) {
+                throw new UnsupportedOperationException(
+                        "force_queue_completion can only be used when in 'queue' mode");
+            }
+            mStartBehavior = START_REDELIVER_INTENT;
+        } else {
+            mStartBehavior = START_NOT_STICKY;
+        }
+    }
+
+    final class GroundyServiceBinder extends Binder {
+        void cancelAllTasks() {
+            GroundyService.this.cancelAllTasks();
+            stopSelf();
+        }
+
+        void cancelTasks(int groupId, int reason) {
+            GroundyService.this.cancelTasks(groupId, reason);
         }
     }
 }

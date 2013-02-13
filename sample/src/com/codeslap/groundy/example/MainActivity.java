@@ -1,6 +1,7 @@
 package com.codeslap.groundy.example;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import com.codeslap.groundy.Groundy;
@@ -12,21 +13,17 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main);
         Groundy.setLogEnabled(false);
 
-
-        findViewById(R.id.run).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.queue_example).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Groundy.create(MainActivity.this, DummyTask.class).queue();
-                Groundy.create(MainActivity.this, DummyTask.class).execute();
-                Groundy.create(MainActivity.this, DummyTask.class).execute();
-                Groundy.create(MainActivity.this, DummyTask.class).group(2).execute();
+                startActivity(new Intent(MainActivity.this, QueueTest.class));
             }
         });
 
-        findViewById(R.id.stop).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.execute_example).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Groundy.cancelTasks(MainActivity.this, 2);
+                startActivity(new Intent(MainActivity.this, ExecuteTest.class));
             }
         });
     }

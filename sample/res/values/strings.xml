@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Groundy examples</string>
+    <string name="queue_task">Queue task</string>
+    <string name="queue_example">Queue example</string>
+    <string name="execute_example">Async example</string>
+    <string name="next_task_counter">Next task id: %s</string>
+    <string name="will_work_for">Will work for about %s secs</string>
 </resources>
