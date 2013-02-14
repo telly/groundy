@@ -58,7 +58,7 @@ public class GroundyService extends Service {
     private AtomicInteger mLastStartId = new AtomicInteger();
     // this help us keep track of the tasks that are scheduled to be executed
     private volatile Map<Integer, Integer> mUnfinishedTasks = Collections.synchronizedMap(new HashMap<Integer, Integer>());
-    private volatile Map<String, List<ResultReceiver>> mAttachedReceivers = Collections.synchronizedMap(new HashMap<String, List<ResultReceiver>>());
+    private volatile Map<String, Set<ResultReceiver>> mAttachedReceivers = Collections.synchronizedMap(new HashMap<String, Set<ResultReceiver>>());
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -340,7 +340,7 @@ public class GroundyService extends Service {
     }
 
     final class GroundyServiceBinder extends Binder {
-        public void attachReceiver(String token, ResultReceiver resultReceiver) {
+        void attachReceiver(String token, ResultReceiver resultReceiver) {
             if (!mRunning) {
                 return;
             }
@@ -350,15 +350,33 @@ public class GroundyService extends Service {
                 }
             }
 
-            List<ResultReceiver> resultReceivers;
+            Set<ResultReceiver> resultReceivers;
             if (mAttachedReceivers.containsKey(token)) {
                 resultReceivers = mAttachedReceivers.get(token);
             } else {
-                resultReceivers = new ArrayList<ResultReceiver>();
+                resultReceivers = new HashSet<ResultReceiver>();
                 mAttachedReceivers.put(token, resultReceivers);
             }
 
             resultReceivers.add(resultReceiver);
+        }
+
+        void detachReceiver(String token, ResultReceiver resultReceiver) {
+            if (!mRunning) {
+                return;
+            }
+            for (GroundyTask runningTask : mRunningTasks) {
+                if (token.equals(runningTask.getToken())) {
+                    runningTask.removeReceiver(resultReceiver);
+                }
+            }
+
+            if (!mAttachedReceivers.containsKey(token)) {
+                return;
+            }
+
+            Set<ResultReceiver> resultReceivers = mAttachedReceivers.get(token);
+            resultReceivers.remove(resultReceiver);
         }
 
         void cancelAllTasks() {

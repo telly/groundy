@@ -3,9 +3,8 @@ Groundy library for Android
 
 Groundy is a fancy implementation of the 'Service + ResultReceiver' technique which
 is heavily inspired in a Google I/O 2010 presentation by Virgil Dobjanschi
-called [Android REST client applications][1].
-
-Groundy is useful in any kind of apps that requires the use of background threads:
+called [Android REST client applications][1]. Groundy is useful in any kind of apps
+that requires the use of background threads:
 
 - Execute calls to external services (e.g. RESTful web services)
 - Download and/or process files
@@ -14,6 +13,8 @@ Groundy is useful in any kind of apps that requires the use of background thread
 
 Groundy offers a special `Service` that will take care of creating background
 threads and allows to report results to the `Activity` using a `ResultReceiver`.
+It will also force you to decouple the background work logic from your activities,
+which in turn makes your code cleaner and easier to maintain.
 
 Basic usage
 ===========
@@ -67,10 +68,8 @@ Do not forget to add `GroundyService` to the `AndroidManifest.xml` file:
 <service android:name="com.codeslap.groundy.GroundyService"/>
 ```
 
-Maven integration
+Maven integration [![Build Status](https://travis-ci.org/casidiablo/groundy.png?branch=develop)](https://travis-ci.org/casidiablo/groundy)
 =================
-
-[![Build Status](https://travis-ci.org/casidiablo/groundy.png?branch=develop)](https://travis-ci.org/casidiablo/groundy)
 
 In order to use this library from you Android project using maven your pom should look like this:
 
@@ -78,7 +77,7 @@ In order to use this library from you Android project using maven your pom shoul
 <dependency>
     <groupId>com.codeslap</groupId>
     <artifactId>groundy</artifactId>
-    <version>0.6</version>
+    <version>0.7</version>
     <scope>compile</scope>
 </dependency>
 ```

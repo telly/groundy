@@ -75,6 +75,7 @@ public class AttachReceiverExample extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         mDetachableReceiver.clearReceiver();
+        GroundyManger.detachReceiver(this, "the_token", mDetachableReceiver);
     }
 
     private final DetachableResultReceiver.Receiver mReceiver = new DetachableResultReceiver.Receiver() {

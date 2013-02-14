@@ -112,12 +112,58 @@ public class GroundyManger {
             throw new IllegalStateException("result receiver cannot be null");
         }
 
-        return context.bindService(new Intent(context, GroundyService.class), new ServiceConnection() {
+        return context.bindService(new Intent(context, groundyServiceClass), new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 if (service instanceof GroundyService.GroundyServiceBinder) {
                     GroundyService.GroundyServiceBinder binder = (GroundyService.GroundyServiceBinder) service;
                     binder.attachReceiver(token, resultReceiver);
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+            }
+        }, Context.BIND_AUTO_CREATE);
+    }
+
+    /**
+     * Detaches a receiver from the GroundyService
+     *
+     * @param context        used to reach the service
+     * @param token          used to refer to a specific task
+     * @param resultReceiver result receiver to attach
+     * @return true if the service was reached (it does not mean the result receiver was attached)
+     */
+    public static boolean detachReceiver(Context context, final String token, final ResultReceiver resultReceiver) {
+        return detachReceiver(context, GroundyService.class, token, resultReceiver);
+    }
+
+    /**
+     * Detaches a receiver from the GroundyService
+     *
+     * @param context             used to reach the service
+     * @param groundyServiceClass a custom GroundyService implementation
+     * @param token               used to refer to a specific task
+     * @param resultReceiver      result receiver to attach
+     * @return true if the service was reached (it does not mean the result receiver was attached)
+     */
+    public static boolean detachReceiver(Context context, Class<? extends GroundyService> groundyServiceClass,
+                                         final String token, final ResultReceiver resultReceiver) {
+        if (TextUtils.isEmpty(token)) {
+            throw new IllegalStateException("token cannot be null");
+        }
+
+        if (resultReceiver == null) {
+            throw new IllegalStateException("result receiver cannot be null");
+        }
+
+        return context.bindService(new Intent(context, groundyServiceClass), new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                if (service instanceof GroundyService.GroundyServiceBinder) {
+                    GroundyService.GroundyServiceBinder binder = (GroundyService.GroundyServiceBinder) service;
+                    binder.detachReceiver(token, resultReceiver);
                 }
             }
 

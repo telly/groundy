@@ -282,6 +282,13 @@ public abstract class GroundyTask {
         mReceivers.add(receiver);
     }
 
+    void removeReceiver(ResultReceiver receiver) {
+        if (mReceivers == null) {
+            return;
+        }
+        mReceivers.remove(receiver);
+    }
+
     protected void send(int resultCode, Bundle resultData) {
         if (!hasReceivers()) {
             return;
