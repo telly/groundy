@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Groundy by casidiablo</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Groundy</h1>
+        <p>Sexy way to execute async/background tasks on Android</p>
+
+        <p class="view"><a href="https://github.com/casidiablo/groundy">View the Project on GitHub <small>casidiablo/groundy</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/casidiablo/groundy/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/casidiablo/groundy/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/casidiablo/groundy">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>Groundy library for Android</h1>
+
+<p>Groundy is a fancy implementation of the 'Service + ResultReceiver' technique which
+is heavily inspired in a Google I/O 2010 presentation by Virgil Dobjanschi
+called <a href="http://www.youtube.com/watch?v=xHXn3Kg2IQE">Android REST client applications</a>.</p>
+
+<p>Groundy is useful in any kind of apps that requires the use of background threads:</p>
+
+<ul>
+<li>Execute calls to external services (e.g. RESTful web services)</li>
+<li>Download and/or process files</li>
+<li>Encoding audio/video</li>
+<li>Any kind of task that could block the main thread</li>
+</ul><p>Groundy offers a special <code>Service</code> that will take care of creating background
+threads and allows to report results to the <code>Activity</code> using a <code>ResultReceiver</code>.</p>
+
+<h1>Basic usage</h1>
+
+<p>Create a subclass of <code>GroundyTask</code>:</p>
+
+<div class="highlight"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ExampleTask</span> <span class="kd">extends</span> <span class="n">GroundyTask</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">boolean</span> <span class="nf">doInBackground</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">// use params</span>
+        <span class="n">String</span> <span class="n">exampleParam</span> <span class="o">=</span> <span class="n">getStringParam</span><span class="o">(</span><span class="s">"key_name"</span><span class="o">);</span>
+
+        <span class="c1">// lots of code</span>
+
+        <span class="c1">// add results... this will be sent back to the activity</span>
+        <span class="c1">// through the ResultReceiver once this method has returned</span>
+        <span class="n">addStringResult</span><span class="o">(</span><span class="s">"the_result"</span><span class="o">,</span> <span class="s">"some result"</span><span class="o">);</span>
+
+        <span class="k">return</span> <span class="n">success</span><span class="o">;</span> <span class="c1">// true if task was executed successfully</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+
+<p>Whenever you want to execute the task, just do this:</p>
+
+<div class="highlight"><pre><span class="c1">// this is usually performed from within an Activity</span>
+<span class="n">Bundle</span> <span class="n">params</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Bundler</span><span class="o">().</span><span class="na">add</span><span class="o">(</span><span class="s">"key_name"</span><span class="o">,</span> <span class="s">"foo"</span><span class="o">).</span><span class="na">build</span><span class="o">();</span>
+<span class="n">Groundy</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">ExampleTask</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+       <span class="o">.</span><span class="na">receiver</span><span class="o">(</span><span class="n">receiver</span><span class="o">)</span> <span class="c1">// optional</span>
+       <span class="o">.</span><span class="na">params</span><span class="o">(</span><span class="n">params</span><span class="o">)</span>     <span class="c1">// optional</span>
+       <span class="o">.</span><span class="na">queue</span><span class="o">();</span>
+</pre></div>
+
+<p>You will get results in your result receiver (in the main thread):</p>
+
+<div class="highlight"><pre><span class="kd">private</span> <span class="kd">final</span> <span class="n">ResultReceiver</span> <span class="n">receiver</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ResultReceiver</span><span class="o">(</span><span class="k">new</span> <span class="n">Handler</span><span class="o">()){</span>
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onReceiveResult</span><span class="o">(</span><span class="kt">int</span> <span class="n">resultCode</span><span class="o">,</span> <span class="n">Bundle</span> <span class="n">resultData</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">resultData</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="s">"the_result"</span><span class="o">);</span>
+        <span class="c1">// do something</span>
+    <span class="o">}</span>
+<span class="o">};</span>
+</pre></div>
+
+<p>Do not forget to add <code>GroundyService</code> to the <code>AndroidManifest.xml</code> file:</p>
+
+<div class="highlight"><pre><span class="nt">&lt;service</span> <span class="na">android:name=</span><span class="s">"com.codeslap.groundy.GroundyService"</span><span class="nt">/&gt;</span>
+</pre></div>
+
+<h1>Maven integration</h1>
+
+<p><a href="https://travis-ci.org/casidiablo/groundy"><img src="https://travis-ci.org/casidiablo/groundy.png?branch=develop" alt="Build Status"></a></p>
+
+<p>In order to use this library from you Android project using maven your pom should look like this:</p>
+
+<div class="highlight"><pre><span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.codeslap<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>groundy<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>0.6<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;scope&gt;</span>compile<span class="nt">&lt;/scope&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</pre></div>
+
+<h1>License</h1>
+
+<blockquote>
+<p>Copyright 2013 CodeSlap</p>
+
+<p>Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at</p>
+
+<p><a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.</p>
+</blockquote>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/casidiablo">casidiablo</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
