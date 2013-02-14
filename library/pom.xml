@@ -22,11 +22,11 @@
     <parent>
         <groupId>com.codeslap</groupId>
         <artifactId>groundy-parent</artifactId>
-        <version>0.7</version>
+        <version>0.8-SNAPSHOT</version>
     </parent>
     <groupId>com.codeslap</groupId>
     <artifactId>groundy</artifactId>
-    <version>0.7</version>
+    <version>0.8-SNAPSHOT</version>
 
     <name>Groundy library</name>
     <description>Fancy way to execute async/background tasks on Android</description>

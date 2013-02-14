@@ -23,12 +23,12 @@
     <parent>
         <groupId>com.codeslap</groupId>
         <artifactId>groundy-parent</artifactId>
-        <version>0.7</version>
+        <version>0.8-SNAPSHOT</version>
     </parent>
 
     <groupId>com.codeslap</groupId>
     <artifactId>examples</artifactId>
-    <version>0.7</version>
+    <version>0.8-SNAPSHOT</version>
     <packaging>apk</packaging>
 
     <name>Groundy Example</name>
