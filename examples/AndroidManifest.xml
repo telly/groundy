@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    android:installLocation="auto"
+    android:versionCode="1"
+    android:versionName="1.0-SNAPSHOT"
+    package="com.codeslap.groundy.example">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application>
+        <activity android:name="com.groundy.example.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name="com.groundy.example.SimpleTaskTest" android:configChanges="orientation" android:screenOrientation="portrait"/>
+        <activity android:name="com.groundy.example.SafeSimpleTaskTest"/>
+        <activity android:name="com.groundy.example.AttachReceiverExample"/>
+        <activity android:name="com.groundy.example.ChuckNorrisActivity" android:configChanges="orientation" android:screenOrientation="portrait"/>
+        <activity android:name="com.groundy.example.QueueTest" android:configChanges="orientation" android:screenOrientation="portrait"/>
+        <activity android:name="com.groundy.example.ExecuteTest" android:configChanges="orientation" android:screenOrientation="portrait"/>
+        <service android:name="com.codeslap.groundy.GroundyService"/>
+        <service android:name="com.groundy.example.AsyncGroundyService">
+            <meta-data android:name="groundy:mode" android:value="async"/>
+        </service>
+    </application>
+</manifest>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/simple_example_explanation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/simple_example_explanation" />
+
+    <Button
+        android:id="@+id/send_random_task"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/execute_some_random_task"
+        android:layout_gravity="center" />
+</FrameLayout>
