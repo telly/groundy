@@ -160,6 +160,6 @@
 
     <modules>
         <module>library</module>
-        <module>sample</module>
+        <module>examples</module>
     </modules>
 </project>

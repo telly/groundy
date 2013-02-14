@@ -28,12 +28,12 @@
     </parent>
 
     <groupId>com.codeslap</groupId>
-    <artifactId>sample</artifactId>
+    <artifactId>examples</artifactId>
     <version>0.7-SNAPSHOT</version>
     <packaging>apk</packaging>
 
     <name>Groundy Example</name>
-    <description>Android app sample for Groundy library</description>
+    <description>Groundy library examples</description>
 
     <dependencies>
         <dependency>
