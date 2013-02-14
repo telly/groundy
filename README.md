@@ -24,7 +24,7 @@ Create a subclass of `GroundyTask`:
 public class ExampleTask extends GroundyTask {
     @Override
     protected boolean doInBackground() {
-        // use params
+        // you can send parameters to the task using a Bundle (optional)
         String exampleParam = getStringParam("key_name");
 
         // lots of code

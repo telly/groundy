@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.codeslap.groundy.example;
+package com.groundy.example;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -27,14 +27,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import com.codeslap.groundy.Groundy;
+import com.codeslap.groundy.example.R;
 import com.codeslap.groundy.util.Bundler;
 
 import java.util.Random;
 
 public class QueueTest extends Activity {
 
-    public static final String KEY_COUNT = "count";
-    public static final String KEY_ESTIMATED = "estimated";
     protected MyReceiver mReceiver;
     private int mCounter = 1;
     private Button mBtnAddTask;
@@ -61,7 +60,10 @@ public class QueueTest extends Activity {
                     time = 1000;
                 }
 
-                processTask(new Bundler().add(KEY_COUNT, count).add(KEY_ESTIMATED, time).build());
+                processTask(new Bundler()
+                        .add(RandomTimeTask.KEY_COUNT, count)
+                        .add(RandomTimeTask.KEY_ESTIMATED, time)
+                        .build());
 
                 mBtnAddTask.setText(getString(R.string.next_task_counter, mCounter));
 
@@ -90,7 +92,7 @@ public class QueueTest extends Activity {
         protected void onReceiveResult(int resultCode, Bundle resultData) {
             super.onReceiveResult(resultCode, resultData);
             if (resultCode == Groundy.STATUS_PROGRESS) {
-                int count = resultData.getInt(KEY_COUNT);
+                int count = resultData.getInt(RandomTimeTask.KEY_COUNT);
                 int progress = resultData.getInt(Groundy.KEY_PROGRESS);
                 findItem(count).setProgress(progress);
                 mAdapter.notifyDataSetChanged();

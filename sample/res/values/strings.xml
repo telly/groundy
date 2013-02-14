@@ -6,4 +6,17 @@
     <string name="execute_example">Async example</string>
     <string name="next_task_counter">Next task id: %s</string>
     <string name="will_work_for">Will work for about %s secs</string>
+    <string name="simple_example_explanation">Each time you click \'Execute some random task\' it will simply queue a
+        new
+        task that takes from 0 to 10 secs to execute. While task is running the button is disabled. This is just to
+        demonstrate a result receiver. This also demonstrate that result receivers callbacks run in the UI thread.
+    </string>
+    <string name="task_finished">Task finished :) enabling button</string>
+    <string name="simple_example">Simple example</string>
+    <string name="execute_some_random_task">Execute some random task</string>
+    <string name="task_will_take_x">Task will take %s ms</string>
+    <string name="safe_example_explanation">Same as SimpleExample, but also demonstrates how to handle config changes like
+        device rotation. Go ahead, don\'t be afraid, rotate the phone just after you have queue the task.
+    </string>
+    <string name="safe_simple_example">Safe simple example</string>
 </resources>

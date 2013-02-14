@@ -1,4 +1,4 @@
-package com.codeslap.groundy.example;
+package com.groundy.example;
 
 import android.os.Bundle;
 import com.codeslap.groundy.Groundy;

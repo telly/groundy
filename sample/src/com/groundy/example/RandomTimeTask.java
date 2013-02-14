@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.codeslap.groundy.example;
+package com.groundy.example;
 
 import android.os.Bundle;
 import com.codeslap.groundy.Groundy;
@@ -25,9 +25,12 @@ import com.codeslap.groundy.GroundyTask;
 
 public class RandomTimeTask extends GroundyTask {
 
+    public static final String KEY_ESTIMATED = "estimated";
+    public static final String KEY_COUNT = "count";
+
     @Override
     protected boolean doInBackground() {
-        int time = getIntParam(QueueTest.KEY_ESTIMATED);
+        int time = getIntParam(KEY_ESTIMATED);
         if (time < 1000) {
             time = 1000;
         }
@@ -37,11 +40,12 @@ public class RandomTimeTask extends GroundyTask {
         int currentPercentage = 0;
         while (currentPercentage <= 100) {
             try {
-                Bundle resultData = new Bundle();
-                resultData.putInt(Groundy.KEY_PROGRESS, currentPercentage);
-                resultData.putInt(QueueTest.KEY_COUNT, getIntParam(QueueTest.KEY_COUNT));
-                getReceiver().send(Groundy.STATUS_PROGRESS, resultData);
-
+                if (getReceiver() != null) {
+                    Bundle resultData = new Bundle();
+                    resultData.putInt(Groundy.KEY_PROGRESS, currentPercentage);
+                    resultData.putInt(KEY_COUNT, getIntParam(KEY_COUNT));
+                    getReceiver().send(Groundy.STATUS_PROGRESS, resultData);
+                }
                 Thread.sleep(interval);
                 currentPercentage++;
             } catch (InterruptedException e) {

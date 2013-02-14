@@ -5,6 +5,18 @@
     android:layout_height="match_parent">
 
     <Button
+        android:id="@+id/simple_example"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/simple_example" />
+
+    <Button
+        android:id="@+id/safe_simple_example"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/safe_simple_example" />
+
+    <Button
         android:id="@+id/queue_example"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

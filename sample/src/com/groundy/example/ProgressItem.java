@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.codeslap.groundy.example;
+package com.groundy.example;
 
 public class ProgressItem {
     private long mCount;

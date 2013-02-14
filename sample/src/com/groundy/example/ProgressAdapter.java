@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.codeslap.groundy.example;
+package com.groundy.example;
 
 import android.content.Context;
 import android.view.View;
@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.codeslap.groundy.adapter.Layout;
 import com.codeslap.groundy.adapter.ListBaseAdapter;
 import com.codeslap.groundy.adapter.ResourceId;
+import com.codeslap.groundy.example.R;
 
 public class ProgressAdapter extends ListBaseAdapter<ProgressItem, ProgressAdapter.ViewHolder> {
 
