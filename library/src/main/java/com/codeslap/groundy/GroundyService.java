@@ -53,10 +53,12 @@ public class GroundyService extends Service {
     private GroundyMode mMode = GroundyMode.QUEUE;
     private int mStartBehavior = START_NOT_STICKY;
     private final WakeLockHelper mWakeLockHelper;
+    private boolean mRunning;
 
     private AtomicInteger mLastStartId = new AtomicInteger();
     // this help us keep track of the tasks that are scheduled to be executed
-    private volatile Map<Integer, Integer> mScheduledTasks = Collections.synchronizedMap(new HashMap<Integer, Integer>());
+    private volatile Map<Integer, Integer> mUnfinishedTasks = Collections.synchronizedMap(new HashMap<Integer, Integer>());
+    private volatile Map<String, List<ResultReceiver>> mAttachedReceivers = Collections.synchronizedMap(new HashMap<String, List<ResultReceiver>>());
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -89,6 +91,7 @@ public class GroundyService extends Service {
         if (intent == null) {
             // we should not have received a null intent... kill the service just in case
             stopSelf(startId);
+            mRunning = false;
             return mStartBehavior;
         }
 
@@ -111,6 +114,7 @@ public class GroundyService extends Service {
             throw new UnsupportedOperationException("Wrong intent received: " + intent);
         }
 
+        mRunning = true;
         return mStartBehavior;
     }
 
@@ -132,9 +136,10 @@ public class GroundyService extends Service {
         msg.arg2 = flags;
         msg.obj = intent;
         msg.what = intent.getIntExtra(Groundy.KEY_GROUP_ID, DEFAULT_GROUP_ID);
-        mScheduledTasks.put(startId, msg.what);
+
+        mUnfinishedTasks.put(startId, msg.what);
         if (!groundyHandler.sendMessage(msg)) {
-            mScheduledTasks.remove(startId);
+            mUnfinishedTasks.remove(startId);
         }
     }
 
@@ -154,7 +159,7 @@ public class GroundyService extends Service {
             }
         }
         internalQuit(GroundyTask.CANCEL_ALL);
-        mScheduledTasks.clear();
+        mUnfinishedTasks.clear();
     }
 
     private void cancelTasks(int groupId, int reason) {
@@ -183,13 +188,13 @@ public class GroundyService extends Service {
 
             // remove future tasks
             List<Integer> targetTasks = new ArrayList<Integer>();
-            for (Integer startId : mScheduledTasks.keySet()) {
-                if (mScheduledTasks.get(startId) == groupId) {
+            for (Integer startId : mUnfinishedTasks.keySet()) {
+                if (mUnfinishedTasks.get(startId) == groupId) {
                     targetTasks.add(startId);
                 }
             }
             for (Integer targetStartId : targetTasks) {
-                mScheduledTasks.remove(targetStartId);
+                mUnfinishedTasks.remove(targetStartId);
             }
         }
     }
@@ -227,12 +232,13 @@ public class GroundyService extends Service {
                     // when in queue mode, we must stop each intent received
                     stopSelf(msg.arg1);
                 }
-                mScheduledTasks.remove(msg.arg1);
+                mUnfinishedTasks.remove(msg.arg1);
             }
 
-            if (mScheduledTasks.isEmpty()) {
+            if (mUnfinishedTasks.isEmpty()) {
                 // stop the service by calling stopSelf with the latest startId
                 stopSelf(mLastStartId.get());
+                mRunning = false;
             }
         }
     }
@@ -254,11 +260,6 @@ public class GroundyService extends Service {
         Bundle extras = intent.getExtras();
         extras = (extras == null) ? Bundle.EMPTY : extras;
 
-        ResultReceiver receiver = (ResultReceiver) extras.get(Groundy.KEY_RECEIVER);
-        if (receiver != null) {
-            receiver.send(Groundy.STATUS_RUNNING, Bundle.EMPTY);
-        }
-
         Class<?> taskName = (Class<?>) extras.getSerializable(Groundy.KEY_TASK);
         //noinspection unchecked
         GroundyTask groundyTask = GroundyTaskFactory.get((Class<? extends GroundyTask>) taskName, this);
@@ -267,7 +268,20 @@ public class GroundyService extends Service {
             return;
         }
 
-        groundyTask.setReceiver(receiver);
+        // set up the result receiver(s)
+        ResultReceiver receiver = (ResultReceiver) extras.get(Groundy.KEY_RECEIVER);
+        if (receiver != null) {
+            groundyTask.addReceiver(receiver);
+        }
+        String token = intent.getStringExtra(Groundy.KEY_TOKEN);
+        if (mAttachedReceivers.containsKey(token)) {
+            for (ResultReceiver resultReceiver : mAttachedReceivers.get(token)) {
+                groundyTask.addReceiver(resultReceiver);
+            }
+        }
+        groundyTask.setToken(token);
+        groundyTask.send(Groundy.STATUS_RUNNING, Bundle.EMPTY);
+
         groundyTask.setStartId(startId);
         groundyTask.setGroupId(groupId);
         groundyTask.setRedelivered(redelivery);
@@ -285,10 +299,8 @@ public class GroundyService extends Service {
         }
 
         //Lets try to send back the response
-        if (receiver != null) {
-            Bundle resultData = groundyTask.getResultData();
-            receiver.send(groundyTask.getResultCode(), resultData);
-        }
+        Bundle resultData = groundyTask.getResultData();
+        groundyTask.send(groundyTask.getResultCode(), resultData);
     }
 
     private void updateModeFromMetadata() {
@@ -328,6 +340,27 @@ public class GroundyService extends Service {
     }
 
     final class GroundyServiceBinder extends Binder {
+        public void attachReceiver(String token, ResultReceiver resultReceiver) {
+            if (!mRunning) {
+                return;
+            }
+            for (GroundyTask runningTask : mRunningTasks) {
+                if (token.equals(runningTask.getToken())) {
+                    runningTask.addReceiver(resultReceiver);
+                }
+            }
+
+            List<ResultReceiver> resultReceivers;
+            if (mAttachedReceivers.containsKey(token)) {
+                resultReceivers = mAttachedReceivers.get(token);
+            } else {
+                resultReceivers = new ArrayList<ResultReceiver>();
+                mAttachedReceivers.put(token, resultReceivers);
+            }
+
+            resultReceivers.add(resultReceiver);
+        }
+
         void cancelAllTasks() {
             GroundyService.this.cancelAllTasks();
             stopSelf();

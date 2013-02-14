@@ -40,12 +40,12 @@ public class RandomTimeTask extends GroundyTask {
         int currentPercentage = 0;
         while (currentPercentage <= 100) {
             try {
-                if (getReceiver() != null) {
-                    Bundle resultData = new Bundle();
-                    resultData.putInt(Groundy.KEY_PROGRESS, currentPercentage);
-                    resultData.putInt(KEY_COUNT, getIntParam(KEY_COUNT));
-                    getReceiver().send(Groundy.STATUS_PROGRESS, resultData);
-                }
+                Bundle resultData = new Bundle();
+                resultData.putInt(Groundy.KEY_PROGRESS, currentPercentage);
+                resultData.putInt(KEY_COUNT, getIntParam(KEY_COUNT));
+                send(Groundy.STATUS_PROGRESS, resultData);
+
+                // let's fake some work ^_^
                 Thread.sleep(interval);
                 currentPercentage++;
             } catch (InterruptedException e) {

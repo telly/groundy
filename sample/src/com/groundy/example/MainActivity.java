@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import com.codeslap.groundy.Groundy;
+import com.codeslap.groundy.GroundyManger;
 import com.codeslap.groundy.example.R;
 
 public class MainActivity extends Activity {
@@ -12,7 +12,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        Groundy.setLogEnabled(false);
+        GroundyManger.setLogEnabled(false);
 
         findViewById(R.id.simple_example).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -25,6 +25,13 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, SafeSimpleTaskTest.class));
+            }
+        });
+
+        findViewById(R.id.attach_receiver_example).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, AttachReceiverExample.class));
             }
         });
 

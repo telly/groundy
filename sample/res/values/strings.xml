@@ -19,4 +19,5 @@
         device rotation. Go ahead, don\'t be afraid, rotate the phone just after you have queue the task.
     </string>
     <string name="safe_simple_example">Safe simple example</string>
+    <string name="attach_receiver_example">Attach receiver example</string>
 </resources>

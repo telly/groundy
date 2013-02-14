@@ -14,6 +14,7 @@
         </activity>
         <activity android:name="com.groundy.example.SimpleTaskTest" android:configChanges="orientation" android:screenOrientation="portrait"/>
         <activity android:name="com.groundy.example.SafeSimpleTaskTest"/>
+        <activity android:name="com.groundy.example.AttachReceiverExample"/>
         <activity android:name="com.groundy.example.QueueTest" android:configChanges="orientation" android:screenOrientation="portrait"/>
         <activity android:name="com.groundy.example.ExecuteTest" android:configChanges="orientation" android:screenOrientation="portrait"/>
         <service android:name="com.codeslap.groundy.GroundyService"/>

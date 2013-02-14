@@ -24,6 +24,9 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 import com.codeslap.groundy.util.Bundler;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Implementation of this class get executed by the {@link GroundyService}
  *
@@ -40,10 +43,11 @@ public abstract class GroundyTask {
     private final Bundle mResultData = new Bundle();
     private final Bundle mParameters = new Bundle();
     private int mStartId;
-    private ResultReceiver mReceiver;
+    private List<ResultReceiver> mReceivers;
     private volatile int mQuittingReason = 0;
     private int mGroupId;
     private boolean mRedelivered;
+    private String mToken;
 
     /**
      * Creates a GroundyTask composed of
@@ -96,6 +100,14 @@ public abstract class GroundyTask {
 
     void setRedelivered(boolean redelivered) {
         mRedelivered = redelivered;
+    }
+
+    protected String getToken() {
+        return mToken;
+    }
+
+    void setToken(String token) {
+        mToken = token;
     }
 
     /**
@@ -263,26 +275,28 @@ public abstract class GroundyTask {
         return true;
     }
 
-    void setReceiver(ResultReceiver receiver) {
-        mReceiver = receiver;
+    void addReceiver(ResultReceiver receiver) {
+        if (mReceivers == null) {
+            mReceivers = new ArrayList<ResultReceiver>();
+        }
+        mReceivers.add(receiver);
     }
 
-    protected ResultReceiver getReceiver() {
-        return mReceiver;
+    protected void send(int resultCode, Bundle resultData) {
+        if (!hasReceivers()) {
+            return;
+        }
+        for (ResultReceiver receiver : mReceivers) {
+            receiver.send(resultCode, resultData);
+        }
     }
 
     protected void sendStringResult(int code, String key, String value) {
-        if (mReceiver == null) {
-            return;
-        }
-        mReceiver.send(code, new Bundler().add(key, value).build());
+        send(code, new Bundler().add(key, value).build());
     }
 
     protected void sendIntResult(int code, String key, int value) {
-        if (mReceiver == null) {
-            return;
-        }
-        mReceiver.send(code, new Bundler().add(key, value).build());
+        send(code, new Bundler().add(key, value).build());
     }
 
     /**
@@ -325,12 +339,16 @@ public abstract class GroundyTask {
      * @param progress percentage to send to receiver
      */
     public void updateProgress(int progress) {
-        if (mReceiver == null) {
+        if (!hasReceivers()) {
             return;
         }
         Bundle resultData = new Bundle();
         resultData.putInt(Groundy.KEY_PROGRESS, progress);
-        mReceiver.send(Groundy.STATUS_PROGRESS, resultData);
+        send(Groundy.STATUS_PROGRESS, resultData);
+    }
+
+    protected boolean hasReceivers() {
+        return mReceivers != null && !mReceivers.isEmpty();
     }
 
     protected boolean keepWifiOn() {
@@ -365,7 +383,7 @@ public abstract class GroundyTask {
         if (mGroupId != that.mGroupId) return false;
         if (mQuittingReason != that.mQuittingReason) return false;
         if (!mParameters.equals(that.mParameters)) return false;
-        if (mReceiver != null ? !mReceiver.equals(that.mReceiver) : that.mReceiver != null) return false;
+        if (mReceivers != null ? !mReceivers.equals(that.mReceivers) : that.mReceivers != null) return false;
 
         return true;
     }
@@ -373,7 +391,7 @@ public abstract class GroundyTask {
     @Override
     public int hashCode() {
         int result = mParameters.hashCode();
-        result = 31 * result + (mReceiver != null ? mReceiver.hashCode() : 0);
+        result = 31 * result + (mReceivers != null ? mReceivers.hashCode() : 0);
         result = 31 * result + mQuittingReason;
         result = 31 * result + mGroupId;
         return result;
@@ -386,8 +404,8 @@ public abstract class GroundyTask {
         if (!mParameters.isEmpty()) {
             toString += ", parameters=" + mParameters;
         }
-        if (mReceiver != null) {
-            toString += ", receiver=" + mReceiver;
+        if (mReceivers != null) {
+            toString += ", receiver=" + mReceivers;
         }
         if (mRedelivered) {
             toString += ", redelivered";
