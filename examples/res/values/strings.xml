@@ -20,4 +20,6 @@
     </string>
     <string name="safe_simple_example">Safe simple example</string>
     <string name="attach_receiver_example">Attach receiver example</string>
+    <string name="chuck_norris_example">Chuck Norris example</string>
+    <string name="get_norris_fact">Get Chuck Norris fact</string>
 </resources>

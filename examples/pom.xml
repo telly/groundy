@@ -52,6 +52,13 @@
             <artifactId>groundy</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.github.kevinsawicki</groupId>
+            <artifactId>http-request</artifactId>
+            <version>4.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

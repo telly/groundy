@@ -1,4 +1,4 @@
-package com.groundy.example;
+package com.groundy.example.tasks;
 
 import android.util.Log;
 import com.codeslap.groundy.GroundyTask;

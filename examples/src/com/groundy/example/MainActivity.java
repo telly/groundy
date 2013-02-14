@@ -35,6 +35,13 @@ public class MainActivity extends Activity {
             }
         });
 
+        findViewById(R.id.chuck_norris_example).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, ChuckNorrisActivity.class));
+            }
+        });
+
         findViewById(R.id.queue_example).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.groundy.example;
+package com.groundy.example.tasks;
 
 import android.os.Bundle;
 import com.codeslap.groundy.Groundy;
