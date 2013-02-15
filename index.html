@@ -32,9 +32,8 @@
 
 <p>Groundy is a fancy implementation of the 'Service + ResultReceiver' technique which
 is heavily inspired in a Google I/O 2010 presentation by Virgil Dobjanschi
-called <a href="http://www.youtube.com/watch?v=xHXn3Kg2IQE">Android REST client applications</a>.</p>
-
-<p>Groundy is useful in any kind of apps that requires the use of background threads:</p>
+called <a href="http://www.youtube.com/watch?v=xHXn3Kg2IQE">Android REST client applications</a>. Groundy is useful in any kind of apps
+that requires the use of background threads:</p>
 
 <ul>
 <li>Execute calls to external services (e.g. RESTful web services)</li>
@@ -42,7 +41,9 @@ called <a href="http://www.youtube.com/watch?v=xHXn3Kg2IQE">Android REST client 
 <li>Encoding audio/video</li>
 <li>Any kind of task that could block the main thread</li>
 </ul><p>Groundy offers a special <code>Service</code> that will take care of creating background
-threads and allows to report results to the <code>Activity</code> using a <code>ResultReceiver</code>.</p>
+threads and allows to report results to the <code>Activity</code> using a <code>ResultReceiver</code>.
+It will also force you to decouple the background work logic from your activities,
+which in turn makes your code cleaner and easier to maintain.</p>
 
 <h1>Basic usage</h1>
 
@@ -51,7 +52,7 @@ threads and allows to report results to the <code>Activity</code> using a <code>
 <div class="highlight"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ExampleTask</span> <span class="kd">extends</span> <span class="n">GroundyTask</span> <span class="o">{</span>
     <span class="nd">@Override</span>
     <span class="kd">protected</span> <span class="kt">boolean</span> <span class="nf">doInBackground</span><span class="o">()</span> <span class="o">{</span>
-        <span class="c1">// use params</span>
+        <span class="c1">// you can send parameters to the task using a Bundle (optional)</span>
         <span class="n">String</span> <span class="n">exampleParam</span> <span class="o">=</span> <span class="n">getStringParam</span><span class="o">(</span><span class="s">"key_name"</span><span class="o">);</span>
 
         <span class="c1">// lots of code</span>
@@ -91,19 +92,20 @@ threads and allows to report results to the <code>Activity</code> using a <code>
 <div class="highlight"><pre><span class="nt">&lt;service</span> <span class="na">android:name=</span><span class="s">"com.codeslap.groundy.GroundyService"</span><span class="nt">/&gt;</span>
 </pre></div>
 
-<h1>Maven integration</h1>
-
-<p><a href="https://travis-ci.org/casidiablo/groundy"><img src="https://travis-ci.org/casidiablo/groundy.png?branch=develop" alt="Build Status"></a></p>
+<h1>Maven integration <a href="https://travis-ci.org/casidiablo/groundy"><img src="https://travis-ci.org/casidiablo/groundy.png?branch=develop" alt="Build Status"></a>
+</h1>
 
 <p>In order to use this library from you Android project using maven your pom should look like this:</p>
 
 <div class="highlight"><pre><span class="nt">&lt;dependency&gt;</span>
     <span class="nt">&lt;groupId&gt;</span>com.codeslap<span class="nt">&lt;/groupId&gt;</span>
     <span class="nt">&lt;artifactId&gt;</span>groundy<span class="nt">&lt;/artifactId&gt;</span>
-    <span class="nt">&lt;version&gt;</span>0.6<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;version&gt;</span>0.7<span class="nt">&lt;/version&gt;</span>
     <span class="nt">&lt;scope&gt;</span>compile<span class="nt">&lt;/scope&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
 </pre></div>
+
+<p>If you don't use Maven, you can download this jar: <a href="https://github.com/downloads/casidiablo/groundy/groundy-0.7.jar">groundy-0.7.jar</a></p>
 
 <h1>License</h1>
 
