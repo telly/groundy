@@ -22,4 +22,7 @@
     <string name="attach_receiver_example">Attach receiver example</string>
     <string name="chuck_norris_example">Chuck Norris example</string>
     <string name="get_norris_fact">Get Chuck Norris fact</string>
+    <string name="download_example">Download Example</string>
+    <string name="start_download">Start download</string>
+    <string name="file_downloaded">File downloaded</string>
 </resources>

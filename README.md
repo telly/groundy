@@ -82,6 +82,8 @@ In order to use this library from you Android project using maven your pom shoul
 </dependency>
 ```
 
+If you don't use Maven, you can download this jar: [groundy-0.7.jar][2]
+
 License
 =======
 
@@ -100,3 +102,4 @@ License
 >limitations under the License.
 
   [1]: http://www.youtube.com/watch?v=xHXn3Kg2IQE
+  [2]: https://github.com/downloads/casidiablo/groundy/groundy-0.7.jar

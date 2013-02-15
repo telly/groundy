@@ -55,5 +55,12 @@ public class MainActivity extends Activity {
                 startActivity(new Intent(MainActivity.this, ExecuteTest.class));
             }
         });
+
+        findViewById(R.id.download_example).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, DownloadExample.class));
+            }
+        });
     }
 }
