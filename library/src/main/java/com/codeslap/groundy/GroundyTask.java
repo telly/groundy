@@ -1,14 +1,11 @@
 /*
- * Copyright 2013 CodeSlap
- *
- *   Authors: Cristian C. <cristian@elhacker.net>
- *            Evelio T.   <eveliotc@gmail.com>
+ * Copyright 2012 Twitvid Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,8 +27,8 @@ import java.util.List;
 /**
  * Implementation of this class get executed by the {@link GroundyService}
  *
- * @author evelio
- * @author cristian
+ * @author Evelio Tarazona <evelio@twitvid.com>
+ * @author Cristian Castiblanco <cristian@elhacker.net>
  * @version 1.1
  */
 public abstract class GroundyTask {

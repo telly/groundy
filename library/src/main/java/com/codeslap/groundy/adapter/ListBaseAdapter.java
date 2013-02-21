@@ -1,14 +1,12 @@
 /*
- * Copyright 2013 CodeSlap
- *
- *   Authors: Cristian C. <cristian@elhacker.net>
- *            Evelio T.   <eveliotc@gmail.com>
+ * Copyright 2012 Twitvid Inc.
+ * Copyright 2013 Cristian Castiblanco
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,7 +32,7 @@ import java.util.Map;
 /**
  * Generic class used to easily create a list adapter.
  *
- * @author cristian
+ * @author Cristian Castiblanco <cristian@elhacker.net>
  */
 public abstract class ListBaseAdapter<Item, ViewHolder> extends BaseAdapter {
 
