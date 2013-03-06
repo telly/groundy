@@ -50,9 +50,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git@github.com:telly/groundy.git</connection>
-        <developerConnection>scm:git:git@github.com:telly/groundy.git</developerConnection>
-        <url>git@github.com:telly/groundy.git</url>
+        <connection>scm:git:git@github.com:twitvid/groundy.git</connection>
+        <developerConnection>scm:git:git@github.com:twitvid/groundy.git</developerConnection>
+        <url>git@github.com:twitvid/groundy.git</url>
     </scm>
 
     <developers>
