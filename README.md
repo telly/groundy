@@ -87,9 +87,7 @@ If you don't use Maven, you can download this jar: [groundy-0.7.jar][2]
 License
 =======
 
->Copyright 2012 Twitvid Inc.
->
->Copyright 2012-2013 Cristian Castiblanco
+>Copyright 2013 Telly Inc.
 >
 >Licensed under the Apache License, Version 2.0 (the "License");
 >you may not use this file except in compliance with the License.
