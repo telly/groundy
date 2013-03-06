@@ -27,7 +27,7 @@
     <packaging>pom</packaging>
     <name>Groundy project</name>
     <description>Fancy way to execute async/background tasks on Android</description>
-    <url>https://github.com/casidiablo/groundy</url>
+    <url>https://github.com/telly/groundy</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -50,9 +50,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git@github.com:casidiablo/groundy.git</connection>
-        <developerConnection>scm:git:git@github.com:casidiablo/groundy.git</developerConnection>
-        <url>git@github.com:casidiablo/groundy.git</url>
+        <connection>scm:git:git@github.com:telly/groundy.git</connection>
+        <developerConnection>scm:git:git@github.com:telly/groundy.git</developerConnection>
+        <url>git@github.com:telly/groundy.git</url>
     </scm>
 
     <developers>
@@ -111,25 +111,6 @@
         </pluginManagement>
 
         <plugins>
-            <plugin>
-                <groupId>com.github.github</groupId>
-                <artifactId>downloads-maven-plugin</artifactId>
-                <version>0.6</version>
-                <configuration>
-                    <description>Official ${project.name} build of the ${project.version} release</description>
-                    <override>true</override>
-                    <includeAttached>true</includeAttached>
-                    <server>github</server>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>upload</goal>
-                        </goals>
-                        <phase>deploy</phase>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>

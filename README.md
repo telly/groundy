@@ -23,19 +23,19 @@ Create a subclass of `GroundyTask`:
 
 ```java
 public class ExampleTask extends GroundyTask {
-    @Override
-    protected boolean doInBackground() {
-        // you can send parameters to the task using a Bundle (optional)
-        String exampleParam = getStringParam("key_name");
+  @Override
+  protected boolean doInBackground() {
+    // you can send parameters to the task using a Bundle (optional)
+    String exampleParam = getStringParam("key_name");
 
-        // lots of code
+    // lots of code
 
-        // add results... this will be sent back to the activity
-        // through the ResultReceiver once this method has returned
-        addStringResult("the_result", "some result");
+    // add results... this will be sent back to the activity
+    // through the ResultReceiver once this method has returned
+    addStringResult("the_result", "some result");
 
-        return success; // true if task was executed successfully
-    }
+    return success; // true if task was executed successfully
+  }
 }
 ```
 
@@ -45,20 +45,20 @@ Whenever you want to execute the task, just do this:
 // this is usually performed from within an Activity
 Bundle params = new Bundler().add("key_name", "foo").build();
 Groundy.create(this, ExampleTask.class)
-       .receiver(receiver) // optional
-       .params(params)     // optional
-       .queue();
+    .receiver(receiver) // optional
+    .params(params)     // optional
+    .queue();
 ```
 
 You will get results in your result receiver (in the main thread):
 
 ```java
 private final ResultReceiver receiver = new ResultReceiver(new Handler()){
-    @Override
-    protected void onReceiveResult(int resultCode, Bundle resultData) {
-        String result = resultData.getString("the_result");
-        // do something
-    }
+  @Override
+  protected void onReceiveResult(int resultCode, Bundle resultData) {
+    String result = resultData.getString("the_result");
+    // do something
+  }
 };
 ```
 
@@ -75,14 +75,12 @@ In order to use this library from you Android project using maven your pom shoul
 
 ```xml
 <dependency>
-    <groupId>com.codeslap</groupId>
-    <artifactId>groundy</artifactId>
-    <version>0.7</version>
-    <scope>compile</scope>
+  <groupId>com.telly</groupId>
+  <artifactId>groundy</artifactId>
+  <version>0.8</version>
+  <scope>compile</scope>
 </dependency>
 ```
-
-If you don't use Maven, you can download this jar: [groundy-0.7.jar][2]
 
 License
 =======
@@ -102,4 +100,3 @@ License
 >limitations under the License.
 
   [1]: http://www.youtube.com/watch?v=xHXn3Kg2IQE
-  [2]: https://github.com/downloads/casidiablo/groundy/groundy-0.7.jar
