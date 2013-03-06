@@ -20,12 +20,12 @@
     <parent>
         <groupId>com.telly</groupId>
         <artifactId>groundy-parent</artifactId>
-        <version>0.8</version>
+        <version>0.9-SNAPSHOT</version>
     </parent>
 
     <groupId>com.telly</groupId>
     <artifactId>groundy-examples</artifactId>
-    <version>0.8</version>
+    <version>0.9-SNAPSHOT</version>
     <packaging>apk</packaging>
 
     <name>Groundy Example</name>
