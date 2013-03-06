@@ -1,12 +1,11 @@
 /*
- * Copyright 2012 Twitvid Inc.
- * Copyright 2013 Cristian Castiblanco
+ * Copyright 2013 Telly Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,19 +17,19 @@
 package com.groundy.example;
 
 import android.os.Bundle;
-import com.codeslap.groundy.Groundy;
 import com.groundy.example.tasks.RandomTimeTask;
+import com.telly.groundy.Groundy;
 
 /**
  * @author Cristian Castiblanco <cristian@elhacker.net>
  */
 public class ExecuteTest extends QueueTest {
-    @Override
-    protected void processTask(Bundle params) {
-        Groundy.create(this, RandomTimeTask.class)
-                .params(params)
-                .service(AsyncGroundyService.class)
-                .receiver(mReceiver)
-                .execute();
-    }
+  @Override
+  protected void processTask(Bundle params) {
+    Groundy.create(this, RandomTimeTask.class)
+        .params(params)
+        .service(AsyncGroundyService.class)
+        .receiver(mReceiver)
+        .execute();
+  }
 }

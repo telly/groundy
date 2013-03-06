@@ -1,11 +1,11 @@
 /*
- * Copyright 2012 Twitvid Inc.
+ * Copyright 2013 Telly Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.codeslap.groundy;
+package com.telly.groundy;
 
 import android.content.Context;
 
@@ -22,21 +22,21 @@ import android.content.Context;
  * @author Evelio Tarazona <evelio@twitvid.com>
  */
 class WakeLockHelper {
-    private final Context mContext;
+  private final Context mContext;
 
-    WakeLockHelper(Context context) {
-        mContext = context;
-    }
+  WakeLockHelper(Context context) {
+    mContext = context;
+  }
 
-    synchronized void acquire() {
-        DeviceStatus.keepCpuAwake(mContext, true);
-        if (DeviceStatus.isCurrentConnectionWifi(mContext)) {
-            DeviceStatus.keepWiFiOn(mContext, true);
-        }
+  synchronized void acquire() {
+    DeviceStatus.keepCpuAwake(mContext, true);
+    if (DeviceStatus.isCurrentConnectionWifi(mContext)) {
+      DeviceStatus.keepWiFiOn(mContext, true);
     }
+  }
 
-    synchronized void release() {
-        DeviceStatus.keepWiFiOn(mContext, false);
-        DeviceStatus.keepCpuAwake(mContext, false);
-    }
+  synchronized void release() {
+    DeviceStatus.keepWiFiOn(mContext, false);
+    DeviceStatus.keepCpuAwake(mContext, false);
+  }
 }
