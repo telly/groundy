@@ -1,12 +1,11 @@
 /*
- * Copyright 2010 Google Inc.
- * Copyright 2013 Cristian Castiblanco
+ * Copyright 2013 Telly Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.codeslap.groundy;
+package com.telly.groundy;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,33 +27,33 @@ import android.util.Log;
  * listening {@link android.app.Activity} can be swapped out during configuration changes.
  */
 public class DetachableResultReceiver extends ResultReceiver {
-    private static final String TAG = "DetachableResultReceiver";
+  private static final String TAG = "DetachableResultReceiver";
 
-    private Receiver mReceiver;
+  private Receiver mReceiver;
 
-    public DetachableResultReceiver(Handler handler) {
-        super(handler);
+  public DetachableResultReceiver(Handler handler) {
+    super(handler);
+  }
+
+  public void clearReceiver() {
+    mReceiver = null;
+  }
+
+  public void setReceiver(Receiver receiver) {
+    mReceiver = receiver;
+  }
+
+  public interface Receiver {
+    public void onReceiveResult(int resultCode, Bundle resultData);
+  }
+
+  @Override
+  protected void onReceiveResult(int resultCode, Bundle resultData) {
+    if (mReceiver != null) {
+      mReceiver.onReceiveResult(resultCode, resultData);
+    } else {
+      Log.w(TAG, "Dropping result on floor for code " + resultCode + ": "
+          + resultData.toString());
     }
-
-    public void clearReceiver() {
-        mReceiver = null;
-    }
-
-    public void setReceiver(Receiver receiver) {
-        mReceiver = receiver;
-    }
-
-    public interface Receiver {
-        public void onReceiveResult(int resultCode, Bundle resultData);
-    }
-
-    @Override
-    protected void onReceiveResult(int resultCode, Bundle resultData) {
-        if (mReceiver != null) {
-            mReceiver.onReceiveResult(resultCode, resultData);
-        } else {
-            Log.w(TAG, "Dropping result on floor for code " + resultCode + ": "
-                    + resultData.toString());
-        }
-    }
+  }
 }
