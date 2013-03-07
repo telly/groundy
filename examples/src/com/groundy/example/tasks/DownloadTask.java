@@ -16,21 +16,23 @@
 
 package com.groundy.example.tasks;
 
-import com.github.kevinsawicki.http.HttpRequest;
 import com.telly.groundy.GroundyTask;
-import org.json.JSONObject;
+import com.telly.groundy.util.DownloadUtils;
+
+import java.io.File;
 
 /**
  * @author Cristian Castiblanco <cristian@elhacker.net>
  */
-public class ChuckNorrisTask extends GroundyTask {
+public class DownloadTask extends GroundyTask {
+  public static final String PARAM_URL = "com.groundy.example.param.URL";
+
   @Override
   protected boolean doInBackground() {
     try {
-      String jsonBody = HttpRequest.get("http://api.icndb.com/jokes/random").body();
-      JSONObject jsonObject = new JSONObject(jsonBody);
-      String fact = jsonObject.getJSONObject("value").getString("joke");
-      addStringResult("fact", fact);
+      String url = getParameters().getString(PARAM_URL);
+      File dest = new File(getContext().getFilesDir(), new File(url).getName());
+      DownloadUtils.downloadFile(getContext(), url, dest, DownloadUtils.getDownloadListenerForTask(this));
       return true;
     } catch (Exception e) {
       return false;

@@ -14,12 +14,29 @@
  * limitations under the License.
  */
 
-package com.groundy.example;
+package com.telly.groundy;
 
-import com.telly.groundy.GroundyService;
+import android.content.Context;
 
 /**
- * @author Cristian Castiblanco <cristian@elhacker.net>
+ * @author Evelio Tarazona <evelio@twitvid.com>
  */
-public class AsyncGroundyService extends GroundyService {
+class WakeLockHelper {
+  private final Context mContext;
+
+  WakeLockHelper(Context context) {
+    mContext = context;
+  }
+
+  synchronized void acquire() {
+    DeviceStatus.keepCpuAwake(mContext, true);
+    if (DeviceStatus.isCurrentConnectionWifi(mContext)) {
+      DeviceStatus.keepWiFiOn(mContext, true);
+    }
+  }
+
+  synchronized void release() {
+    DeviceStatus.keepWiFiOn(mContext, false);
+    DeviceStatus.keepCpuAwake(mContext, false);
+  }
 }

@@ -20,18 +20,16 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-    <Button
-        android:id="@+id/get_norris_fact"
+    <EditText
+        android:id="@+id/edit_url"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/get_norris_fact"/>
+        android:inputType="textUri"
+        android:text="http://goo.gl/hQyDu"/>
 
-    <EditText
-        android:id="@+id/norris_facts"
+    <Button
+        android:id="@+id/start_download"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="left|top"
-        android:inputType="textCapSentences|textMultiLine"
-        android:enabled="false"/>
+        android:layout_height="wrap_content"
+        android:text="@string/start_download"/>
 </LinearLayout>
