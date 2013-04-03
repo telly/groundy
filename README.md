@@ -67,7 +67,7 @@ private final ResultReceiver receiver = new ResultReceiver(new Handler()){
 Do not forget to add `GroundyService` to the `AndroidManifest.xml` file:
 
 ```xml
-<service android:name="com.codeslap.groundy.GroundyService"/>
+<service android:name="com.telly.groundy.GroundyService"/>
 ```
 
 Maven integration
