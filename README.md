@@ -1,6 +1,8 @@
 Groundy library for Android
 ===========================
 
+![Groundy](http://i.imgur.com/fgC2aaw.png)
+
 Groundy is a fancy implementation of the 'Service + ResultReceiver' technique which
 is heavily inspired in a Google I/O 2010 presentation by Virgil Dobjanschi
 called [Android REST client applications][1]. Groundy is useful in any kind of apps
