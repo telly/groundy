@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.Toast;
 import com.groundy.example.tasks.CancelableTask;
 import com.groundy.example.tasks.RandomTimeTask;
@@ -28,42 +29,55 @@ import com.telly.groundy.Groundy;
 import com.telly.groundy.GroundyManger;
 import com.telly.groundy.example.R;
 import com.telly.groundy.util.Bundler;
+
 import java.util.Random;
 
 import static android.widget.Toast.makeText;
 
 public class CancelTaskExample extends Activity {
   private static final int GROUP_ID = 333;
-  private View mBtnAddTask, mBtnCancelTask;
+  private static final int FOO_CANCEL_REASON = 45;
+  private View mCancelBtn;
+  private int mCounter;
+  private ProgressAdapter mAdapter;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.cancel_example);
-    mBtnAddTask = findViewById(R.id.send_random_task);
-    mBtnAddTask.setOnClickListener(new View.OnClickListener() {
+
+    ListView listView = (ListView) findViewById(R.id.list);
+    mAdapter = new ProgressAdapter(this);
+    listView.setAdapter(mAdapter);
+
+    findViewById(R.id.send_random_task).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        mBtnAddTask.setEnabled(false);
-        mBtnCancelTask.setEnabled(true);
-
         // configure task parameters
+        int count = mCounter++;
         int time = new Random().nextInt(10000);
-        Bundle params = new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time).build();
+        Bundle params = new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time).add(RandomTimeTask.KEY_ID, count).build();
         makeText(CancelTaskExample.this, getString(R.string.task_will_take_x, time),
-            Toast.LENGTH_SHORT).show();
+          Toast.LENGTH_SHORT).show();
+
+        ProgressItem progressItem = new ProgressItem();
+        progressItem.setId(count);
+        progressItem.setProgress(0);
+        progressItem.setEstimated(time / 1000);
+        mAdapter.addItem(progressItem);
 
         // queue task
         Groundy.create(CancelTaskExample.this, CancelableTask.class).receiver(resultReceiver)
-            .group(GROUP_ID).params(params).queue();
+          .group(GROUP_ID).params(params).queue();
       }
     });
 
-    mBtnCancelTask = findViewById(R.id.cancel_random_task);
-    mBtnCancelTask.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View v) {
-        mBtnCancelTask.setEnabled(false);
-        GroundyManger.cancelTasks(CancelTaskExample.this, GROUP_ID, listener);
+    mCancelBtn = findViewById(R.id.cancel_random_task);
+    mCancelBtn.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        mCancelBtn.setEnabled(false);
+        GroundyManger.cancelTasks(CancelTaskExample.this, GROUP_ID, FOO_CANCEL_REASON, listener);
       }
     });
   }
@@ -72,20 +86,37 @@ public class CancelTaskExample extends Activity {
     @Override
     protected void onReceiveResult(int resultCode, Bundle resultData) {
       super.onReceiveResult(resultCode, resultData);
-      if (resultCode == Groundy.STATUS_FINISHED) {
-        mBtnAddTask.setEnabled(true);
-        makeText(CancelTaskExample.this, R.string.task_finished, Toast.LENGTH_LONG).show();
+      int id = resultData.getInt(RandomTimeTask.KEY_ID);
+      ProgressItem item = findItem(id);
+      if (resultCode == Groundy.STATUS_PROGRESS) {
+        int progress = resultData.getInt(Groundy.KEY_PROGRESS);
+        item.setProgress(progress);
       }
+      if (resultCode == Groundy.STATUS_ERROR && resultData.getInt(Groundy.KEY_CANCEL_REASON, 0) == FOO_CANCEL_REASON) {
+        item.setCancelled(true);
+      }
+      mAdapter.notifyDataSetChanged();
+    }
+
+    private ProgressItem findItem(int id) {
+      for (ProgressItem progressItem : mAdapter.getItems()) {
+        if (id == progressItem.getId()) {
+          return progressItem;
+        }
+      }
+      return null;
     }
   };
 
   private final GroundyManger.CancelListener listener = new GroundyManger.CancelListener() {
-    @Override public void onCancelResult(int groupId, boolean oneOrMoreCancelled) {
-      if (oneOrMoreCancelled) {
-        mBtnAddTask.setEnabled(true);
-        mBtnCancelTask.setEnabled(false);
-      } else {
+    @Override
+    public void onCancelResult(int groupId, int cancelledTasks) {
+      mCancelBtn.setEnabled(true);
+      if (cancelledTasks == 0) {
         makeText(CancelTaskExample.this, R.string.couldnt_cancel_task, Toast.LENGTH_SHORT).show();
+      } else {
+        String message = getString(R.string.tasks_cancelled, cancelledTasks);
+        makeText(CancelTaskExample.this, message, Toast.LENGTH_SHORT).show();
       }
     }
   };

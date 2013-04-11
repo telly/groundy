@@ -47,5 +47,7 @@
   <string name="file_downloaded">File downloaded</string>
   <string name="cancel_random_task">Cancel task</string>
   <string name="cancel_example">Cancel Task Example</string>
-  <string name="couldnt_cancel_task">Couldn\'t cancel task</string>
+  <string name="couldnt_cancel_task">Couldn\'t cancel any task</string>
+  <string name="tasks_cancelled">Tasks cancelled: %s</string>
+  <string name="task_cancelled">Task cancelled</string>
 </resources>

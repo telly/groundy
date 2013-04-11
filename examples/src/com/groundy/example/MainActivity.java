@@ -68,14 +68,14 @@ public class MainActivity extends Activity {
     findViewById(R.id.queue_example).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, QueueTest.class));
+        startActivity(new Intent(MainActivity.this, QueueExample.class));
       }
     });
 
     findViewById(R.id.execute_example).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, ExecuteTest.class));
+        startActivity(new Intent(MainActivity.this, ExecuteExample.class));
       }
     });
 

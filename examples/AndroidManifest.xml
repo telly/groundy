@@ -44,11 +44,11 @@
       android:configChanges="orientation"
       android:screenOrientation="portrait" />
     <activity
-      android:name="com.groundy.example.QueueTest"
+      android:name="com.groundy.example.QueueExample"
       android:configChanges="orientation"
       android:screenOrientation="portrait" />
     <activity
-      android:name="com.groundy.example.ExecuteTest"
+      android:name="com.groundy.example.ExecuteExample"
       android:configChanges="orientation"
       android:screenOrientation="portrait" />
     <activity

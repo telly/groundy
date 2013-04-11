@@ -20,7 +20,7 @@ import android.os.Bundle;
 import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.Groundy;
 
-public class ExecuteTest extends QueueTest {
+public class ExecuteExample extends QueueExample {
   @Override
   protected void processTask(Bundle params) {
     Groundy.create(this, RandomTimeTask.class).params(params).service(AsyncGroundyService.class)

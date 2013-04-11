@@ -16,22 +16,22 @@
 
 package com.groundy.example;
 
-/** @author Cristian Castiblanco <cristian@elhacker.net> */
 public class ProgressItem {
-  private long mCount;
+  private long mId;
   private int mProgress;
   private int mEstimated;
+  private boolean mCancelled;
 
-  public long getCount() {
-    return mCount;
+  public long getId() {
+    return mId;
   }
 
   public int getEstimated() {
     return mEstimated;
   }
 
-  public void setCount(long count) {
-    mCount = count;
+  public void setId(long id) {
+    mId = id;
   }
 
   public int getProgress() {
@@ -46,6 +46,14 @@ public class ProgressItem {
     mProgress = progress;
   }
 
+  public void setCancelled(boolean cancelled) {
+    mCancelled = cancelled;
+  }
+
+  public boolean isCancelled() {
+    return mCancelled;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -53,7 +61,7 @@ public class ProgressItem {
 
     ProgressItem that = (ProgressItem) o;
 
-    if (mCount != that.mCount) return false;
+    if (mId != that.mId) return false;
     if (mProgress != that.mProgress) return false;
 
     return true;
@@ -61,7 +69,7 @@ public class ProgressItem {
 
   @Override
   public int hashCode() {
-    int result = (int) (mCount ^ (mCount >>> 32));
+    int result = (int) (mId ^ (mId >>> 32));
     result = 31 * result + mProgress;
     return result;
   }
@@ -69,7 +77,7 @@ public class ProgressItem {
   @Override
   public String toString() {
     return "ProgressItem{" +
-        "mCount=" + mCount +
+        "mId=" + mId +
         ", mProgress=" + mProgress +
         '}';
   }

@@ -29,7 +29,7 @@ import com.telly.groundy.example.R;
 import com.telly.groundy.util.Bundler;
 import java.util.Random;
 
-public class QueueTest extends Activity {
+public class QueueExample extends Activity {
 
   protected MyReceiver mReceiver;
   private int mCounter = 1;
@@ -57,13 +57,13 @@ public class QueueTest extends Activity {
           time = 1000;
         }
 
-        processTask(new Bundler().add(RandomTimeTask.KEY_COUNT, count)
+        processTask(new Bundler().add(RandomTimeTask.KEY_ID, count)
             .add(RandomTimeTask.KEY_ESTIMATED, time).build());
 
         mBtnAddTask.setText(getString(R.string.next_task_counter, mCounter));
 
         ProgressItem progressItem = new ProgressItem();
-        progressItem.setCount(count);
+        progressItem.setId(count);
         progressItem.setProgress(0);
         progressItem.setEstimated(time / 1000);
         mAdapter.addItem(progressItem);
@@ -84,7 +84,7 @@ public class QueueTest extends Activity {
     protected void onReceiveResult(int resultCode, Bundle resultData) {
       super.onReceiveResult(resultCode, resultData);
       if (resultCode == Groundy.STATUS_PROGRESS) {
-        int count = resultData.getInt(RandomTimeTask.KEY_COUNT);
+        int count = resultData.getInt(RandomTimeTask.KEY_ID);
         int progress = resultData.getInt(Groundy.KEY_PROGRESS);
         findItem(count).setProgress(progress);
         mAdapter.notifyDataSetChanged();
@@ -93,7 +93,7 @@ public class QueueTest extends Activity {
 
     private ProgressItem findItem(int count) {
       for (ProgressItem progressItem : mAdapter.getItems()) {
-        if (count == progressItem.getCount()) {
+        if (count == progressItem.getId()) {
           return progressItem;
         }
       }

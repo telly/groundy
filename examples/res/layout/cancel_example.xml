@@ -37,6 +37,10 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="@string/cancel_random_task"
-    android:layout_gravity="center"
-    android:enabled="false"/>
+    android:layout_gravity="center"/>
+
+  <ListView
+    android:id="@+id/list"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
 </LinearLayout>

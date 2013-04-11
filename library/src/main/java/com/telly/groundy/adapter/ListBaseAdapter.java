@@ -17,6 +17,7 @@
 package com.telly.groundy.adapter;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,8 +31,6 @@ import java.util.Map;
 
 /**
  * Generic class used to easily create a list adapter.
- *
- * @author Cristian Castiblanco <cristian@elhacker.net>
  */
 public abstract class ListBaseAdapter<Item, ViewHolder> extends BaseAdapter {
 
@@ -132,6 +131,18 @@ public abstract class ListBaseAdapter<Item, ViewHolder> extends BaseAdapter {
 
   public Context getContext() {
     return mContext;
+  }
+
+  public String getString(int resId) {
+    return mContext.getString(resId);
+  }
+
+  public String getString(int resId, Object... objects) {
+    return mContext.getString(resId, objects);
+  }
+
+  public Resources getResources() {
+    return mContext.getResources();
   }
 
   public List<Item> getItems() {

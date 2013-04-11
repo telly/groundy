@@ -21,11 +21,8 @@ import com.telly.groundy.Groundy;
 import com.telly.groundy.GroundyTask;
 
 public class CancelableTask extends GroundyTask {
-  public static final String KEY_ESTIMATED = "estimated";
-  public static final String KEY_COUNT = "count";
-
   @Override protected boolean doInBackground() {
-    int time = getIntParam(KEY_ESTIMATED);
+    int time = getIntParam(RandomTimeTask.KEY_ESTIMATED);
     if (time < 1000) {
       time = 1000;
     }
@@ -37,13 +34,14 @@ public class CancelableTask extends GroundyTask {
       try {
         Bundle resultData = new Bundle();
         resultData.putInt(Groundy.KEY_PROGRESS, currentPercentage);
-        resultData.putInt(KEY_COUNT, getIntParam(KEY_COUNT));
+        resultData.putInt(RandomTimeTask.KEY_ID, getIntParam(RandomTimeTask.KEY_ID));
         send(Groundy.STATUS_PROGRESS, resultData);
 
         // let's fake some work ^_^
         Thread.sleep(interval);
         if (isQuitting()) {
           // cancel task
+          addIntResult(RandomTimeTask.KEY_ID, getIntParam(RandomTimeTask.KEY_ID));
           return false;
         }
         currentPercentage++;

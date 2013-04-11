@@ -23,6 +23,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.*;
 import android.util.Log;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -100,7 +101,7 @@ public class GroundyService extends Service {
       if (mMode == GroundyMode.QUEUE) {
         // make sure we don't allow to asynchronously execute tasks while we are not in queue mode
         throw new UnsupportedOperationException(
-            "Current mode is 'queue'. You cannot use .execute() while" + " in this mode. You must enable 'async' mode by adding metadata to the manifest.");
+          "Current mode is 'queue'. You cannot use .execute() while" + " in this mode. You must enable 'async' mode by adding metadata to the manifest.");
       }
       HandlerThread thread = new HandlerThread("AsyncGroundyService");
       thread.start();
@@ -165,39 +166,42 @@ public class GroundyService extends Service {
   /**
    * @param groupId group id identifying the kind of task
    * @param reason  reason to cancel this group
-   * @return true if at least one unscheduled task was removed
+   * @return number of tasks cancelled
    */
-  private boolean cancelTasks(int groupId, int reason) {
+  private int cancelTasks(int groupId, int reason) {
     if (groupId == DEFAULT_GROUP_ID) {
       throw new IllegalStateException("Cannot use 0 when cancelling tasks by group id");
     }
 
     if (mStartBehavior == START_REDELIVER_INTENT) {
       Log.w(TAG,
-          "Cancelling groups of tasks is not secure when using force_queue_completion. If your service gets killed unpredictable behavior can happen.");
+        "Cancelling groups of tasks is not secure when using force_queue_completion. If your service gets killed unpredictable behavior can happen.");
     }
 
-    boolean hasMessagesWithinGroup = mGroundyHandler.hasMessages(groupId);
-    if (!hasMessagesWithinGroup) {
-      return false;
-    }
+    // prevent current scheduled tasks with this group id from executing
+    mGroundyHandler.removeMessages(groupId);
+
+    int stoppedTasks = 0;
     synchronized (mRunningTasks) {
-      // prevent current scheduled tasks with this group id from executing
-      mGroundyHandler.removeMessages(groupId);
-
-      // stop current running tasks
-      List<GroundyTask> stoppedTasks = new ArrayList<GroundyTask>();
-      for (GroundyTask groundyTask : mRunningTasks) {
-        if (groundyTask.getGroupId() == groupId) {
-          groundyTask.stopTask(reason);
-          stoppedTasks.add(groundyTask);
+      if (!mRunningTasks.isEmpty()) {
+        // stop current running tasks
+        List<GroundyTask> tasksToStop = new ArrayList<GroundyTask>();
+        for (GroundyTask groundyTask : mRunningTasks) {
+          if (groundyTask.getGroupId() == groupId) {
+            groundyTask.stopTask(reason);
+            tasksToStop.add(groundyTask);
+          }
         }
+        mRunningTasks.removeAll(tasksToStop);
+        stoppedTasks = tasksToStop.size();
       }
-      mRunningTasks.removeAll(stoppedTasks);
     }
 
-    Set<Integer> idsSet = mUnfinishedTasks.keySet();
     synchronized (mUnfinishedTasks) { // remove future tasks
+      if (mUnfinishedTasks.size() == 0) {
+        return 0;
+      }
+      Set<Integer> idsSet = mUnfinishedTasks.keySet();
       List<Integer> toRemove = new ArrayList<Integer>();
       for (Integer startId : idsSet) {
         if (mUnfinishedTasks.get(startId) == groupId) {
@@ -205,7 +209,7 @@ public class GroundyService extends Service {
         }
       }
       idsSet.removeAll(toRemove);
-      return !toRemove.isEmpty();
+      return toRemove.size() - stoppedTasks;
     }
   }
 
@@ -223,33 +227,6 @@ public class GroundyService extends Service {
         groundyTask.stopTask(quittingReason);
       }
       mRunningTasks.clear();
-    }
-  }
-
-  private final class GroundyHandler extends Handler {
-
-    public GroundyHandler(Looper looper) {
-      super(looper);
-    }
-
-    @Override
-    public void handleMessage(Message msg) {
-      Intent intent = (Intent) msg.obj;
-      if (intent != null) {
-        onHandleIntent(intent, msg.what, msg.arg1, msg.arg2 == START_FLAG_REDELIVERY);
-
-        if (mMode == GroundyMode.QUEUE) {
-          // when in queue mode, we must stop each intent received
-          stopSelf(msg.arg1);
-        }
-        mUnfinishedTasks.remove(msg.arg1);
-      }
-
-      if (mUnfinishedTasks.isEmpty()) {
-        // stop the service by calling stopSelf with the latest startId
-        stopSelf(mLastStartId.get());
-        mRunning = false;
-      }
     }
   }
 
@@ -308,6 +285,9 @@ public class GroundyService extends Service {
 
     //Lets try to send back the response
     Bundle resultData = groundyTask.getResultData();
+    if (groundyTask.isQuitting()) {
+      resultData.putInt(Groundy.KEY_CANCEL_REASON, groundyTask.getQuittingReason());
+    }
     groundyTask.send(groundyTask.getResultCode(), resultData);
   }
 
@@ -339,11 +319,38 @@ public class GroundyService extends Service {
     if (forceQueueCompletion) {
       if (mMode == GroundyMode.ASYNC) {
         throw new UnsupportedOperationException(
-            "force_queue_completion can only be used when in 'queue' mode");
+          "force_queue_completion can only be used when in 'queue' mode");
       }
       mStartBehavior = START_REDELIVER_INTENT;
     } else {
       mStartBehavior = START_NOT_STICKY;
+    }
+  }
+
+  private final class GroundyHandler extends Handler {
+
+    public GroundyHandler(Looper looper) {
+      super(looper);
+    }
+
+    @Override
+    public void handleMessage(Message msg) {
+      Intent intent = (Intent) msg.obj;
+      if (intent != null) {
+        onHandleIntent(intent, msg.what, msg.arg1, msg.arg2 == START_FLAG_REDELIVERY);
+
+        if (mMode == GroundyMode.QUEUE) {
+          // when in queue mode, we must stop each intent received
+          stopSelf(msg.arg1);
+        }
+        mUnfinishedTasks.remove(msg.arg1);
+      }
+
+      if (mUnfinishedTasks.isEmpty()) {
+        // stop the service by calling stopSelf with the latest startId
+        stopSelf(mLastStartId.get());
+        mRunning = false;
+      }
     }
   }
 
@@ -393,9 +400,9 @@ public class GroundyService extends Service {
     /**
      * @param groupId group id identifying the kind of task
      * @param reason  reason to cancel this group
-     * @return true if at least one unscheduled task was removed
+     * @return number of cancelled tasks (before they were ran)
      */
-    boolean cancelTasks(int groupId, int reason) {
+    int cancelTasks(int groupId, int reason) {
       return GroundyService.this.cancelTasks(groupId, reason);
     }
   }

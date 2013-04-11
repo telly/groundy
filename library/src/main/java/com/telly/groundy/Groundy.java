@@ -31,6 +31,7 @@ public class Groundy {
   public static final String KEY_PROGRESS = "com.telly.groundy.key.PROGRESS";
   public static final String KEY_TASK = "com.telly.groundy.key.TASK";
   public static final String KEY_GROUP_ID = "com.telly.groundy.key.GROUP_ID";
+  public static final String KEY_CANCEL_REASON = "com.telly.groundy.key.CANCEL_REASON";
   static final String KEY_TOKEN = "com.telly.groundy.key.TOKEN";
 
   public static final int STATUS_FINISHED = 200;
@@ -168,10 +169,7 @@ public class Groundy {
    * {@link Groundy#execute()} method.
    */
   public void queue() {
-    if (mAlreadyProcessed) {
-      throw new IllegalStateException("Task already queued or executed");
-    }
-    mAlreadyProcessed = true;
+    markAsProcessed();
     boolean async = false;
     startApiService(async);
   }
@@ -180,12 +178,16 @@ public class Groundy {
    * Execute a task right away
    */
   public void execute() {
+    markAsProcessed();
+    boolean async = true;
+    startApiService(async);
+  }
+
+  private void markAsProcessed() {
     if (mAlreadyProcessed) {
       throw new IllegalStateException("Task already queued or executed");
     }
     mAlreadyProcessed = true;
-    boolean async = true;
-    startApiService(async);
   }
 
   private void startApiService(boolean async) {
