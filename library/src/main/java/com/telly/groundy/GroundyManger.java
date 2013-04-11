@@ -97,9 +97,9 @@ public class GroundyManger {
     new GroundyServiceConnection(context, groundyServiceClass) {
       @Override
       protected void onGroundyServiceBound(GroundyService.GroundyServiceBinder binder) {
-        int tasksCancelled = binder.cancelTasks(groupId, reason);
+        GroundyService.CancelResponse cancelResponse = binder.cancelTasks(groupId, reason);
         if (cancelListener != null) {
-          cancelListener.onCancelResult(groupId, tasksCancelled);
+          cancelListener.onCancelResult(groupId, cancelResponse);
         }
       }
     }.start();
@@ -242,6 +242,6 @@ public class GroundyManger {
   }
 
   public static interface CancelListener {
-    void onCancelResult(int groupId, int tasksCancelled);
+    void onCancelResult(int groupId, GroundyService.CancelResponse tasksCancelled);
   }
 }

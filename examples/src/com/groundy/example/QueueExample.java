@@ -27,6 +27,7 @@ import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.Groundy;
 import com.telly.groundy.example.R;
 import com.telly.groundy.util.Bundler;
+
 import java.util.Random;
 
 public class QueueExample extends Activity {
@@ -57,8 +58,8 @@ public class QueueExample extends Activity {
           time = 1000;
         }
 
-        processTask(new Bundler().add(RandomTimeTask.KEY_ID, count)
-            .add(RandomTimeTask.KEY_ESTIMATED, time).build());
+        processTask(new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time)
+          .build());
 
         mBtnAddTask.setText(getString(R.string.next_task_counter, mCounter));
 
@@ -84,7 +85,7 @@ public class QueueExample extends Activity {
     protected void onReceiveResult(int resultCode, Bundle resultData) {
       super.onReceiveResult(resultCode, resultData);
       if (resultCode == Groundy.STATUS_PROGRESS) {
-        int count = resultData.getInt(RandomTimeTask.KEY_ID);
+        int count = resultData.getInt(Groundy.KEY_TASK_ID);
         int progress = resultData.getInt(Groundy.KEY_PROGRESS);
         findItem(count).setProgress(progress);
         mAdapter.notifyDataSetChanged();

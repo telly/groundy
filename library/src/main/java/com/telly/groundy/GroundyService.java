@@ -23,14 +23,11 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.*;
 import android.util.Log;
+import android.util.Pair;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * @author Evelio Tarazona <evelio@twitvid.com>
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
 public class GroundyService extends Service {
 
   static final String ACTION_QUEUE = "com.telly.groundy.action.QUEUE";
@@ -58,13 +55,13 @@ public class GroundyService extends Service {
 
   private AtomicInteger mLastStartId = new AtomicInteger();
   // this help us keep track of the tasks that are scheduled to be executed
-  private volatile Map<Integer, Integer> mUnfinishedTasks;
-  private volatile Map<String, Set<ResultReceiver>> mAttachedReceivers;
+  private volatile SortedMap<Integer, Pair<Integer, Long>> mPendingTasks;
+  private volatile SortedMap<String, Set<ResultReceiver>> mAttachedReceivers;
 
   public GroundyService() {
     mWakeLockHelper = new WakeLockHelper(this);
-    mAttachedReceivers = Collections.synchronizedMap(new HashMap<String, Set<ResultReceiver>>());
-    mUnfinishedTasks = Collections.synchronizedMap(new HashMap<Integer, Integer>());
+    mAttachedReceivers = Collections.synchronizedSortedMap(new TreeMap<String, Set<ResultReceiver>>());
+    mPendingTasks = Collections.synchronizedSortedMap(new TreeMap<Integer, Pair<Integer, Long>>());
     mRunningTasks = Collections.synchronizedSet(new HashSet<GroundyTask>());
   }
 
@@ -137,10 +134,14 @@ public class GroundyService extends Service {
     msg.arg2 = flags;
     msg.obj = intent;
     msg.what = intent.getIntExtra(Groundy.KEY_GROUP_ID, DEFAULT_GROUP_ID);
+    long taskId = intent.getLongExtra(Groundy.KEY_TASK_ID, 0);
+    if (taskId == 0) {
+      throw new RuntimeException("Task id cannot be 0. What kind of sorcery is this?");
+    }
 
-    mUnfinishedTasks.put(startId, msg.what);
+    mPendingTasks.put(startId, new Pair<Integer, Long>(msg.what, taskId));
     if (!groundyHandler.sendMessage(msg)) {
-      mUnfinishedTasks.remove(startId);
+      mPendingTasks.remove(startId);
     }
   }
 
@@ -160,15 +161,16 @@ public class GroundyService extends Service {
       }
     }
     internalQuit(GroundyTask.CANCEL_ALL);
-    mUnfinishedTasks.clear();
+    mPendingTasks.clear();
   }
 
   /**
+   *
    * @param groupId group id identifying the kind of task
    * @param reason  reason to cancel this group
    * @return number of tasks cancelled
    */
-  private int cancelTasks(int groupId, int reason) {
+  private CancelResponse cancelTasks(int groupId, int reason) {
     if (groupId == DEFAULT_GROUP_ID) {
       throw new IllegalStateException("Cannot use 0 when cancelling tasks by group id");
     }
@@ -181,7 +183,7 @@ public class GroundyService extends Service {
     // prevent current scheduled tasks with this group id from executing
     mGroundyHandler.removeMessages(groupId);
 
-    int stoppedTasks = 0;
+    Set<Long> interruptedTasks = new HashSet<Long>();
     synchronized (mRunningTasks) {
       if (!mRunningTasks.isEmpty()) {
         // stop current running tasks
@@ -190,26 +192,49 @@ public class GroundyService extends Service {
           if (groundyTask.getGroupId() == groupId) {
             groundyTask.stopTask(reason);
             tasksToStop.add(groundyTask);
+            interruptedTasks.add(groundyTask.getId());
           }
         }
         mRunningTasks.removeAll(tasksToStop);
-        stoppedTasks = tasksToStop.size();
       }
     }
 
-    synchronized (mUnfinishedTasks) { // remove future tasks
-      if (mUnfinishedTasks.size() == 0) {
-        return 0;
+    Set<Long> notExecutedTasks = new HashSet<Long>();
+    synchronized (mPendingTasks) { // remove future tasks
+      if (mPendingTasks.size() == 0) {
+        return null;
       }
-      Set<Integer> idsSet = mUnfinishedTasks.keySet();
       List<Integer> toRemove = new ArrayList<Integer>();
+      Set<Integer> idsSet = mPendingTasks.keySet();
       for (Integer startId : idsSet) {
-        if (mUnfinishedTasks.get(startId) == groupId) {
+        Pair<Integer, Long> groupAndId = mPendingTasks.get(startId);
+        if (groupAndId.first == groupId) {
           toRemove.add(startId);
+          notExecutedTasks.add(groupAndId.second);
         }
       }
       idsSet.removeAll(toRemove);
-      return toRemove.size() - stoppedTasks;
+    }
+
+    notExecutedTasks.removeAll(interruptedTasks);
+    return new CancelResponse(interruptedTasks, notExecutedTasks);
+  }
+
+  public static class CancelResponse {
+    private final Set<Long> interruptedTasks;
+    private final Set<Long> notExecutedTasks;
+
+    public CancelResponse(Set<Long> interruptedTasks, Set<Long> notExecutedTasks) {
+      this.interruptedTasks = interruptedTasks;
+      this.notExecutedTasks = notExecutedTasks;
+    }
+
+    public Set<Long> getInterruptedTasks() {
+      return interruptedTasks;
+    }
+
+    public Set<Long> getNotExecutedTasks() {
+      return notExecutedTasks;
     }
   }
 
@@ -243,7 +268,7 @@ public class GroundyService extends Service {
    */
   private void onHandleIntent(Intent intent, int groupId, int startId, boolean redelivery) {
     Bundle extras = intent.getExtras();
-    extras = (extras == null) ? Bundle.EMPTY : extras;
+    extras = (extras == null) ? new Bundle() : extras;
 
     Class<?> taskName = (Class<?>) extras.getSerializable(Groundy.KEY_TASK);
     //noinspection unchecked
@@ -252,6 +277,7 @@ public class GroundyService extends Service {
       L.e(TAG, "Groundy task no provided");
       return;
     }
+    groundyTask.setId(extras.getLong(Groundy.KEY_TASK_ID));
 
     // set up the result receiver(s)
     ResultReceiver receiver = (ResultReceiver) extras.get(Groundy.KEY_RECEIVER);
@@ -259,13 +285,16 @@ public class GroundyService extends Service {
       groundyTask.addReceiver(receiver);
     }
     String token = intent.getStringExtra(Groundy.KEY_TOKEN);
+    if (token == null) {
+      token = "";
+    }
     if (mAttachedReceivers.containsKey(token)) {
       for (ResultReceiver resultReceiver : mAttachedReceivers.get(token)) {
         groundyTask.addReceiver(resultReceiver);
       }
     }
     groundyTask.setToken(token);
-    groundyTask.send(Groundy.STATUS_RUNNING, Bundle.EMPTY);
+    groundyTask.send(Groundy.STATUS_RUNNING, new Bundle());
 
     groundyTask.setStartId(startId);
     groundyTask.setGroupId(groupId);
@@ -343,10 +372,10 @@ public class GroundyService extends Service {
           // when in queue mode, we must stop each intent received
           stopSelf(msg.arg1);
         }
-        mUnfinishedTasks.remove(msg.arg1);
+        mPendingTasks.remove(msg.arg1);
       }
 
-      if (mUnfinishedTasks.isEmpty()) {
+      if (mPendingTasks.isEmpty()) {
         // stop the service by calling stopSelf with the latest startId
         stopSelf(mLastStartId.get());
         mRunning = false;
@@ -398,11 +427,12 @@ public class GroundyService extends Service {
     }
 
     /**
+     *
      * @param groupId group id identifying the kind of task
      * @param reason  reason to cancel this group
      * @return number of cancelled tasks (before they were ran)
      */
-    int cancelTasks(int groupId, int reason) {
+    CancelResponse cancelTasks(int groupId, int reason) {
       return GroundyService.this.cancelTasks(groupId, reason);
     }
   }

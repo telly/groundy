@@ -45,6 +45,7 @@ public abstract class GroundyTask {
   private int mGroupId;
   private boolean mRedelivered;
   private String mToken;
+  private long mId;
 
   /**
    * Creates a GroundyTask composed of
@@ -105,6 +106,14 @@ public abstract class GroundyTask {
 
   void setToken(String token) {
     mToken = token;
+  }
+
+  void setId(long id) {
+    mId = id;
+  }
+
+  protected long getId() {
+    return mId;
   }
 
   /**
@@ -291,6 +300,7 @@ public abstract class GroundyTask {
       return;
     }
     for (ResultReceiver receiver : mReceivers) {
+      resultData.putLong(Groundy.KEY_TASK_ID, getId());
       receiver.send(resultCode, resultData);
     }
   }

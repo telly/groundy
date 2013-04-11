@@ -22,6 +22,9 @@
   package="com.telly.groundy.example">
 
   <uses-permission android:name="android.permission.INTERNET" />
+  <uses-sdk
+    android:minSdkVersion="8"
+    android:targetSdkVersion="16"/>
   <application>
     <activity android:name="com.groundy.example.MainActivity">
       <intent-filter>

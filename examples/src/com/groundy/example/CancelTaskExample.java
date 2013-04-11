@@ -27,10 +27,12 @@ import com.groundy.example.tasks.CancelableTask;
 import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.Groundy;
 import com.telly.groundy.GroundyManger;
+import com.telly.groundy.GroundyService;
 import com.telly.groundy.example.R;
 import com.telly.groundy.util.Bundler;
 
 import java.util.Random;
+import java.util.Set;
 
 import static android.widget.Toast.makeText;
 
@@ -38,7 +40,6 @@ public class CancelTaskExample extends Activity {
   private static final int GROUP_ID = 333;
   private static final int FOO_CANCEL_REASON = 45;
   private View mCancelBtn;
-  private int mCounter;
   private ProgressAdapter mAdapter;
 
   @Override
@@ -54,21 +55,22 @@ public class CancelTaskExample extends Activity {
       @Override
       public void onClick(View v) {
         // configure task parameters
-        int count = mCounter++;
         int time = new Random().nextInt(10000);
-        Bundle params = new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time).add(RandomTimeTask.KEY_ID, count).build();
-        makeText(CancelTaskExample.this, getString(R.string.task_will_take_x, time),
-          Toast.LENGTH_SHORT).show();
+        Bundle params = new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time)
+          .build();
+
+        // queue task
+        long queue = Groundy.create(CancelTaskExample.this, CancelableTask.class)
+          .receiver(resultReceiver)
+          .group(GROUP_ID)
+          .params(params)
+          .queue();
 
         ProgressItem progressItem = new ProgressItem();
-        progressItem.setId(count);
+        progressItem.setId(queue);
         progressItem.setProgress(0);
         progressItem.setEstimated(time / 1000);
         mAdapter.addItem(progressItem);
-
-        // queue task
-        Groundy.create(CancelTaskExample.this, CancelableTask.class).receiver(resultReceiver)
-          .group(GROUP_ID).params(params).queue();
       }
     });
 
@@ -82,41 +84,51 @@ public class CancelTaskExample extends Activity {
     });
   }
 
+  private ProgressItem findItem(long id) {
+    for (ProgressItem progressItem : mAdapter.getItems()) {
+      if (id == progressItem.getId()) {
+        return progressItem;
+      }
+    }
+    return null;
+  }
+
   private final ResultReceiver resultReceiver = new ResultReceiver(new Handler()) {
     @Override
     protected void onReceiveResult(int resultCode, Bundle resultData) {
       super.onReceiveResult(resultCode, resultData);
-      int id = resultData.getInt(RandomTimeTask.KEY_ID);
+      long id = resultData.getLong(Groundy.KEY_TASK_ID);
       ProgressItem item = findItem(id);
       if (resultCode == Groundy.STATUS_PROGRESS) {
         int progress = resultData.getInt(Groundy.KEY_PROGRESS);
         item.setProgress(progress);
-      }
-      if (resultCode == Groundy.STATUS_ERROR && resultData.getInt(Groundy.KEY_CANCEL_REASON, 0) == FOO_CANCEL_REASON) {
-        item.setCancelled(true);
+      } else if (resultCode == Groundy.STATUS_ERROR && resultData.getInt(Groundy.KEY_CANCEL_REASON,
+        0) == FOO_CANCEL_REASON) {
+        item.setState(ProgressItem.INTERRUPTED);
+      } else if (resultCode == Groundy.STATUS_FINISHED) {
+        item.setState(ProgressItem.DONE);
       }
       mAdapter.notifyDataSetChanged();
-    }
-
-    private ProgressItem findItem(int id) {
-      for (ProgressItem progressItem : mAdapter.getItems()) {
-        if (id == progressItem.getId()) {
-          return progressItem;
-        }
-      }
-      return null;
     }
   };
 
   private final GroundyManger.CancelListener listener = new GroundyManger.CancelListener() {
     @Override
-    public void onCancelResult(int groupId, int cancelledTasks) {
+    public void onCancelResult(int groupId, GroundyService.CancelResponse cancelledTasks) {
       mCancelBtn.setEnabled(true);
-      if (cancelledTasks == 0) {
+      if (cancelledTasks == null) {
         makeText(CancelTaskExample.this, R.string.couldnt_cancel_task, Toast.LENGTH_SHORT).show();
       } else {
-        String message = getString(R.string.tasks_cancelled, cancelledTasks);
-        makeText(CancelTaskExample.this, message, Toast.LENGTH_SHORT).show();
+        Set<Long> notExecutedTasks = cancelledTasks.getNotExecutedTasks();
+        int interruptedTasks = cancelledTasks.getInterruptedTasks().size();
+        int notExecuted = notExecutedTasks.size();
+        String message = getString(R.string.tasks_interrupted, interruptedTasks, notExecuted);
+        makeText(CancelTaskExample.this, message, Toast.LENGTH_LONG).show();
+
+        for (Long taskId : notExecutedTasks) {
+          ProgressItem item = findItem(taskId);
+          item.setState(ProgressItem.CANCELLED);
+        }
       }
     }
   };

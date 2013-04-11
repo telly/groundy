@@ -31,6 +31,7 @@ public class Groundy {
   public static final String KEY_PROGRESS = "com.telly.groundy.key.PROGRESS";
   public static final String KEY_TASK = "com.telly.groundy.key.TASK";
   public static final String KEY_GROUP_ID = "com.telly.groundy.key.GROUP_ID";
+  public static final String KEY_TASK_ID = "com.telly.groundy.key.TASK_ID";
   public static final String KEY_CANCEL_REASON = "com.telly.groundy.key.CANCEL_REASON";
   static final String KEY_TOKEN = "com.telly.groundy.key.TOKEN";
 
@@ -41,6 +42,7 @@ public class Groundy {
 
   private final Context mContext;
   private final Class<? extends GroundyTask> mGroundyTask;
+  private final long mId;
   private String mToken;
   private ResultReceiver mResultReceiver;
   private Bundle mParams;
@@ -51,6 +53,7 @@ public class Groundy {
   private Groundy(Context context, Class<? extends GroundyTask> groundyTask) {
     mContext = context.getApplicationContext();
     mGroundyTask = groundyTask;
+    mId = System.nanoTime();
   }
 
   /**
@@ -167,20 +170,26 @@ public class Groundy {
    * executed until the previous queued tasks are done.
    * If you need your task to execute right away use the
    * {@link Groundy#execute()} method.
+   *
+   * @return a unique number assigned to this task
    */
-  public void queue() {
+  public long queue() {
     markAsProcessed();
     boolean async = false;
     startApiService(async);
+    return mId;
   }
 
   /**
    * Execute a task right away
+   *
+   * @return a unique number assigned to this task
    */
-  public void execute() {
+  public long execute() {
     markAsProcessed();
     boolean async = true;
     startApiService(async);
+    return mId;
   }
 
   private void markAsProcessed() {
@@ -200,6 +209,7 @@ public class Groundy {
       intent.putExtra(KEY_RECEIVER, mResultReceiver);
     }
     intent.putExtra(KEY_TASK, mGroundyTask);
+    intent.putExtra(KEY_TASK_ID, mId);
     intent.putExtra(KEY_GROUP_ID, mGroupId);
     intent.putExtra(KEY_TOKEN, mToken);
     mContext.startService(intent);

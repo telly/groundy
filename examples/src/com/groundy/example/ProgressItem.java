@@ -17,10 +17,14 @@
 package com.groundy.example;
 
 public class ProgressItem {
+  public static final int DEFAULT = 0;
+  public static final int INTERRUPTED = 1;
+  public static final int CANCELLED = 2;
+  public static final int DONE = 3;
   private long mId;
   private int mProgress;
   private int mEstimated;
-  private boolean mCancelled;
+  private int mState = DEFAULT;
 
   public long getId() {
     return mId;
@@ -46,12 +50,12 @@ public class ProgressItem {
     mProgress = progress;
   }
 
-  public void setCancelled(boolean cancelled) {
-    mCancelled = cancelled;
+  public void setState(int cancelled) {
+    mState = cancelled;
   }
 
-  public boolean isCancelled() {
-    return mCancelled;
+  public int getState() {
+    return mState;
   }
 
   @Override

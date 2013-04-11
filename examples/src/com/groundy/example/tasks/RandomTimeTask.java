@@ -23,7 +23,6 @@ import com.telly.groundy.GroundyTask;
 public class RandomTimeTask extends GroundyTask {
 
   public static final String KEY_ESTIMATED = "estimated";
-  public static final String KEY_ID = "id";
 
   @Override
   protected boolean doInBackground() {
@@ -39,7 +38,6 @@ public class RandomTimeTask extends GroundyTask {
       try {
         Bundle resultData = new Bundle();
         resultData.putInt(Groundy.KEY_PROGRESS, currentPercentage);
-        resultData.putInt(KEY_ID, getIntParam(KEY_ID));
         send(Groundy.STATUS_PROGRESS, resultData);
 
         // let's fake some work ^_^

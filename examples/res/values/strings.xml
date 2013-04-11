@@ -48,6 +48,8 @@
   <string name="cancel_random_task">Cancel task</string>
   <string name="cancel_example">Cancel Task Example</string>
   <string name="couldnt_cancel_task">Couldn\'t cancel any task</string>
-  <string name="tasks_cancelled">Tasks cancelled: %s</string>
-  <string name="task_cancelled">Task cancelled</string>
+  <string name="tasks_interrupted">%1$s tasks interrupted, %2$s tasks didn\'t run</string>
+  <string name="task_didnt_run">Task didn\'t even run</string>
+  <string name="task_interrupted">Task was interrupted</string>
+  <string name="task_completed">Task completed</string>
 </resources>

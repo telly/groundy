@@ -34,14 +34,11 @@ public class CancelableTask extends GroundyTask {
       try {
         Bundle resultData = new Bundle();
         resultData.putInt(Groundy.KEY_PROGRESS, currentPercentage);
-        resultData.putInt(RandomTimeTask.KEY_ID, getIntParam(RandomTimeTask.KEY_ID));
         send(Groundy.STATUS_PROGRESS, resultData);
 
         // let's fake some work ^_^
         Thread.sleep(interval);
         if (isQuitting()) {
-          // cancel task
-          addIntResult(RandomTimeTask.KEY_ID, getIntParam(RandomTimeTask.KEY_ID));
           return false;
         }
         currentPercentage++;

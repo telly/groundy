@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <style name="ProgressBarOrangeGroundyTheme" parent="android:Widget.ProgressBar.Horizontal">
+    <item name="android:progressDrawable">@drawable/progress_horizontal_holo_orange</item>
+  </style>
+</resources>

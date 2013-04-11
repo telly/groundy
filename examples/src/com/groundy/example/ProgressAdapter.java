@@ -35,18 +35,24 @@ public class ProgressAdapter extends ListBaseAdapter<ProgressItem, ProgressAdapt
   @Override
   public void populateHolder(int position, View view, ViewGroup parent, ProgressItem item,
                              ViewHolder holder) {
-    holder.id.setText(String.valueOf(item.getId()));
     holder.progressBar.setProgress(item.getProgress());
-    if (item.isCancelled()) {
-      holder.estimated.setText(getString(R.string.task_cancelled));
-    } else {
-      holder.estimated.setText(getString(R.string.will_work_for, item.getEstimated()));
+    switch (item.getState()) {
+      case ProgressItem.CANCELLED:
+        holder.estimated.setText(getString(R.string.task_didnt_run));
+        break;
+      case ProgressItem.INTERRUPTED:
+        holder.estimated.setText(R.string.task_interrupted);
+        break;
+      case ProgressItem.DONE:
+        holder.estimated.setText(R.string.task_completed);
+        break;
+      default:
+        holder.estimated.setText(getString(R.string.will_work_for, item.getEstimated()));
     }
   }
 
   @Layout(R.layout.progress_row)
   public static class ViewHolder {
-    @ResourceId(R.id.lbl_id) TextView id;
     @ResourceId(R.id.lbl_estimated) TextView estimated;
     @ResourceId(R.id.progress) ProgressBar progressBar;
   }
