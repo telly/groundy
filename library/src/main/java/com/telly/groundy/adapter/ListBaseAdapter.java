@@ -32,6 +32,7 @@ import java.util.Map;
 /**
  * Generic class used to easily create a list adapter.
  */
+// TODO make this work with multiple view types
 public abstract class ListBaseAdapter<Item, ViewHolder> extends BaseAdapter {
 
   private final List<Item> mItems = new ArrayList<Item>();
@@ -39,6 +40,7 @@ public abstract class ListBaseAdapter<Item, ViewHolder> extends BaseAdapter {
   private final Context mContext;
   private final Class<ViewHolder> mViewHolderClass;
   private final int mLayoutId;
+  private int[] mLayoutIds;
   private final Map<Field, Integer> mFieldCache = new HashMap<Field, Integer>();
 
   public ListBaseAdapter(Context context, Class<ViewHolder> viewHolder) {
@@ -50,6 +52,12 @@ public abstract class ListBaseAdapter<Item, ViewHolder> extends BaseAdapter {
     }
     Layout layout = viewHolder.getAnnotation(Layout.class);
     mLayoutId = layout.value();
+    if (mLayoutId == 0) {
+      mLayoutIds = layout.ids();
+      if (mLayoutIds == null || mLayoutIds.length == 0) {
+        throw new IllegalStateException("Either value or ids annotation must be specified");
+      }
+    }
 
     // cache all fields to know what field corresponds to what resource id
     for (Field field : mViewHolderClass.getDeclaredFields()) {
@@ -107,7 +115,7 @@ public abstract class ListBaseAdapter<Item, ViewHolder> extends BaseAdapter {
       }
 
       // inflate the base view
-      view = mInflater.inflate(mLayoutId, null);
+      view = mInflater.inflate(getHolderLayoutIdFor(position), null);
 
       for (Field field : mFieldCache.keySet()) {
         int resourceId = mFieldCache.get(field);
@@ -125,6 +133,18 @@ public abstract class ListBaseAdapter<Item, ViewHolder> extends BaseAdapter {
     }
     populateHolder(position, view, parent, getItem(position), holder);
     return view;
+  }
+
+  protected int getHolderLayoutIdFor(int position) {
+    return mLayoutId;
+  }
+
+  @Override
+  public int getItemViewType(int position) {
+    if (mLayoutIds == null) {
+      return 1;
+    }
+    return mLayoutIds.length;
   }
 
   public abstract void populateHolder(int position, View view, ViewGroup parent, Item item, ViewHolder holder);

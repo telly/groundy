@@ -25,19 +25,39 @@
     android:layout_height="wrap_content"
     android:text="@string/cancel_example_explanation" />
 
-  <Button
-    android:id="@+id/send_random_task"
-    android:layout_width="wrap_content"
+  <LinearLayout
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:text="@string/execute_some_random_task"
-    android:layout_gravity="center" />
+    android:orientation="horizontal">
+    <Button
+      android:id="@+id/queue_blue_task"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:text="@string/queue_blue_task"
+      android:layout_weight="1"/>
 
-  <Button
-    android:id="@+id/cancel_random_task"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="@string/cancel_random_task"
-    android:layout_gravity="center"/>
+    <Button
+      android:id="@+id/queue_orange_task"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:text="@string/queue_orange_task"
+      android:layout_weight="1"/>
+
+    <Button
+      android:id="@+id/cancel_blue_task"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:text="@string/cancel_blue_task"
+      android:layout_weight="1"/>
+
+    <Button
+      android:id="@+id/cancel_orange_task"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:text="@string/cancel_orange_task"
+      android:layout_weight="1"/>
+  </LinearLayout>
+
 
   <ListView
     android:id="@+id/list"

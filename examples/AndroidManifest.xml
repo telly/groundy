@@ -25,8 +25,8 @@
   <uses-sdk
     android:minSdkVersion="8"
     android:targetSdkVersion="16"/>
-  <application>
-    <activity android:name="com.groundy.example.MainActivity">
+  <application android:icon="@drawable/ic_launcher">
+    <activity android:name="com.groundy.example.MainActivity" android:label="@string/groundy_examples">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
@@ -34,29 +34,35 @@
     </activity>
     <activity
       android:name="com.groundy.example.SimpleTaskExample"
+      android:label="@string/simple_example"
       android:configChanges="orientation"
       android:screenOrientation="portrait" />
-    <activity android:name="com.groundy.example.SafeSimpleTaskTest" />
-    <activity android:name="com.groundy.example.AttachReceiverExample" />
+    <activity android:name="com.groundy.example.SafeSimpleTaskTest" android:label="@string/safe_simple_example" />
+    <activity android:name="com.groundy.example.AttachReceiverExample" android:label="@string/attach_receiver_example"/>
     <activity
       android:name="com.groundy.example.ChuckNorrisActivity"
       android:configChanges="orientation"
+      android:label="@string/chuck_norris_example"
       android:screenOrientation="portrait" />
     <activity
       android:name="com.groundy.example.DownloadExample"
       android:configChanges="orientation"
+      android:label="@string/download_example"
       android:screenOrientation="portrait" />
     <activity
       android:name="com.groundy.example.QueueExample"
       android:configChanges="orientation"
+      android:label="@string/queue_example"
       android:screenOrientation="portrait" />
     <activity
       android:name="com.groundy.example.ExecuteExample"
       android:configChanges="orientation"
+      android:label="@string/execute_example"
       android:screenOrientation="portrait" />
     <activity
       android:name="com.groundy.example.CancelTaskExample"
       android:configChanges="orientation"
+      android:label="@string/cancel_example"
       android:screenOrientation="portrait" />
 
     <service android:name="com.telly.groundy.GroundyService" />

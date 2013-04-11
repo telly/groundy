@@ -36,11 +36,11 @@ import java.util.Set;
 
 import static android.widget.Toast.makeText;
 
-public class CancelTaskExample extends Activity {
-  private static final int GROUP_ID = 333;
+public class CancelTaskExample extends Activity implements View.OnClickListener {
+  public static final int BLUE_TASKS = 333;
+  public static final int ORANGE_TASKS = 444;
   private static final int FOO_CANCEL_REASON = 45;
-  private View mCancelBtn;
-  private ProgressAdapter mAdapter;
+  private CancelProgressAdapter mAdapter;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -48,40 +48,55 @@ public class CancelTaskExample extends Activity {
     setContentView(R.layout.cancel_example);
 
     ListView listView = (ListView) findViewById(R.id.list);
-    mAdapter = new ProgressAdapter(this);
+    mAdapter = new CancelProgressAdapter(this);
     listView.setAdapter(mAdapter);
 
-    findViewById(R.id.send_random_task).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        // configure task parameters
-        int time = new Random().nextInt(10000);
-        Bundle params = new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time)
-          .build();
+    findViewById(R.id.queue_blue_task).setOnClickListener(this);
+    findViewById(R.id.queue_orange_task).setOnClickListener(this);
+    findViewById(R.id.cancel_blue_task).setOnClickListener(this);
+    findViewById(R.id.cancel_orange_task).setOnClickListener(this);
+  }
 
-        // queue task
-        long queue = Groundy.create(CancelTaskExample.this, CancelableTask.class)
-          .receiver(resultReceiver)
-          .group(GROUP_ID)
-          .params(params)
-          .queue();
+  @Override
+  public void onClick(View v) {
+    switch (v.getId()) {
+      case R.id.queue_blue_task:
+        queueTask(BLUE_TASKS);
+        break;
+      case R.id.queue_orange_task:
+        queueTask(ORANGE_TASKS);
+        break;
+      case R.id.cancel_blue_task:
+        cancelTasks(BLUE_TASKS);
+        break;
+      case R.id.cancel_orange_task:
+        cancelTasks(ORANGE_TASKS);
+        break;
+    }
+  }
 
-        ProgressItem progressItem = new ProgressItem();
-        progressItem.setId(queue);
-        progressItem.setProgress(0);
-        progressItem.setEstimated(time / 1000);
-        mAdapter.addItem(progressItem);
-      }
-    });
+  private void cancelTasks(int taskGroup) {
+    GroundyManger.cancelTasks(this, taskGroup, FOO_CANCEL_REASON, listener);
+  }
 
-    mCancelBtn = findViewById(R.id.cancel_random_task);
-    mCancelBtn.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        mCancelBtn.setEnabled(false);
-        GroundyManger.cancelTasks(CancelTaskExample.this, GROUP_ID, FOO_CANCEL_REASON, listener);
-      }
-    });
+  private void queueTask(int groupId) {
+    // configure task parameters
+    int time = new Random().nextInt(10000);
+    Bundle params = new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time).build();
+
+    // queue task
+    long queue = Groundy.create(this, CancelableTask.class)
+      .receiver(resultReceiver)
+      .group(groupId)
+      .params(params)
+      .queue();
+
+    ProgressItem progressItem = new ProgressItem();
+    progressItem.setId(queue);
+    progressItem.setProgress(0);
+    progressItem.setEstimated(time / 1000);
+    progressItem.setColor(groupId);
+    mAdapter.addItem(progressItem);
   }
 
   private ProgressItem findItem(long id) {
@@ -115,7 +130,6 @@ public class CancelTaskExample extends Activity {
   private final GroundyManger.CancelListener listener = new GroundyManger.CancelListener() {
     @Override
     public void onCancelResult(int groupId, GroundyService.CancelResponse cancelledTasks) {
-      mCancelBtn.setEnabled(true);
       if (cancelledTasks == null) {
         makeText(CancelTaskExample.this, R.string.couldnt_cancel_task, Toast.LENGTH_SHORT).show();
       } else {

@@ -33,6 +33,10 @@
   <string name="task_finished">Task finished :) enabling button</string>
   <string name="simple_example">Simple example</string>
   <string name="execute_some_random_task">Execute some random task</string>
+  <string name="queue_blue_task">Queue blue task</string>
+  <string name="cancel_blue_task">Cancel blue tasks</string>
+  <string name="queue_orange_task">Queue orange task</string>
+  <string name="cancel_orange_task">Cancel orange tasks</string>
   <string name="task_will_take_x">Task will take %s ms</string>
   <string name="safe_example_explanation">Same as SimpleExample, but also demonstrates how to handle
     config changes like device rotation. Go ahead, don\'t be afraid, rotate the phone just after you
@@ -52,4 +56,5 @@
   <string name="task_didnt_run">Task didn\'t even run</string>
   <string name="task_interrupted">Task was interrupted</string>
   <string name="task_completed">Task completed</string>
+  <string name="groundy_examples">Groundy Examples</string>
 </resources>

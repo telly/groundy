@@ -25,6 +25,7 @@ public class ProgressItem {
   private int mProgress;
   private int mEstimated;
   private int mState = DEFAULT;
+  private int mColor;
 
   public long getId() {
     return mId;
@@ -84,5 +85,13 @@ public class ProgressItem {
         "mId=" + mId +
         ", mProgress=" + mProgress +
         '}';
+  }
+
+  public void setColor(int color) {
+    mColor = color;
+  }
+
+  public int getColor() {
+    return mColor;
   }
 }

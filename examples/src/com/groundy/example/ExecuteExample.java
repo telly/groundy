@@ -22,8 +22,8 @@ import com.telly.groundy.Groundy;
 
 public class ExecuteExample extends QueueExample {
   @Override
-  protected void processTask(Bundle params) {
-    Groundy.create(this, RandomTimeTask.class).params(params).service(AsyncGroundyService.class)
+  protected long processTask(Bundle params) {
+    return Groundy.create(this, RandomTimeTask.class).params(params).service(AsyncGroundyService.class)
         .receiver(mReceiver).execute();
   }
 }

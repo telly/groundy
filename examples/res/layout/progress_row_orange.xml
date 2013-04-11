@@ -28,7 +28,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginRight="3dp"
-    android:drawableLeft="@drawable/blue_square"
+    android:drawableLeft="@drawable/orange_square"
     android:drawablePadding="5dip"
     android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -38,5 +38,5 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:max="100"
-    style="@style/ProgressBarGroundyTheme" />
+    style="@style/ProgressBarOrangeGroundyTheme" />
 </LinearLayout>

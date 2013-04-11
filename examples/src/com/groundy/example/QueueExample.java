@@ -52,19 +52,18 @@ public class QueueExample extends Activity {
     mBtnAddTask.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        int count = mCounter++;
         int time = new Random().nextInt(10000);
         if (time < 1000) {
           time = 1000;
         }
 
-        processTask(new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time)
+        long id = processTask(new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time)
           .build());
 
         mBtnAddTask.setText(getString(R.string.next_task_counter, mCounter));
 
         ProgressItem progressItem = new ProgressItem();
-        progressItem.setId(count);
+        progressItem.setId(id);
         progressItem.setProgress(0);
         progressItem.setEstimated(time / 1000);
         mAdapter.addItem(progressItem);
@@ -72,8 +71,8 @@ public class QueueExample extends Activity {
     });
   }
 
-  protected void processTask(Bundle params) {
-    Groundy.create(this, RandomTimeTask.class).params(params).receiver(mReceiver).queue();
+  protected long processTask(Bundle params) {
+    return Groundy.create(this, RandomTimeTask.class).params(params).receiver(mReceiver).queue();
   }
 
   private class MyReceiver extends ResultReceiver {
@@ -85,14 +84,14 @@ public class QueueExample extends Activity {
     protected void onReceiveResult(int resultCode, Bundle resultData) {
       super.onReceiveResult(resultCode, resultData);
       if (resultCode == Groundy.STATUS_PROGRESS) {
-        int count = resultData.getInt(Groundy.KEY_TASK_ID);
+        long count = resultData.getLong(Groundy.KEY_TASK_ID);
         int progress = resultData.getInt(Groundy.KEY_PROGRESS);
         findItem(count).setProgress(progress);
         mAdapter.notifyDataSetChanged();
       }
     }
 
-    private ProgressItem findItem(int count) {
+    private ProgressItem findItem(long count) {
       for (ProgressItem progressItem : mAdapter.getItems()) {
         if (count == progressItem.getId()) {
           return progressItem;
