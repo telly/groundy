@@ -23,16 +23,12 @@ import android.os.ResultReceiver;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
-import com.telly.groundy.example.R;
 import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.Groundy;
+import com.telly.groundy.example.R;
 import com.telly.groundy.util.Bundler;
-
 import java.util.Random;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
 public class QueueTest extends Activity {
 
   protected MyReceiver mReceiver;
@@ -61,10 +57,8 @@ public class QueueTest extends Activity {
           time = 1000;
         }
 
-        processTask(new Bundler()
-            .add(RandomTimeTask.KEY_COUNT, count)
-            .add(RandomTimeTask.KEY_ESTIMATED, time)
-            .build());
+        processTask(new Bundler().add(RandomTimeTask.KEY_COUNT, count)
+            .add(RandomTimeTask.KEY_ESTIMATED, time).build());
 
         mBtnAddTask.setText(getString(R.string.next_task_counter, mCounter));
 
@@ -78,10 +72,7 @@ public class QueueTest extends Activity {
   }
 
   protected void processTask(Bundle params) {
-    Groundy.create(this, RandomTimeTask.class)
-        .params(params)
-        .receiver(mReceiver)
-        .queue();
+    Groundy.create(this, RandomTimeTask.class).params(params).receiver(mReceiver).queue();
   }
 
   private class MyReceiver extends ResultReceiver {

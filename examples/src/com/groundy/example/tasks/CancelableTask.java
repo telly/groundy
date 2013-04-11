@@ -20,13 +20,11 @@ import android.os.Bundle;
 import com.telly.groundy.Groundy;
 import com.telly.groundy.GroundyTask;
 
-public class RandomTimeTask extends GroundyTask {
-
+public class CancelableTask extends GroundyTask {
   public static final String KEY_ESTIMATED = "estimated";
   public static final String KEY_COUNT = "count";
 
-  @Override
-  protected boolean doInBackground() {
+  @Override protected boolean doInBackground() {
     int time = getIntParam(KEY_ESTIMATED);
     if (time < 1000) {
       time = 1000;
@@ -44,6 +42,10 @@ public class RandomTimeTask extends GroundyTask {
 
         // let's fake some work ^_^
         Thread.sleep(interval);
+        if (isQuitting()) {
+          // cancel task
+          return false;
+        }
         currentPercentage++;
       } catch (InterruptedException e) {
         e.printStackTrace();

@@ -23,18 +23,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.telly.groundy.example.R;
 import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.DetachableResultReceiver;
 import com.telly.groundy.Groundy;
 import com.telly.groundy.GroundyManger;
+import com.telly.groundy.example.R;
 import com.telly.groundy.util.Bundler;
-
 import java.util.Random;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
 public class AttachReceiverExample extends Activity {
 
   private Button mBtnAddTask;
@@ -71,14 +67,12 @@ public class AttachReceiverExample extends Activity {
         // configure task parameters
         int time = new Random().nextInt(10000);
         Bundle params = new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time).build();
-        Toast.makeText(AttachReceiverExample.this, getString(R.string.task_will_take_x, time), Toast.LENGTH_SHORT).show();
+        Toast.makeText(AttachReceiverExample.this, getString(R.string.task_will_take_x, time),
+            Toast.LENGTH_SHORT).show();
 
         // queue task
         Groundy.create(AttachReceiverExample.this, RandomTimeTask.class)
-            .receiver(mDetachableReceiver)
-            .token("the_token")
-            .params(params)
-            .queue();
+            .receiver(mDetachableReceiver).token("the_token").params(params).queue();
       }
     });
   }
@@ -103,7 +97,8 @@ public class AttachReceiverExample extends Activity {
       if (resultCode == Groundy.STATUS_FINISHED) {
         mBtnAddTask.setText("Got something");
         mBtnAddTask.setEnabled(true);
-        Toast.makeText(AttachReceiverExample.this, R.string.task_finished, Toast.LENGTH_LONG).show();
+        Toast.makeText(AttachReceiverExample.this, R.string.task_finished, Toast.LENGTH_LONG)
+            .show();
       }
     }
   };

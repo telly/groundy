@@ -20,12 +20,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import com.telly.groundy.example.R;
 import com.telly.groundy.GroundyManger;
+import com.telly.groundy.example.R;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
 public class MainActivity extends Activity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +33,14 @@ public class MainActivity extends Activity {
     findViewById(R.id.simple_example).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, SimpleTaskTest.class));
+        startActivity(new Intent(MainActivity.this, SimpleTaskExample.class));
+      }
+    });
+
+    findViewById(R.id.cancel_example).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        startActivity(new Intent(MainActivity.this, CancelTaskExample.class));
       }
     });
 

@@ -25,15 +25,14 @@ import android.os.ResultReceiver;
 import android.text.TextUtils;
 
 /**
- * Allows you to manage your groundy services: cancel all tasks, cancel tasks by group,
- * attach new result receivers, etc.
+ * Allows you to manage your groundy services: cancel all tasks, cancel tasks by group, attach new
+ * result receivers, etc.
  *
  * @author Cristian Castiblanco <cristian@elhacker.net>
  */
 public class GroundyManger {
   /**
-   * Cancel all tasks: the ones running and parallel and
-   * future tasks.
+   * Cancel all tasks: the ones running and parallel and future tasks.
    *
    * @param context used to interact with the service
    */
@@ -42,13 +41,13 @@ public class GroundyManger {
   }
 
   /**
-   * Cancel all tasks: the ones running and parallel and
-   * future tasks.
+   * Cancel all tasks: the ones running and parallel and future tasks.
    *
    * @param context             used to interact with the service
    * @param groundyServiceClass custom groundy service implementation
    */
-  public static void cancelAll(Context context, Class<? extends GroundyService> groundyServiceClass) {
+  public static void cancelAll(Context context,
+                               Class<? extends GroundyService> groundyServiceClass) {
     new GroundyServiceConnection(context, groundyServiceClass) {
       @Override
       protected void onGroundyServiceBound(GroundyService.GroundyServiceBinder binder) {
@@ -58,41 +57,50 @@ public class GroundyManger {
   }
 
   /**
-   * Cancels all tasks of the specified group. The tasks get cancelled with
-   * the {@link GroundyTask#CANCEL_BY_GROUP} reason.
+   * Cancels all tasks of the specified group. The tasks get cancelled with the {@link
+   * GroundyTask#CANCEL_BY_GROUP} reason.
    *
-   * @param context used to interact with the service
-   * @param groupId the group id to cancel
+   * @param context        used to interact with the service
+   * @param groupId        the group id to cancel
+   * @param cancelListener callback for cancel result
    */
-  public static void cancelTasks(Context context, int groupId) {
-    cancelTasks(context, groupId, GroundyTask.CANCEL_BY_GROUP);
+  public static void cancelTasks(Context context, int groupId, CancelListener cancelListener) {
+    cancelTasks(context, groupId, GroundyTask.CANCEL_BY_GROUP, cancelListener);
   }
 
   /**
    * Cancels all tasks of the specified group w/ the specified reason.
    *
-   * @param context used to interact with the service
-   * @param groupId the group id to cancel
+   * @param context        used to interact with the service
+   * @param groupId        the group id to cancel
+   * @param cancelListener callback for cancel result
    */
-  public static void cancelTasks(Context context, int groupId, int reason) {
-    cancelTasks(context, GroundyService.class, groupId, reason);
+  public static void cancelTasks(Context context, int groupId, int reason,
+                                 CancelListener cancelListener) {
+    cancelTasks(context, GroundyService.class, groupId, reason, cancelListener);
   }
 
   /**
    * Cancels all tasks of the specified group w/ the specified reason.
    *
-   * @param context used to interact with the service
-   * @param groupId the group id to cancel
+   * @param context        used to interact with the service
+   * @param groupId        the group id to cancel
+   * @param cancelListener callback for cancel result
    */
-  public static void cancelTasks(final Context context, Class<? extends GroundyService> groundyServiceClass,
-                                 final int groupId, final int reason) {
+  public static void cancelTasks(final Context context,
+                                 Class<? extends GroundyService> groundyServiceClass,
+                                 final int groupId, final int reason,
+                                 final CancelListener cancelListener) {
     if (groupId <= 0) {
       throw new IllegalStateException("Group id must be greater than zero");
     }
     new GroundyServiceConnection(context, groundyServiceClass) {
       @Override
       protected void onGroundyServiceBound(GroundyService.GroundyServiceBinder binder) {
-        binder.cancelTasks(groupId, reason);
+        boolean success = binder.cancelTasks(groupId, reason);
+        if (cancelListener != null) {
+          cancelListener.onCancelResult(groupId, success);
+        }
       }
     }.start();
   }
@@ -105,7 +113,8 @@ public class GroundyManger {
    * @param resultReceiver result receiver to attach
    * @return true if the service was reached (it does not mean the result receiver was attached)
    */
-  public static boolean attachReceiver(Context context, final String token, final ResultReceiver resultReceiver) {
+  public static boolean attachReceiver(Context context, final String token,
+                                       final ResultReceiver resultReceiver) {
     return attachReceiver(context, GroundyService.class, token, resultReceiver);
   }
 
@@ -118,7 +127,8 @@ public class GroundyManger {
    * @param resultReceiver      result receiver to attach
    * @return true if the service was reached (it does not mean the result receiver was attached)
    */
-  public static boolean attachReceiver(Context context, Class<? extends GroundyService> groundyServiceClass,
+  public static boolean attachReceiver(Context context,
+                                       Class<? extends GroundyService> groundyServiceClass,
                                        final String token, final ResultReceiver resultReceiver) {
     if (TextUtils.isEmpty(token)) {
       throw new IllegalStateException("token cannot be null");
@@ -151,7 +161,8 @@ public class GroundyManger {
    * @param resultReceiver result receiver to attach
    * @return true if the service was reached (it does not mean the result receiver was attached)
    */
-  public static boolean detachReceiver(Context context, final String token, final ResultReceiver resultReceiver) {
+  public static boolean detachReceiver(Context context, final String token,
+                                       final ResultReceiver resultReceiver) {
     return detachReceiver(context, GroundyService.class, token, resultReceiver);
   }
 
@@ -164,7 +175,8 @@ public class GroundyManger {
    * @param resultReceiver      result receiver to attach
    * @return true if the service was reached (it does not mean the result receiver was attached)
    */
-  public static boolean detachReceiver(Context context, Class<? extends GroundyService> groundyServiceClass,
+  public static boolean detachReceiver(Context context,
+                                       Class<? extends GroundyService> groundyServiceClass,
                                        final String token, final ResultReceiver resultReceiver) {
     if (TextUtils.isEmpty(token)) {
       throw new IllegalStateException("token cannot be null");
@@ -198,7 +210,8 @@ public class GroundyManger {
     private boolean mAlreadyStarted;
     private final Class<? extends GroundyService> mGroundyServiceClass;
 
-    private GroundyServiceConnection(Context context, Class<? extends GroundyService> groundyServiceClass) {
+    private GroundyServiceConnection(Context context,
+                                     Class<? extends GroundyService> groundyServiceClass) {
       mContext = context;
       mGroundyServiceClass = groundyServiceClass;
     }
@@ -226,5 +239,9 @@ public class GroundyManger {
     }
 
     protected abstract void onGroundyServiceBound(GroundyService.GroundyServiceBinder binder);
+  }
+
+  public static interface CancelListener {
+    void onCancelResult(int groupId, boolean oneOrMoreCancelled);
   }
 }

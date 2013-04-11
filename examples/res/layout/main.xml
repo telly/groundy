@@ -28,6 +28,12 @@
         android:text="@string/simple_example" />
 
     <Button
+        android:id="@+id/cancel_example"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/cancel_example" />
+
+    <Button
         android:id="@+id/safe_simple_example"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2012 Twitvid Inc.
   ~ Copyright 2013 Cristian Castiblanco
   ~
@@ -17,29 +16,36 @@
   -->
 
 <resources>
-    <string name="app_name">Groundy examples</string>
-    <string name="queue_task">Queue task</string>
-    <string name="queue_example">Queue example</string>
-    <string name="execute_example">Async example</string>
-    <string name="next_task_counter">Next task id: %s</string>
-    <string name="will_work_for">Will work for about %s secs</string>
-    <string name="simple_example_explanation">Each time you click \'Execute some random task\' it will simply queue a
-        new
-        task that takes from 0 to 10 secs to execute. While task is running the button is disabled. This is just to
-        demonstrate a result receiver. This also demonstrate that result receivers callbacks run in the UI thread.
-    </string>
-    <string name="task_finished">Task finished :) enabling button</string>
-    <string name="simple_example">Simple example</string>
-    <string name="execute_some_random_task">Execute some random task</string>
-    <string name="task_will_take_x">Task will take %s ms</string>
-    <string name="safe_example_explanation">Same as SimpleExample, but also demonstrates how to handle config changes like
-        device rotation. Go ahead, don\'t be afraid, rotate the phone just after you have queue the task.
-    </string>
-    <string name="safe_simple_example">Safe simple example</string>
-    <string name="attach_receiver_example">Attach receiver example</string>
-    <string name="chuck_norris_example">Chuck Norris example</string>
-    <string name="get_norris_fact">Get Chuck Norris fact</string>
-    <string name="download_example">Download Example</string>
-    <string name="start_download">Start download</string>
-    <string name="file_downloaded">File downloaded</string>
+  <string name="app_name">Groundy examples</string>
+  <string name="queue_task">Queue task</string>
+  <string name="queue_example">Queue example</string>
+  <string name="execute_example">Async example</string>
+  <string name="next_task_counter">Next task id: %s</string>
+  <string name="will_work_for">Will work for about %s secs</string>
+  <string name="simple_example_explanation">Each time you click \'Execute some random task\' it will
+    simply queue a new task that takes from 0 to 10 secs to execute. While task is running the
+    button is disabled. This is just to demonstrate a result receiver. This also demonstrate that
+    result receivers callbacks run in the UI thread.
+  </string>
+  <string name="cancel_example_explanation">Same as SimpleExample, except that you can cancel the
+    task if it has not already been completed/cancelled.
+  </string>
+  <string name="task_finished">Task finished :) enabling button</string>
+  <string name="simple_example">Simple example</string>
+  <string name="execute_some_random_task">Execute some random task</string>
+  <string name="task_will_take_x">Task will take %s ms</string>
+  <string name="safe_example_explanation">Same as SimpleExample, but also demonstrates how to handle
+    config changes like device rotation. Go ahead, don\'t be afraid, rotate the phone just after you
+    have queue the task.
+  </string>
+  <string name="safe_simple_example">Safe simple example</string>
+  <string name="attach_receiver_example">Attach receiver example</string>
+  <string name="chuck_norris_example">Chuck Norris example</string>
+  <string name="get_norris_fact">Get Chuck Norris fact</string>
+  <string name="download_example">Download Example</string>
+  <string name="start_download">Start download</string>
+  <string name="file_downloaded">File downloaded</string>
+  <string name="cancel_random_task">Cancel task</string>
+  <string name="cancel_example">Cancel Task Example</string>
+  <string name="couldnt_cancel_task">Couldn\'t cancel task</string>
 </resources>

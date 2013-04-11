@@ -22,13 +22,10 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.view.View;
 import android.widget.EditText;
-import com.telly.groundy.example.R;
 import com.groundy.example.tasks.ChuckNorrisTask;
 import com.telly.groundy.Groundy;
+import com.telly.groundy.example.R;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
 public class ChuckNorrisActivity extends Activity {
 
   private EditText mNorrisFacts;
@@ -43,9 +40,7 @@ public class ChuckNorrisActivity extends Activity {
     findViewById(R.id.get_norris_fact).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        Groundy.create(ChuckNorrisActivity.this, ChuckNorrisTask.class)
-            .receiver(mReceiver)
-            .queue();
+        Groundy.create(ChuckNorrisActivity.this, ChuckNorrisTask.class).receiver(mReceiver).queue();
       }
     });
   }

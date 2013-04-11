@@ -20,9 +20,6 @@ import com.github.kevinsawicki.http.HttpRequest;
 import com.telly.groundy.GroundyTask;
 import org.json.JSONObject;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
 public class ChuckNorrisTask extends GroundyTask {
   @Override
   protected boolean doInBackground() {

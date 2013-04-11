@@ -23,7 +23,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.*;
 import android.util.Log;
-
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -44,7 +43,7 @@ public class GroundyService extends Service {
 
   public static final String KEY_MODE = "groundy:mode";
   public static final String KEY_FORCE_QUEUE_COMPLETION = "groundy:force_queue_completion";
-  private final Set<GroundyTask> mRunningTasks = Collections.synchronizedSet(new HashSet<GroundyTask>());
+  private final Set<GroundyTask> mRunningTasks;
 
   private final GroundyServiceBinder mBinder = new GroundyServiceBinder();
   private volatile Looper mGroundyLooper;
@@ -58,14 +57,14 @@ public class GroundyService extends Service {
 
   private AtomicInteger mLastStartId = new AtomicInteger();
   // this help us keep track of the tasks that are scheduled to be executed
-  private volatile Map<Integer, Integer> mUnfinishedTasks = Collections.synchronizedMap(new HashMap<Integer, Integer>());
-  private volatile Map<String, Set<ResultReceiver>> mAttachedReceivers = Collections.synchronizedMap(new HashMap<String, Set<ResultReceiver>>());
+  private volatile Map<Integer, Integer> mUnfinishedTasks;
+  private volatile Map<String, Set<ResultReceiver>> mAttachedReceivers;
 
-  /**
-   * Creates an IntentService.  Invoked by your subclass's constructor.
-   */
   public GroundyService() {
     mWakeLockHelper = new WakeLockHelper(this);
+    mAttachedReceivers = Collections.synchronizedMap(new HashMap<String, Set<ResultReceiver>>());
+    mUnfinishedTasks = Collections.synchronizedMap(new HashMap<Integer, Integer>());
+    mRunningTasks = Collections.synchronizedSet(new HashSet<GroundyTask>());
   }
 
   @Override
@@ -100,8 +99,8 @@ public class GroundyService extends Service {
     if (ACTION_EXECUTE.equals(action)) {
       if (mMode == GroundyMode.QUEUE) {
         // make sure we don't allow to asynchronously execute tasks while we are not in queue mode
-        throw new UnsupportedOperationException("Current mode is 'queue'. You cannot use .execute() while" +
-            " in this mode. You must enable 'async' mode by adding metadata to the manifest.");
+        throw new UnsupportedOperationException(
+            "Current mode is 'queue'. You cannot use .execute() while" + " in this mode. You must enable 'async' mode by adding metadata to the manifest.");
       }
       HandlerThread thread = new HandlerThread("AsyncGroundyService");
       thread.start();
@@ -163,16 +162,25 @@ public class GroundyService extends Service {
     mUnfinishedTasks.clear();
   }
 
-  private void cancelTasks(int groupId, int reason) {
+  /**
+   * @param groupId group id identifying the kind of task
+   * @param reason  reason to cancel this group
+   * @return true if at least one unscheduled task was removed
+   */
+  private boolean cancelTasks(int groupId, int reason) {
     if (groupId == DEFAULT_GROUP_ID) {
       throw new IllegalStateException("Cannot use 0 when cancelling tasks by group id");
     }
 
     if (mStartBehavior == START_REDELIVER_INTENT) {
-      Log.w(TAG, "Cancelling groups of tasks is not secure when using force_queue_completion. " +
-          "If your service gets killed unpredictable behavior can happen.");
+      Log.w(TAG,
+          "Cancelling groups of tasks is not secure when using force_queue_completion. If your service gets killed unpredictable behavior can happen.");
     }
 
+    boolean hasMessagesWithinGroup = mGroundyHandler.hasMessages(groupId);
+    if (!hasMessagesWithinGroup) {
+      return false;
+    }
     synchronized (mRunningTasks) {
       // prevent current scheduled tasks with this group id from executing
       mGroundyHandler.removeMessages(groupId);
@@ -186,17 +194,18 @@ public class GroundyService extends Service {
         }
       }
       mRunningTasks.removeAll(stoppedTasks);
+    }
 
-      // remove future tasks
-      List<Integer> targetTasks = new ArrayList<Integer>();
-      for (Integer startId : mUnfinishedTasks.keySet()) {
+    Set<Integer> idsSet = mUnfinishedTasks.keySet();
+    synchronized (mUnfinishedTasks) { // remove future tasks
+      List<Integer> toRemove = new ArrayList<Integer>();
+      for (Integer startId : idsSet) {
         if (mUnfinishedTasks.get(startId) == groupId) {
-          targetTasks.add(startId);
+          toRemove.add(startId);
         }
       }
-      for (Integer targetStartId : targetTasks) {
-        mUnfinishedTasks.remove(targetStartId);
-      }
+      idsSet.removeAll(toRemove);
+      return !toRemove.isEmpty();
     }
   }
 
@@ -245,14 +254,12 @@ public class GroundyService extends Service {
   }
 
   /**
-   * This method is invoked on the worker thread with a request to process.
-   * Only one Intent is processed at a time, but the processing happens on a
-   * worker thread that runs independently from other application logic.
-   * So, if this code takes a long time, it will hold up other requests to
+   * This method is invoked on the worker thread with a request to process. Only one Intent is
+   * processed at a time, but the processing happens on a worker thread that runs independently from
+   * other application logic. So, if this code takes a long time, it will hold up other requests to
    * the same IntentService, but it will not hold up anything else.
    *
-   * @param intent     The value passed to {@link
-   *                   android.content.Context#startService(android.content.Intent)}.
+   * @param intent     The value passed to {@link android.content.Context#startService(android.content.Intent)}.
    * @param groupId    group id identifying the kind of task
    * @param startId    the service start id given when the task was schedule
    * @param redelivery true if this intent was redelivered by the system
@@ -372,12 +379,10 @@ public class GroundyService extends Service {
         }
       }
 
-      if (!mAttachedReceivers.containsKey(token)) {
-        return;
+      if (mAttachedReceivers.containsKey(token)) {
+        Set<ResultReceiver> resultReceivers = mAttachedReceivers.get(token);
+        resultReceivers.remove(resultReceiver);
       }
-
-      Set<ResultReceiver> resultReceivers = mAttachedReceivers.get(token);
-      resultReceivers.remove(resultReceiver);
     }
 
     void cancelAllTasks() {
@@ -385,8 +390,13 @@ public class GroundyService extends Service {
       stopSelf();
     }
 
-    void cancelTasks(int groupId, int reason) {
-      GroundyService.this.cancelTasks(groupId, reason);
+    /**
+     * @param groupId group id identifying the kind of task
+     * @param reason  reason to cancel this group
+     * @return true if at least one unscheduled task was removed
+     */
+    boolean cancelTasks(int groupId, int reason) {
+      return GroundyService.this.cancelTasks(groupId, reason);
     }
   }
 }

@@ -16,9 +16,7 @@
 
 package com.groundy.example;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
+/** @author Cristian Castiblanco <cristian@elhacker.net> */
 public class ProgressItem {
   private long mCount;
   private int mProgress;
