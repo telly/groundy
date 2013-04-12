@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2012 Twitvid Inc.
   ~ Copyright 2013 Cristian Castiblanco
   ~
@@ -17,55 +16,63 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+  android:orientation="vertical"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <Button
+    android:id="@+id/simple_example"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:onClick="onButtonClick"
+    android:text="@string/simple_example" />
 
-    <Button
-        android:id="@+id/simple_example"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/simple_example" />
+  <Button
+    android:id="@+id/cancel_example"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:onClick="onButtonClick"
+    android:text="@string/cancel_example" />
 
-    <Button
-        android:id="@+id/cancel_example"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/cancel_example" />
+  <Button
+    android:id="@+id/safe_simple_example"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:onClick="onButtonClick"
+    android:text="@string/safe_simple_example" />
 
-    <Button
-        android:id="@+id/safe_simple_example"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/safe_simple_example" />
+  <Button
+    android:id="@+id/attach_receiver_example"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:onClick="onButtonClick"
+    android:text="@string/attach_receiver_example" />
 
-    <Button
-        android:id="@+id/attach_receiver_example"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/attach_receiver_example" />
+  <Button
+    android:id="@+id/chuck_norris_example"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:onClick="onButtonClick"
+    android:text="@string/chuck_norris_example" />
 
-    <Button
-        android:id="@+id/chuck_norris_example"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/chuck_norris_example" />
+  <Button
+    android:id="@+id/queue_example"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:onClick="onButtonClick"
+    android:text="@string/queue_example" />
 
-    <Button
-        android:id="@+id/queue_example"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/queue_example" />
+  <Button
+    android:id="@+id/execute_example"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:onClick="onButtonClick"
+    android:text="@string/execute_example" />
 
-    <Button
-        android:id="@+id/execute_example"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/execute_example" />
-
-    <Button
-        android:id="@+id/download_example"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/download_example" />
+  <Button
+    android:id="@+id/download_example"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:onClick="onButtonClick"
+    android:text="@string/download_example" />
 </LinearLayout>
