@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 import com.groundy.example.tasks.CancelableTask;
@@ -36,7 +37,7 @@ import java.util.Set;
 
 import static android.widget.Toast.makeText;
 
-public class CancelTaskExample extends Activity implements View.OnClickListener {
+public class CancelTaskExample extends Activity implements View.OnClickListener, AdapterView.OnItemClickListener {
   public static final int BLUE_TASKS = 333;
   public static final int ORANGE_TASKS = 444;
   private static final int FOO_CANCEL_REASON = 45;
@@ -48,6 +49,7 @@ public class CancelTaskExample extends Activity implements View.OnClickListener 
     setContentView(R.layout.cancel_example);
 
     ListView listView = (ListView) findViewById(R.id.list);
+    listView.setOnItemClickListener(this);
     mAdapter = new CancelProgressAdapter(this);
     listView.setAdapter(mAdapter);
 
@@ -75,28 +77,48 @@ public class CancelTaskExample extends Activity implements View.OnClickListener 
     }
   }
 
+  @Override
+  public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    GroundyManger.cancelTaskById(this, id, new GroundyManger.SingleCancelListener() {
+      @Override
+      public void onCancelResult(long id, int result) {
+        ProgressItem item = findItem(id);
+        switch (result) {
+          case GroundyService.INTERRUPTED:
+            item.setState(ProgressItem.INTERRUPTED);
+            break;
+          case GroundyService.NOT_EXECUTED:
+            item.setState(ProgressItem.CANCELLED);
+            break;
+        }
+        mAdapter.notifyDataSetChanged();
+      }
+    });
+  }
+
   private void cancelTasks(int taskGroup) {
     GroundyManger.cancelTasks(this, taskGroup, FOO_CANCEL_REASON, listener);
   }
 
-  private void queueTask(int groupId) {
+  private long queueTask(int groupId) {
     // configure task parameters
     int time = new Random().nextInt(10000);
     Bundle params = new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time).build();
 
     // queue task
-    long queue = Groundy.create(this, CancelableTask.class)
+    long taskId = Groundy.create(this, CancelableTask.class)
       .receiver(resultReceiver)
       .group(groupId)
       .params(params)
       .queue();
 
     ProgressItem progressItem = new ProgressItem();
-    progressItem.setId(queue);
+    progressItem.setId(taskId);
     progressItem.setProgress(0);
     progressItem.setEstimated(time / 1000);
     progressItem.setColor(groupId);
     mAdapter.addItem(progressItem);
+    return taskId;
   }
 
   private ProgressItem findItem(long id) {
@@ -129,7 +151,7 @@ public class CancelTaskExample extends Activity implements View.OnClickListener 
 
   private final GroundyManger.CancelListener listener = new GroundyManger.CancelListener() {
     @Override
-    public void onCancelResult(int groupId, GroundyService.CancelResponse cancelledTasks) {
+    public void onCancelResult(int groupId, GroundyService.CancelGroupResponse cancelledTasks) {
       if (cancelledTasks == null) {
         makeText(CancelTaskExample.this, R.string.couldnt_cancel_task, Toast.LENGTH_SHORT).show();
       } else {

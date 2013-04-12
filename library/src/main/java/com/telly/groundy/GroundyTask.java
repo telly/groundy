@@ -35,6 +35,7 @@ public abstract class GroundyTask {
   protected static final int CANCEL_ALL = -1;
   protected static final int SERVICE_DESTROYED = -2;
   protected static final int CANCEL_BY_GROUP = -3;
+  protected static final int CANCEL_BY_ID = -4;
   private Context mContext;
   private int mResultCode = Groundy.STATUS_ERROR; // Pessimistic by default
   private final Bundle mResultData = new Bundle();

@@ -84,6 +84,53 @@ public class GroundyManger {
    * Cancels all tasks of the specified group w/ the specified reason.
    *
    * @param context        used to interact with the service
+   * @param id             the task to cancel
+   * @param cancelListener callback for cancel result
+   */
+  public static void cancelTaskById(Context context, final long id, final SingleCancelListener cancelListener) {
+    cancelTaskById(context, id, cancelListener, GroundyService.class);
+  }
+
+  /**
+   * Cancels all tasks of the specified group w/ the specified reason.
+   *
+   * @param context        used to interact with the service
+   * @param id             the task to cancel
+   * @param cancelListener callback for cancel result
+   */
+  public static void cancelTaskById(Context context, final long id, final SingleCancelListener cancelListener,
+                                    Class<? extends GroundyService> groundyServiceClass) {
+    cancelTaskById(context, id, GroundyTask.CANCEL_BY_ID, cancelListener, groundyServiceClass);
+  }
+
+  /**
+   * Cancels all tasks of the specified group w/ the specified reason.
+   *
+   * @param context        used to interact with the service
+   * @param id             the task to cancel
+   * @param cancelListener callback for cancel result
+   */
+  public static void cancelTaskById(Context context, final long id, final int reason,
+                                    final SingleCancelListener cancelListener,
+                                    Class<? extends GroundyService> groundyServiceClass) {
+    if (id <= 0) {
+      throw new IllegalStateException("id must be greater than zero");
+    }
+    new GroundyServiceConnection(context, groundyServiceClass) {
+      @Override
+      protected void onGroundyServiceBound(GroundyService.GroundyServiceBinder binder) {
+        int result = binder.cancelTaskById(id, reason);
+        if (cancelListener != null) {
+          cancelListener.onCancelResult(id, result);
+        }
+      }
+    }.start();
+  }
+
+  /**
+   * Cancels all tasks of the specified group w/ the specified reason.
+   *
+   * @param context        used to interact with the service
    * @param groupId        the group id to cancel
    * @param cancelListener callback for cancel result
    */
@@ -97,9 +144,9 @@ public class GroundyManger {
     new GroundyServiceConnection(context, groundyServiceClass) {
       @Override
       protected void onGroundyServiceBound(GroundyService.GroundyServiceBinder binder) {
-        GroundyService.CancelResponse cancelResponse = binder.cancelTasks(groupId, reason);
+        GroundyService.CancelGroupResponse cancelGroupResponse = binder.cancelTasks(groupId, reason);
         if (cancelListener != null) {
-          cancelListener.onCancelResult(groupId, cancelResponse);
+          cancelListener.onCancelResult(groupId, cancelGroupResponse);
         }
       }
     }.start();
@@ -242,6 +289,10 @@ public class GroundyManger {
   }
 
   public static interface CancelListener {
-    void onCancelResult(int groupId, GroundyService.CancelResponse tasksCancelled);
+    void onCancelResult(int groupId, GroundyService.CancelGroupResponse tasksCancelled);
+  }
+
+  public static interface SingleCancelListener {
+    void onCancelResult(long id, int result);
   }
 }

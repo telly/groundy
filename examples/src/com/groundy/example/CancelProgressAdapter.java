@@ -52,6 +52,11 @@ public class CancelProgressAdapter extends ListBaseAdapter<ProgressItem, CancelP
   }
 
   @Override
+  public long getItemId(int position) {
+    return getItem(position).getId();
+  }
+
+  @Override
   public int getItemViewType(int position) {
     return getItem(position).getColor();
   }

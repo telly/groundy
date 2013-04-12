@@ -33,8 +33,6 @@ import java.util.Random;
 public class QueueExample extends Activity {
 
   protected MyReceiver mReceiver;
-  private int mCounter = 1;
-  private Button mBtnAddTask;
   private ProgressAdapter mAdapter;
 
   @Override
@@ -44,12 +42,12 @@ public class QueueExample extends Activity {
     setContentView(R.layout.queue_example);
 
     ListView listView = (ListView) findViewById(R.id.list);
-    mBtnAddTask = (Button) findViewById(R.id.btn_queue);
     mAdapter = new ProgressAdapter(this);
     listView.setAdapter(mAdapter);
 
-    mBtnAddTask.setText(getString(R.string.next_task_counter, mCounter));
-    mBtnAddTask.setOnClickListener(new View.OnClickListener() {
+    Button btnAddTask = (Button) findViewById(R.id.btn_queue);
+    btnAddTask.setText(R.string.queue_task);
+    btnAddTask.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         int time = new Random().nextInt(10000);
@@ -59,8 +57,6 @@ public class QueueExample extends Activity {
 
         long id = processTask(new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time)
           .build());
-
-        mBtnAddTask.setText(getString(R.string.next_task_counter, mCounter));
 
         ProgressItem progressItem = new ProgressItem();
         progressItem.setId(id);
