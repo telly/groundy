@@ -22,13 +22,13 @@ import android.os.ResultReceiver;
 import android.support.v4.app.Fragment;
 
 /**
- * @author Cristian Castiblanco <cristian@elhacker.net>
+ * @author Cristian <cristian@elhacker.net>
  */
 public abstract class ReceiverFragment extends Fragment implements DetachableResultReceiver.Receiver {
   public static final String TAG = ReceiverFragment.class.getSimpleName();
 
   private boolean mSyncing = false;
-  private DetachableResultReceiver mReceiver;
+  private final DetachableResultReceiver mReceiver;
 
   public ReceiverFragment() {
     mReceiver = new DetachableResultReceiver(new Handler());

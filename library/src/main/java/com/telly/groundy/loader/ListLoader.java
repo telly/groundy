@@ -22,7 +22,7 @@ import android.content.Context;
 import java.util.List;
 
 /**
- * @author Cristian Castiblanco <cristian@elhacker.net>
+ * @author Cristian <cristian@elhacker.net>
  */
 public abstract class ListLoader<T> extends AsyncTaskLoader<List<T>> {
   private List<T> mList;

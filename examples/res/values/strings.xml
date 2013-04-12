@@ -16,7 +16,6 @@
   -->
 
 <resources>
-  <string name="app_name">Groundy examples</string>
   <string name="queue_task">Queue task</string>
   <string name="queue_example">Queue example</string>
   <string name="execute_example">Async example</string>
@@ -48,7 +47,6 @@
   <string name="download_example">Download Example</string>
   <string name="start_download">Start download</string>
   <string name="file_downloaded">File downloaded</string>
-  <string name="cancel_random_task">Cancel task</string>
   <string name="cancel_example">Cancel Task Example</string>
   <string name="couldnt_cancel_task">Couldn\'t cancel any task</string>
   <string name="tasks_interrupted">%1$s tasks interrupted, %2$s tasks didn\'t run</string>
@@ -56,4 +54,5 @@
   <string name="task_interrupted">Task was interrupted</string>
   <string name="task_completed">Task completed</string>
   <string name="groundy_examples">Groundy Examples</string>
+  <string name="download_url">http://goo.gl/hQyDu</string>
 </resources>

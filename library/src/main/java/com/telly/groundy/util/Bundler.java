@@ -26,7 +26,7 @@ import java.util.ArrayList;
 /**
  * Bundle creator brikie
  *
- * @author Cristian Castiblanco <cristian@elhacker.net>
+ * @author Cristian <cristian@elhacker.net>
  */
 public class Bundler {
 
@@ -198,7 +198,7 @@ public class Bundler {
   }
 
   /**
-   * Inserts a SparceArray of Parcelable values into the mapping of this
+   * Inserts a SparseArray of Parcelable values into the mapping of this
    * Bundle, replacing any existing value for the given key.  Either key
    * or value may be null.
    *

@@ -22,7 +22,7 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 
 /**
- * @author Cristian Castiblanco <cristian@elhacker.net>
+ * @author Cristian <cristian@elhacker.net>
  */
 public class Groundy {
   public static final String KEY_PARAMETERS = "com.telly.groundy.key.PARAMATERS";

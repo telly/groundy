@@ -28,7 +28,7 @@ import java.util.List;
  * Implementation of this class get executed by the {@link GroundyService}
  *
  * @author Evelio Tarazona <evelio@twitvid.com>
- * @author Cristian Castiblanco <cristian@elhacker.net>
+ * @author Cristian <cristian@elhacker.net>
  * @version 1.1
  */
 public abstract class GroundyTask {

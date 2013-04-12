@@ -28,7 +28,7 @@ import android.text.TextUtils;
  * Allows you to manage your groundy services: cancel all tasks, cancel tasks by group, attach new
  * result receivers, etc.
  *
- * @author Cristian Castiblanco <cristian@elhacker.net>
+ * @author Cristian <cristian@elhacker.net>
  */
 public class GroundyManger {
   /**
@@ -253,7 +253,7 @@ public class GroundyManger {
   }
 
   private abstract static class GroundyServiceConnection implements ServiceConnection {
-    private Context mContext;
+    private final Context mContext;
     private boolean mAlreadyStarted;
     private final Class<? extends GroundyService> mGroundyServiceClass;
 

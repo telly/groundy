@@ -57,7 +57,7 @@ public class DownloadExample extends Activity {
     });
   }
 
-  private ResultReceiver mReceiver = new ResultReceiver(new Handler()) {
+  private final ResultReceiver mReceiver = new ResultReceiver(new Handler()) {
     @Override
     protected void onReceiveResult(int resultCode, Bundle resultData) {
       super.onReceiveResult(resultCode, resultData);
