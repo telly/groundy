@@ -64,8 +64,8 @@ public class GroundyManger {
    * @param groupId        the group id to cancel
    * @param cancelListener callback for cancel result
    */
-  public static void cancelTasks(Context context, int groupId, CancelListener cancelListener) {
-    cancelTasks(context, groupId, GroundyTask.CANCEL_BY_GROUP, cancelListener);
+  public static void cancelTasksByGroup(Context context, int groupId, CancelListener cancelListener) {
+    cancelTasksByGroup(context, groupId, GroundyTask.CANCEL_BY_GROUP, cancelListener);
   }
 
   /**
@@ -75,8 +75,8 @@ public class GroundyManger {
    * @param groupId        the group id to cancel
    * @param cancelListener callback for cancel result
    */
-  public static void cancelTasks(Context context, int groupId, int reason,
-                                 CancelListener cancelListener) {
+  public static void cancelTasksByGroup(Context context, int groupId, int reason,
+                                        CancelListener cancelListener) {
     cancelTasks(context, GroundyService.class, groupId, reason, cancelListener);
   }
 
@@ -158,11 +158,10 @@ public class GroundyManger {
    * @param context        used to reach the service
    * @param token          used to refer to a specific task
    * @param resultReceiver result receiver to attach
-   * @return true if the service was reached (it does not mean the result receiver was attached)
    */
-  public static boolean attachReceiver(Context context, final String token,
-                                       final ResultReceiver resultReceiver) {
-    return attachReceiver(context, GroundyService.class, token, resultReceiver);
+  public static void attachReceiver(Context context, final String token,
+                                    final ResultReceiver resultReceiver) {
+    attachReceiver(context, GroundyService.class, token, resultReceiver);
   }
 
   /**
@@ -172,9 +171,8 @@ public class GroundyManger {
    * @param groundyServiceClass a custom GroundyService implementation
    * @param token               used to refer to a specific task
    * @param resultReceiver      result receiver to attach
-   * @return true if the service was reached (it does not mean the result receiver was attached)
    */
-  public static boolean attachReceiver(Context context,
+  public static void attachReceiver(Context context,
                                        Class<? extends GroundyService> groundyServiceClass,
                                        final String token, final ResultReceiver resultReceiver) {
     if (TextUtils.isEmpty(token)) {
@@ -185,19 +183,12 @@ public class GroundyManger {
       throw new IllegalStateException("result receiver cannot be null");
     }
 
-    return context.bindService(new Intent(context, groundyServiceClass), new ServiceConnection() {
+    new GroundyServiceConnection(context, groundyServiceClass) {
       @Override
-      public void onServiceConnected(ComponentName name, IBinder service) {
-        if (service instanceof GroundyService.GroundyServiceBinder) {
-          GroundyService.GroundyServiceBinder binder = (GroundyService.GroundyServiceBinder) service;
-          binder.attachReceiver(token, resultReceiver);
-        }
+      protected void onGroundyServiceBound(GroundyService.GroundyServiceBinder binder) {
+        binder.attachReceiver(token, resultReceiver);
       }
-
-      @Override
-      public void onServiceDisconnected(ComponentName name) {
-      }
-    }, Context.BIND_AUTO_CREATE);
+    }.start();
   }
 
   /**
@@ -206,11 +197,10 @@ public class GroundyManger {
    * @param context        used to reach the service
    * @param token          used to refer to a specific task
    * @param resultReceiver result receiver to attach
-   * @return true if the service was reached (it does not mean the result receiver was attached)
    */
-  public static boolean detachReceiver(Context context, final String token,
+  public static void detachReceiver(Context context, final String token,
                                        final ResultReceiver resultReceiver) {
-    return detachReceiver(context, GroundyService.class, token, resultReceiver);
+    detachReceiver(context, GroundyService.class, token, resultReceiver);
   }
 
   /**
@@ -220,9 +210,8 @@ public class GroundyManger {
    * @param groundyServiceClass a custom GroundyService implementation
    * @param token               used to refer to a specific task
    * @param resultReceiver      result receiver to attach
-   * @return true if the service was reached (it does not mean the result receiver was attached)
    */
-  public static boolean detachReceiver(Context context,
+  public static void detachReceiver(Context context,
                                        Class<? extends GroundyService> groundyServiceClass,
                                        final String token, final ResultReceiver resultReceiver) {
     if (TextUtils.isEmpty(token)) {
@@ -233,19 +222,12 @@ public class GroundyManger {
       throw new IllegalStateException("result receiver cannot be null");
     }
 
-    return context.bindService(new Intent(context, groundyServiceClass), new ServiceConnection() {
+    new GroundyServiceConnection(context, groundyServiceClass) {
       @Override
-      public void onServiceConnected(ComponentName name, IBinder service) {
-        if (service instanceof GroundyService.GroundyServiceBinder) {
-          GroundyService.GroundyServiceBinder binder = (GroundyService.GroundyServiceBinder) service;
-          binder.detachReceiver(token, resultReceiver);
-        }
+      protected void onGroundyServiceBound(GroundyService.GroundyServiceBinder binder) {
+        binder.detachReceiver(token, resultReceiver);
       }
-
-      @Override
-      public void onServiceDisconnected(ComponentName name) {
-      }
-    }, Context.BIND_AUTO_CREATE);
+    }.start();
   }
 
   public static void setLogEnabled(boolean enabled) {
@@ -261,6 +243,7 @@ public class GroundyManger {
                                      Class<? extends GroundyService> groundyServiceClass) {
       mContext = context;
       mGroundyServiceClass = groundyServiceClass;
+
     }
 
     @Override

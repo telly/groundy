@@ -97,7 +97,7 @@ public class CancelTaskExample extends Activity implements View.OnClickListener,
   }
 
   private void cancelTasks(int taskGroup) {
-    GroundyManger.cancelTasks(this, taskGroup, FOO_CANCEL_REASON, listener);
+    GroundyManger.cancelTasksByGroup(this, taskGroup, FOO_CANCEL_REASON, listener);
   }
 
   private long queueTask(int groupId) {
