@@ -443,4 +443,10 @@ public abstract class GroundyTask {
     toString += '}';
     return toString;
   }
+
+  /**
+   * Called once the task has been instantiated and it has a valid context
+   */
+  protected void onCreate() {
+  }
 }
