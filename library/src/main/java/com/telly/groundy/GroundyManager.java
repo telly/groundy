@@ -30,7 +30,7 @@ import android.text.TextUtils;
  *
  * @author Cristian <cristian@elhacker.net>
  */
-public class GroundyManger {
+public class GroundyManager {
   /**
    * Cancel all tasks: the ones running and parallel and future tasks.
    *
@@ -276,6 +276,11 @@ public class GroundyManger {
   }
 
   public static interface SingleCancelListener {
+    /**
+     * @param id     the id of the cancelled task
+     * @param result either {@link GroundyService#COULD_NOT_CANCEL}, {@link GroundyService#INTERRUPTED}
+     *               and {@link GroundyService#NOT_EXECUTED}
+     */
     void onCancelResult(long id, int result);
   }
 }

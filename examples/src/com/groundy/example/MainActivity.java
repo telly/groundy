@@ -20,7 +20,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import com.telly.groundy.GroundyManger;
+import com.telly.groundy.GroundyManager;
 import com.telly.groundy.example.R;
 
 import java.util.SortedMap;
@@ -45,7 +45,7 @@ public class MainActivity extends Activity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-    GroundyManger.setLogEnabled(false);
+    GroundyManager.setLogEnabled(false);
   }
 
   public void onButtonClick(View view) {

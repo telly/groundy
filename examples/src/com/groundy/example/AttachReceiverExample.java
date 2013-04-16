@@ -26,7 +26,7 @@ import android.widget.Toast;
 import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.DetachableResultReceiver;
 import com.telly.groundy.Groundy;
-import com.telly.groundy.GroundyManger;
+import com.telly.groundy.GroundyManager;
 import com.telly.groundy.example.R;
 import com.telly.groundy.util.Bundler;
 import java.util.Random;
@@ -52,7 +52,7 @@ public class AttachReceiverExample extends Activity {
     }
     mDetachableReceiver.setReceiver(mReceiver);
 
-    GroundyManger.attachReceiver(this, "the_token", mDetachableReceiver);
+    GroundyManager.attachReceiver(this, "the_token", mDetachableReceiver);
 
     mBtnAddTask = (Button) findViewById(R.id.send_random_task);
     if (savedInstanceState != null) {
@@ -88,7 +88,7 @@ public class AttachReceiverExample extends Activity {
   protected void onDestroy() {
     super.onDestroy();
     mDetachableReceiver.clearReceiver();
-    GroundyManger.detachReceiver(this, "the_token", mDetachableReceiver);
+    GroundyManager.detachReceiver(this, "the_token", mDetachableReceiver);
   }
 
   private final DetachableResultReceiver.Receiver mReceiver = new DetachableResultReceiver.Receiver() {

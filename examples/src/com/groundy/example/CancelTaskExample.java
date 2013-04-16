@@ -27,7 +27,7 @@ import android.widget.Toast;
 import com.groundy.example.tasks.CancelableTask;
 import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.Groundy;
-import com.telly.groundy.GroundyManger;
+import com.telly.groundy.GroundyManager;
 import com.telly.groundy.GroundyService;
 import com.telly.groundy.example.R;
 import com.telly.groundy.util.Bundler;
@@ -79,25 +79,25 @@ public class CancelTaskExample extends Activity implements View.OnClickListener,
 
   @Override
   public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-    GroundyManger.cancelTaskById(this, id, new GroundyManger.SingleCancelListener() {
-      @Override
-      public void onCancelResult(long id, int result) {
-        ProgressItem item = findItem(id);
-        switch (result) {
-          case GroundyService.INTERRUPTED:
-            item.setState(ProgressItem.INTERRUPTED);
-            break;
-          case GroundyService.NOT_EXECUTED:
-            item.setState(ProgressItem.CANCELLED);
-            break;
+    GroundyManager.cancelTaskById(this, id, new GroundyManager.SingleCancelListener() {
+        @Override
+        public void onCancelResult(long id, int result) {
+            ProgressItem item = findItem(id);
+            switch (result) {
+                case GroundyService.INTERRUPTED:
+                    item.setState(ProgressItem.INTERRUPTED);
+                    break;
+                case GroundyService.NOT_EXECUTED:
+                    item.setState(ProgressItem.CANCELLED);
+                    break;
+            }
+            mAdapter.notifyDataSetChanged();
         }
-        mAdapter.notifyDataSetChanged();
-      }
     });
   }
 
   private void cancelTasks(int taskGroup) {
-    GroundyManger.cancelTasksByGroup(this, taskGroup, FOO_CANCEL_REASON, listener);
+    GroundyManager.cancelTasksByGroup(this, taskGroup, FOO_CANCEL_REASON, listener);
   }
 
   private long queueTask(int groupId) {
@@ -149,7 +149,7 @@ public class CancelTaskExample extends Activity implements View.OnClickListener,
     }
   };
 
-  private final GroundyManger.CancelListener listener = new GroundyManger.CancelListener() {
+  private final GroundyManager.CancelListener listener = new GroundyManager.CancelListener() {
     @Override
     public void onCancelResult(int groupId, GroundyService.CancelGroupResponse cancelledTasks) {
       if (cancelledTasks == null) {

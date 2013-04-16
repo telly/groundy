@@ -34,8 +34,20 @@ public class GroundyService extends Service {
   private static final String TAG = GroundyService.class.getSimpleName();
 
   public static final int DEFAULT_GROUP_ID = 0;
+  /**
+   * To be returned by cancelTaskById. It means the task was not cancelled at all. It could happen for two reasons:
+   * the task had already been completed; or the task didn't even existed.
+   */
   public static final int COULD_NOT_CANCEL = 0;
+  /**
+   * To be returned by cancelTaskById. It means the task was already running and {@link GroundyTask#stopTask(int)}
+   * was called on it. It depends on the task implementation to react to in such cases; thus, this does not
+   * mean the task was completely stopped.
+   */
   public static final int INTERRUPTED = 1;
+  /**
+   * To be returned by cancelTaskById. It means the task was not even executed, but it was queued.
+   */
   public static final int NOT_EXECUTED = 2;
 
   private static enum GroundyMode {QUEUE, ASYNC}
@@ -197,6 +209,12 @@ public class GroundyService extends Service {
     stopSelf();
   }
 
+  /**
+   * @param id     task to cancel
+   * @param reason the reason to cancel this task. can be anything but 0
+   * @return either {@link GroundyService#COULD_NOT_CANCEL}, {@link GroundyService#INTERRUPTED}
+   *         and {@link GroundyService#NOT_EXECUTED}
+   */
   private int cancelTaskById(long id, int reason) {
     if (id == 0) {
       throw new IllegalArgumentException("id cannot be null");
@@ -219,7 +237,6 @@ public class GroundyService extends Service {
   }
 
   /**
-   *
    * @param groupId group id identifying the kind of task
    * @param reason  reason to cancel this group
    * @return number of tasks cancelled
@@ -474,7 +491,6 @@ public class GroundyService extends Service {
     }
 
     /**
-     *
      * @param groupId group id identifying the kind of task
      * @param reason  reason to cancel this group
      * @return number of cancelled tasks (before they were ran)
@@ -484,10 +500,10 @@ public class GroundyService extends Service {
     }
 
     /**
-     *
      * @param id     task id
      * @param reason reason to cancel this group
-     * @return number of cancelled tasks (before they were ran)
+     * @return either {@link GroundyService#COULD_NOT_CANCEL}, {@link GroundyService#INTERRUPTED}
+     *         and {@link GroundyService#NOT_EXECUTED}
      */
     int cancelTaskById(long id, int reason) {
       return GroundyService.this.cancelTaskById(id, reason);
