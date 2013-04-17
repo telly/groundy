@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @author Cristian Castiblanco <cristian@elhacker.net>
+ * @author Cristian <cristian@elhacker.net>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -30,5 +30,10 @@ public @interface Layout {
   /**
    * @return android resource id of the layout representing this view holder
    */
-  int value();
+  int value() default 0;
+
+  /**
+   * @return android resource id array of the layout representing this view holder
+   */
+  int[] ids() default 0;
 }

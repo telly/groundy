@@ -28,7 +28,7 @@ import java.net.URLConnection;
 
 /**
  * @author Evelio Tarazona <evelio@twitvid.com>
- * @author Cristian Castiblanco <cristian@elhacker.net>
+ * @author Cristian <cristian@elhacker.net>
  * @version 1.1
  */
 public class DownloadUtils {
@@ -96,7 +96,7 @@ public class DownloadUtils {
   }
 
   /**
-   * Internal version of {@link #downloadFile(Context, String, java.io.File, DownloadUtils.DownloadProgressListener }
+   * Internal version of {@link #downloadFile(Context, String, java.io.File, DownloadUtils.DownloadProgressListener)}
    *
    * @param fromUrl  the url to download from
    * @param toFile   the file to download to

@@ -21,8 +21,7 @@ import android.util.Log;
 /**
  * Platform log gateway
  *
- * @author Evelio Tarazona <evelio@twitvid.com>
- * @hide
+ * @author Evelio Tarazona <evelio@telly.com>
  */
 class L {
   /**

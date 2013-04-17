@@ -21,14 +21,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import com.telly.groundy.example.R;
 import com.telly.groundy.adapter.Layout;
 import com.telly.groundy.adapter.ListBaseAdapter;
 import com.telly.groundy.adapter.ResourceId;
+import com.telly.groundy.example.R;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
 public class ProgressAdapter extends ListBaseAdapter<ProgressItem, ProgressAdapter.ViewHolder> {
 
   public ProgressAdapter(Context context) {
@@ -36,19 +33,27 @@ public class ProgressAdapter extends ListBaseAdapter<ProgressItem, ProgressAdapt
   }
 
   @Override
-  public void populateHolder(int position, View view, ViewGroup parent, ProgressItem item, ViewHolder holder) {
-    holder.label.setText(String.valueOf(item.getCount()));
+  public void populateHolder(int position, View view, ViewGroup parent, ProgressItem item,
+                             ViewHolder holder) {
     holder.progressBar.setProgress(item.getProgress());
-    holder.estimated.setText(getContext().getString(R.string.will_work_for, item.getEstimated()));
+    switch (item.getState()) {
+      case ProgressItem.CANCELLED:
+        holder.estimated.setText(getString(R.string.task_didnt_run));
+        break;
+      case ProgressItem.INTERRUPTED:
+        holder.estimated.setText(R.string.task_interrupted);
+        break;
+      case ProgressItem.DONE:
+        holder.estimated.setText(R.string.task_completed);
+        break;
+      default:
+        holder.estimated.setText(getString(R.string.will_work_for, item.getEstimated()));
+    }
   }
 
   @Layout(R.layout.progress_row)
   public static class ViewHolder {
-    @ResourceId(R.id.lbl_id)
-    TextView label;
-    @ResourceId(R.id.lbl_estimated)
-    TextView estimated;
-    @ResourceId(R.id.progress)
-    ProgressBar progressBar;
+    @ResourceId(R.id.lbl_estimated) TextView estimated;
+    @ResourceId(R.id.progress) ProgressBar progressBar;
   }
 }

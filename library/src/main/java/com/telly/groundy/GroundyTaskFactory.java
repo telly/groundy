@@ -61,6 +61,7 @@ class GroundyTaskFactory {
         sCache.remove(taskClass);
       }
       groundyTask.setContext(context);
+      groundyTask.onCreate();
       return groundyTask;
     } catch (Exception e) {
       L.e(TAG, "Unable to create task for call " + taskClass, e);

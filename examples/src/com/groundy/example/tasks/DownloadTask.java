@@ -18,12 +18,8 @@ package com.groundy.example.tasks;
 
 import com.telly.groundy.GroundyTask;
 import com.telly.groundy.util.DownloadUtils;
-
 import java.io.File;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
 public class DownloadTask extends GroundyTask {
   public static final String PARAM_URL = "com.groundy.example.param.URL";
 
@@ -32,7 +28,8 @@ public class DownloadTask extends GroundyTask {
     try {
       String url = getParameters().getString(PARAM_URL);
       File dest = new File(getContext().getFilesDir(), new File(url).getName());
-      DownloadUtils.downloadFile(getContext(), url, dest, DownloadUtils.getDownloadListenerForTask(this));
+      DownloadUtils
+          .downloadFile(getContext(), url, dest, DownloadUtils.getDownloadListenerForTask(this));
       return true;
     } catch (Exception e) {
       return false;

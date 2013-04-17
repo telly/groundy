@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-  ~ Copyright 2012 Twitvid Inc.
-  ~ Copyright 2013 Cristian Castiblanco
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2013 Telly
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,18 +15,18 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+  android:orientation="vertical"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <Button
+    android:id="@+id/btn_queue"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:text="@string/queue_task" />
 
-    <Button
-        android:id="@+id/btn_queue"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/queue_task" />
-
-    <ListView
-        android:id="@+id/list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+  <ListView
+    android:id="@+id/list"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
 </LinearLayout>

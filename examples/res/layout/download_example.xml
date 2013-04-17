@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textUri"
-        android:text="http://goo.gl/hQyDu"/>
+        android:text="@string/download_url"/>
 
     <Button
         android:id="@+id/start_download"
