@@ -33,6 +33,7 @@ public class Groundy {
   public static final String KEY_GROUP_ID = "com.telly.groundy.key.GROUP_ID";
   public static final String KEY_TASK_ID = "com.telly.groundy.key.TASK_ID";
   public static final String KEY_CANCEL_REASON = "com.telly.groundy.key.CANCEL_REASON";
+  public static final String ORIGINAL_PARAMS = "com.telly.groundy.key.ORIGINAL_PARAMS";
   static final String KEY_TOKEN = "com.telly.groundy.key.TOKEN";
 
   public static final int STATUS_FINISHED = 200;

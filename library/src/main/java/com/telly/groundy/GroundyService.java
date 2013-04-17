@@ -109,7 +109,7 @@ public class GroundyService extends Service {
       if (mMode == GroundyMode.QUEUE) {
         // make sure we don't allow to asynchronously execute tasks while we are not in queue mode
         throw new UnsupportedOperationException(
-          "Current mode is 'queue'. You cannot use .execute() while" + " in this mode. You must enable 'async' mode by adding metadata to the manifest.");
+            "Current mode is 'queue'. You cannot use .execute() while" + " in this mode. You must enable 'async' mode by adding metadata to the manifest.");
       }
       HandlerThread thread = new HandlerThread("AsyncGroundyService");
       thread.start();
@@ -251,7 +251,7 @@ public class GroundyService extends Service {
 
     if (mStartBehavior == START_REDELIVER_INTENT) {
       L.d(TAG,
-        "Cancelling groups of tasks is not secure when using force_queue_completion. If your service gets killed unpredictable behavior can happen.");
+          "Cancelling groups of tasks is not secure when using force_queue_completion. If your service gets killed unpredictable behavior can happen.");
     }
 
     // prevent current scheduled tasks with this group id from executing
@@ -390,7 +390,7 @@ public class GroundyService extends Service {
       mWakeLockHelper.acquire();
     }
     TaskInfo taskInfo = mTasksInfoSet.get(groundyTask.getId());
-    if(taskInfo == null) {
+    if (taskInfo == null) {
       // this can be null if the task is cancelled before this
       return;
     }
@@ -404,6 +404,7 @@ public class GroundyService extends Service {
 
     //Lets try to send back the response
     Bundle resultData = groundyTask.getResultData();
+    resultData.putBundle(Groundy.ORIGINAL_PARAMS, groundyTask.getParameters());
     if (groundyTask.isQuitting()) {
       resultData.putInt(Groundy.KEY_CANCEL_REASON, groundyTask.getQuittingReason());
     }
@@ -438,7 +439,7 @@ public class GroundyService extends Service {
     if (forceQueueCompletion) {
       if (mMode == GroundyMode.ASYNC) {
         throw new UnsupportedOperationException(
-          "force_queue_completion can only be used when in 'queue' mode");
+            "force_queue_completion can only be used when in 'queue' mode");
       }
       mStartBehavior = START_REDELIVER_INTENT;
     } else {
