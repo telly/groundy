@@ -390,6 +390,10 @@ public class GroundyService extends Service {
       mWakeLockHelper.acquire();
     }
     TaskInfo taskInfo = mTasksInfoSet.get(groundyTask.getId());
+    if(taskInfo == null) {
+      // this can be null if the task is cancelled before this
+      return;
+    }
     taskInfo.task = groundyTask;
     L.d(TAG, "Executing task: " + groundyTask);
     groundyTask.execute();
