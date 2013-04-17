@@ -28,13 +28,14 @@ import java.util.List;
  * Implementation of this class get executed by the {@link GroundyService}
  *
  * @author Evelio Tarazona <evelio@twitvid.com>
- * @author Cristian Castiblanco <cristian@elhacker.net>
+ * @author Cristian <cristian@elhacker.net>
  * @version 1.1
  */
 public abstract class GroundyTask {
   protected static final int CANCEL_ALL = -1;
   protected static final int SERVICE_DESTROYED = -2;
   protected static final int CANCEL_BY_GROUP = -3;
+  protected static final int CANCEL_BY_ID = -4;
   private Context mContext;
   private int mResultCode = Groundy.STATUS_ERROR; // Pessimistic by default
   private final Bundle mResultData = new Bundle();
@@ -45,6 +46,7 @@ public abstract class GroundyTask {
   private int mGroupId;
   private boolean mRedelivered;
   private String mToken;
+  private long mId;
 
   /**
    * Creates a GroundyTask composed of
@@ -105,6 +107,14 @@ public abstract class GroundyTask {
 
   void setToken(String token) {
     mToken = token;
+  }
+
+  void setId(long id) {
+    mId = id;
+  }
+
+  protected long getId() {
+    return mId;
   }
 
   /**
@@ -291,6 +301,7 @@ public abstract class GroundyTask {
       return;
     }
     for (ResultReceiver receiver : mReceivers) {
+      resultData.putLong(Groundy.KEY_TASK_ID, getId());
       receiver.send(resultCode, resultData);
     }
   }
@@ -431,5 +442,11 @@ public abstract class GroundyTask {
     }
     toString += '}';
     return toString;
+  }
+
+  /**
+   * Called once the task has been instantiated and it has a valid context
+   */
+  protected void onCreate() {
   }
 }

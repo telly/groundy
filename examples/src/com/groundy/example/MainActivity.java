@@ -20,66 +20,35 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import com.telly.groundy.GroundyManager;
 import com.telly.groundy.example.R;
-import com.telly.groundy.GroundyManger;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 public class MainActivity extends Activity {
+
+  private static final SortedMap<Integer, Class<? extends Activity>> map;
+  static {
+    map = new TreeMap<Integer, Class<? extends Activity>>();
+    map.put(R.id.simple_example, SimpleTaskExample.class);
+    map.put(R.id.cancel_example, CancelTaskExample.class);
+    map.put(R.id.safe_simple_example, SafeSimpleTaskTest.class);
+    map.put(R.id.attach_receiver_example, AttachReceiverExample.class);
+    map.put(R.id.chuck_norris_example, ChuckNorrisActivity.class);
+    map.put(R.id.queue_example, QueueExample.class);
+    map.put(R.id.execute_example, ExecuteExample.class);
+    map.put(R.id.download_example, DownloadExample.class);
+  }
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-    GroundyManger.setLogEnabled(false);
+    GroundyManager.setLogEnabled(false);
+  }
 
-    findViewById(R.id.simple_example).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, SimpleTaskTest.class));
-      }
-    });
-
-    findViewById(R.id.safe_simple_example).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, SafeSimpleTaskTest.class));
-      }
-    });
-
-    findViewById(R.id.attach_receiver_example).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, AttachReceiverExample.class));
-      }
-    });
-
-    findViewById(R.id.chuck_norris_example).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, ChuckNorrisActivity.class));
-      }
-    });
-
-    findViewById(R.id.queue_example).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, QueueTest.class));
-      }
-    });
-
-    findViewById(R.id.execute_example).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, ExecuteTest.class));
-      }
-    });
-
-    findViewById(R.id.download_example).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, DownloadExample.class));
-      }
-    });
+  public void onButtonClick(View view) {
+    startActivity(new Intent(this, map.get(view.getId())));
   }
 }

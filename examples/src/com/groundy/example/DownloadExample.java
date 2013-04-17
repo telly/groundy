@@ -24,14 +24,11 @@ import android.os.ResultReceiver;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
-import com.telly.groundy.example.R;
 import com.groundy.example.tasks.DownloadTask;
 import com.telly.groundy.Groundy;
+import com.telly.groundy.example.R;
 import com.telly.groundy.util.Bundler;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
 public class DownloadExample extends Activity {
 
   private EditText mEditUrl;
@@ -54,15 +51,13 @@ public class DownloadExample extends Activity {
 
         String url = mEditUrl.getText().toString().trim();
         Bundle extras = new Bundler().add(DownloadTask.PARAM_URL, url).build();
-        Groundy.create(DownloadExample.this, DownloadTask.class)
-            .receiver(mReceiver)
-            .params(extras)
+        Groundy.create(DownloadExample.this, DownloadTask.class).receiver(mReceiver).params(extras)
             .queue();
       }
     });
   }
 
-  private ResultReceiver mReceiver = new ResultReceiver(new Handler()) {
+  private final ResultReceiver mReceiver = new ResultReceiver(new Handler()) {
     @Override
     protected void onReceiveResult(int resultCode, Bundle resultData) {
       super.onReceiveResult(resultCode, resultData);
@@ -75,7 +70,8 @@ public class DownloadExample extends Activity {
           mProgressDialog.dismiss();
           break;
         case Groundy.STATUS_ERROR:
-          Toast.makeText(DownloadExample.this, resultData.getString(Groundy.KEY_ERROR), Toast.LENGTH_LONG).show();
+          Toast.makeText(DownloadExample.this, resultData.getString(Groundy.KEY_ERROR),
+              Toast.LENGTH_LONG).show();
           mProgressDialog.dismiss();
           break;
       }

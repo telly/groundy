@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-  ~ Copyright 2012 Twitvid Inc.
-  ~ Copyright 2013 Cristian Castiblanco
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2012 Telly Inc.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,20 +14,20 @@
   ~ limitations under the License.
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <TextView
+    android:id="@+id/simple_example_explanation"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:text="@string/simple_example_explanation" />
 
-    <TextView
-        android:id="@+id/simple_example_explanation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/simple_example_explanation" />
-
-    <Button
-        android:id="@+id/send_random_task"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/execute_some_random_task"
-        android:layout_gravity="center" />
-</FrameLayout>
+  <Button
+    android:id="@+id/send_random_task"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/execute_some_random_task"
+    android:layout_gravity="center" />
+</merge>

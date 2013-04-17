@@ -18,8 +18,5 @@ package com.groundy.example;
 
 import com.telly.groundy.GroundyService;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
 public class AsyncGroundyService extends GroundyService {
 }

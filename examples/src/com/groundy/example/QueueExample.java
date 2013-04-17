@@ -23,21 +23,16 @@ import android.os.ResultReceiver;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
-import com.telly.groundy.example.R;
 import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.Groundy;
+import com.telly.groundy.example.R;
 import com.telly.groundy.util.Bundler;
 
 import java.util.Random;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
-public class QueueTest extends Activity {
+public class QueueExample extends Activity {
 
   protected MyReceiver mReceiver;
-  private int mCounter = 1;
-  private Button mBtnAddTask;
   private ProgressAdapter mAdapter;
 
   @Override
@@ -47,29 +42,24 @@ public class QueueTest extends Activity {
     setContentView(R.layout.queue_example);
 
     ListView listView = (ListView) findViewById(R.id.list);
-    mBtnAddTask = (Button) findViewById(R.id.btn_queue);
     mAdapter = new ProgressAdapter(this);
     listView.setAdapter(mAdapter);
 
-    mBtnAddTask.setText(getString(R.string.next_task_counter, mCounter));
-    mBtnAddTask.setOnClickListener(new View.OnClickListener() {
+    Button btnAddTask = (Button) findViewById(R.id.btn_queue);
+    btnAddTask.setText(R.string.queue_task);
+    btnAddTask.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        int count = mCounter++;
         int time = new Random().nextInt(10000);
         if (time < 1000) {
           time = 1000;
         }
 
-        processTask(new Bundler()
-            .add(RandomTimeTask.KEY_COUNT, count)
-            .add(RandomTimeTask.KEY_ESTIMATED, time)
-            .build());
-
-        mBtnAddTask.setText(getString(R.string.next_task_counter, mCounter));
+        long id = processTask(new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time)
+          .build());
 
         ProgressItem progressItem = new ProgressItem();
-        progressItem.setCount(count);
+        progressItem.setId(id);
         progressItem.setProgress(0);
         progressItem.setEstimated(time / 1000);
         mAdapter.addItem(progressItem);
@@ -77,11 +67,8 @@ public class QueueTest extends Activity {
     });
   }
 
-  protected void processTask(Bundle params) {
-    Groundy.create(this, RandomTimeTask.class)
-        .params(params)
-        .receiver(mReceiver)
-        .queue();
+  protected long processTask(Bundle params) {
+    return Groundy.create(this, RandomTimeTask.class).params(params).receiver(mReceiver).queue();
   }
 
   private class MyReceiver extends ResultReceiver {
@@ -93,16 +80,16 @@ public class QueueTest extends Activity {
     protected void onReceiveResult(int resultCode, Bundle resultData) {
       super.onReceiveResult(resultCode, resultData);
       if (resultCode == Groundy.STATUS_PROGRESS) {
-        int count = resultData.getInt(RandomTimeTask.KEY_COUNT);
+        long count = resultData.getLong(Groundy.KEY_TASK_ID);
         int progress = resultData.getInt(Groundy.KEY_PROGRESS);
         findItem(count).setProgress(progress);
         mAdapter.notifyDataSetChanged();
       }
     }
 
-    private ProgressItem findItem(int count) {
+    private ProgressItem findItem(long count) {
       for (ProgressItem progressItem : mAdapter.getItems()) {
-        if (count == progressItem.getCount()) {
+        if (count == progressItem.getId()) {
           return progressItem;
         }
       }

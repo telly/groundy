@@ -22,7 +22,7 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 
 /**
- * @author Cristian Castiblanco <cristian@elhacker.net>
+ * @author Cristian <cristian@elhacker.net>
  */
 public class Groundy {
   public static final String KEY_PARAMETERS = "com.telly.groundy.key.PARAMATERS";
@@ -31,6 +31,9 @@ public class Groundy {
   public static final String KEY_PROGRESS = "com.telly.groundy.key.PROGRESS";
   public static final String KEY_TASK = "com.telly.groundy.key.TASK";
   public static final String KEY_GROUP_ID = "com.telly.groundy.key.GROUP_ID";
+  public static final String KEY_TASK_ID = "com.telly.groundy.key.TASK_ID";
+  public static final String KEY_CANCEL_REASON = "com.telly.groundy.key.CANCEL_REASON";
+  public static final String ORIGINAL_PARAMS = "com.telly.groundy.key.ORIGINAL_PARAMS";
   static final String KEY_TOKEN = "com.telly.groundy.key.TOKEN";
 
   public static final int STATUS_FINISHED = 200;
@@ -40,6 +43,7 @@ public class Groundy {
 
   private final Context mContext;
   private final Class<? extends GroundyTask> mGroundyTask;
+  private final long mId;
   private String mToken;
   private ResultReceiver mResultReceiver;
   private Bundle mParams;
@@ -50,6 +54,7 @@ public class Groundy {
   private Groundy(Context context, Class<? extends GroundyTask> groundyTask) {
     mContext = context.getApplicationContext();
     mGroundyTask = groundyTask;
+    mId = System.nanoTime();
   }
 
   /**
@@ -166,26 +171,33 @@ public class Groundy {
    * executed until the previous queued tasks are done.
    * If you need your task to execute right away use the
    * {@link Groundy#execute()} method.
+   *
+   * @return a unique number assigned to this task
    */
-  public void queue() {
-    if (mAlreadyProcessed) {
-      throw new IllegalStateException("Task already queued or executed");
-    }
-    mAlreadyProcessed = true;
+  public long queue() {
+    markAsProcessed();
     boolean async = false;
     startApiService(async);
+    return mId;
   }
 
   /**
    * Execute a task right away
+   *
+   * @return a unique number assigned to this task
    */
-  public void execute() {
+  public long execute() {
+    markAsProcessed();
+    boolean async = true;
+    startApiService(async);
+    return mId;
+  }
+
+  private void markAsProcessed() {
     if (mAlreadyProcessed) {
       throw new IllegalStateException("Task already queued or executed");
     }
     mAlreadyProcessed = true;
-    boolean async = true;
-    startApiService(async);
   }
 
   private void startApiService(boolean async) {
@@ -198,6 +210,7 @@ public class Groundy {
       intent.putExtra(KEY_RECEIVER, mResultReceiver);
     }
     intent.putExtra(KEY_TASK, mGroundyTask);
+    intent.putExtra(KEY_TASK_ID, mId);
     intent.putExtra(KEY_GROUP_ID, mGroupId);
     intent.putExtra(KEY_TOKEN, mToken);
     mContext.startService(intent);

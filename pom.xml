@@ -58,10 +58,17 @@
     <developers>
         <developer>
             <id>casidiablo</id>
-            <name>Cristian Castiblanco</name>
+            <name>Cristian</name>
             <email>cristian@elhacker.net</email>
             <timezone>0</timezone>
             <url>http://casidiablo.net/</url>
+        </developer>
+        <developer>
+            <id>eveliotc</id>
+            <name>Evelio Tarazona</name>
+            <email>evelio@telly.com</email>
+            <timezone>0</timezone>
+            <url>http://evel.io/</url>
         </developer>
     </developers>
 
