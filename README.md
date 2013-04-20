@@ -3,20 +3,13 @@ Groundy library for Android
 
 ![Groundy](http://i.imgur.com/fgC2aaw.png)
 
-Groundy is a fancy implementation of the 'Service + ResultReceiver' technique which
-is heavily inspired in a Google I/O 2010 presentation by Virgil Dobjanschi
-called [Android REST client applications][1]. Groundy is useful in any kind of apps
-that requires the use of background threads:
+Groundy is a fun, sexy way to do background work on your Android app; it's specially useful for
+running tasks that must be executed even if your activities are rotated or even quited. It allows
+you to receive notifications from the background task directly to your activity or any object.
 
-- Execute calls to external services (e.g. RESTful web services)
-- Download and/or process files
-- Encoding audio/video
-- Any kind of task that could block the main thread
-
-Groundy offers a special `Service` that will take care of creating background
-threads and allows to report results to the `Activity` using a `ResultReceiver`.
-It will also force you to decouple the background work logic from your activities,
-which in turn makes your code cleaner and easier to maintain.
+It is useful for several scenarios like executing calls to external services (e.g. RESTful web
+services), download and/or process files, encoding audio/video and any kind of task that could
+block the main thread.
 
 Basic usage
 ===========
@@ -26,17 +19,17 @@ Create a subclass of `GroundyTask`:
 ```java
 public class ExampleTask extends GroundyTask {
   @Override
-  protected boolean doInBackground() {
+  protected TaskResult doInBackground() {
     // you can send parameters to the task using a Bundle (optional)
     String exampleParam = getStringParam("key_name");
 
     // lots of code
 
-    // add results... this will be sent back to the activity
-    // through the ResultReceiver once this method has returned
-    addStringResult("the_result", "some result");
-
-    return success; // true if task was executed successfully
+    // return a TaskResult depending on the success of your task
+    // and optionally pass some results back
+    Succeeded result = new Succeeded();
+    result.add("the_result", "some result");
+    return result;
   }
 }
 ```
@@ -47,27 +40,38 @@ Whenever you want to execute the task, just do this:
 // this is usually performed from within an Activity
 Bundle params = new Bundler().add("key_name", "foo").build();
 Groundy.create(this, ExampleTask.class)
-    .receiver(receiver) // optional
-    .params(params)     // optional
+    .callback(YourActivity.this)  // required if you want to get notified of your task lifecycle
+    .params(params)               // optional
     .queue();
 ```
 
 You will get results in your result receiver (in the main thread):
 
 ```java
-private final ResultReceiver receiver = new ResultReceiver(new Handler()){
-  @Override
-  protected void onReceiveResult(int resultCode, Bundle resultData) {
-    String result = resultData.getString("the_result");
-    // do something
-  }
-};
+@OnSuccess(ExampleTask.class)
+public void onSuccess(@Param("the_result") String result) {
+  // do something with the result
+}
 ```
 
 Do not forget to add `GroundyService` to the `AndroidManifest.xml` file:
 
 ```xml
 <service android:name="com.telly.groundy.GroundyService"/>
+```
+
+Extending callback system
+=========================
+
+There are some already defined callback annotations: `@OnSuccess`, `@OnFailed`, `@OnCancel`,
+`@OnProgress` and `@OnStart`, but you can also create your own callback types. Take a look
+at the Custom callbacks example and learn how you can write callbacks like:
+
+```java
+@OnChuckNorris
+public void onChuckNorrisAttack(@Param("target") String target) {
+  Toast.makeText(this, "Chuck Norris kicked your " + target, Toast.LENGTH_SHORT).show();
+}
 ```
 
 Maven integration
@@ -79,26 +83,7 @@ In order to use this library from you Android project using maven your pom shoul
 <dependency>
   <groupId>com.telly</groupId>
   <artifactId>groundy</artifactId>
-  <version>0.8</version>
+  <version>0.9-SNAPSHOT</version>
   <scope>compile</scope>
 </dependency>
 ```
-
-License
-=======
-
->Copyright 2013 Telly Inc.
->
->Licensed under the Apache License, Version 2.0 (the "License");
->you may not use this file except in compliance with the License.
->You may obtain a copy of the License at
->
->  http://www.apache.org/licenses/LICENSE-2.0
->
->Unless required by applicable law or agreed to in writing, software
->distributed under the License is distributed on an "AS IS" BASIS,
->WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
->See the License for the specific language governing permissions and
->limitations under the License.
-
-  [1]: http://www.youtube.com/watch?v=xHXn3Kg2IQE

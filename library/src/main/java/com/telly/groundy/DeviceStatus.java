@@ -1,17 +1,24 @@
-/*
- * Copyright 2013 Telly Inc.
+/**
+ * Copyright Telly, Inc. and other Groundy contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the
+ * following conditions:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+ * NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+ * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.telly.groundy;
@@ -25,18 +32,10 @@ import android.net.wifi.WifiManager.WifiLock;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 
-/**
- * Device status related Utils
- *
- * @author Evelio Tarazona <evelio@twitvid.com>
- * @version 1.0
- */
 class DeviceStatus {
   private static final String TAG = "groundy";
 
-  /**
-   * Non instance constant class
-   */
+  /** Non instance constant class */
   private DeviceStatus() {
   }
 
@@ -47,7 +46,8 @@ class DeviceStatus {
    * @return true if there's an active network connection, false otherwise
    */
   public static boolean isOnline(Context context) {
-    ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    ConnectivityManager cm = (ConnectivityManager) context.getSystemService(
+        Context.CONNECTIVITY_SERVICE);
     if (cm == null) {
       return false;
     }
@@ -59,11 +59,11 @@ class DeviceStatus {
    * Check if current connection is Wi-Fi
    *
    * @param context Context to use
-   * @return true if current connection is Wi-Fi
-   *         false otherwise
+   * @return true if current connection is Wi-Fi false otherwise
    */
   public static boolean isCurrentConnectionWifi(Context context) {
-    ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    ConnectivityManager cm = (ConnectivityManager) context.getSystemService(
+        Context.CONNECTIVITY_SERVICE);
     if (cm == null) {
       return false;
     }
@@ -72,27 +72,24 @@ class DeviceStatus {
 
   }
 
-  /**
-   * CPU wake lock unique instance
-   */
+  /** CPU wake lock unique instance */
   private static WakeLock cpuWakeLock;
 
   /**
    * Register a wake lock to power management in the device
    *
    * @param context Context to use
-   * @param awake   if true the device cpu will keep awake until
-   *                false is called back.
-   *                if true is passed several times only the first time after a false call will
-   *                take effect, also if false is passed and previously the cpu was not turned on
-   *                (true call) does nothing.
+   * @param awake   if true the device cpu will keep awake until false is called back. if true is
+   *                passed several times only the first time after a false call will take effect,
+   *                also if false is passed and previously the cpu was not turned on (true call)
+   *                does nothing.
    */
   public static void keepCpuAwake(Context context, boolean awake) {
     if (cpuWakeLock == null) {
       PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
       if (pm != null) {
-        cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK
-            | PowerManager.ON_AFTER_RELEASE, TAG);
+        cpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE,
+            TAG);
         cpuWakeLock.setReferenceCounted(true);
       }
 
@@ -108,19 +105,16 @@ class DeviceStatus {
     }
   }
 
-  /**
-   * WiFi lock unique instance
-   */
+  /** WiFi lock unique instance */
   private static WifiLock wifiLock;
 
   /**
    * Register a WiFi lock to WiFi management in the device
    *
    * @param context Context to use
-   * @param on      if true the device WiFi radio will keep awake until
-   *                false is called back.
-   *                if true is passed several times only the first time after a false call will
-   *                take effect, also if false is passed and previously the WiFi radio was not turned on
+   * @param on      if true the device WiFi radio will keep awake until false is called back. if
+   *                true is passed several times only the first time after a false call will take
+   *                effect, also if false is passed and previously the WiFi radio was not turned on
    *                (true call) does nothing.
    */
   public static void keepWiFiOn(Context context, boolean on) {

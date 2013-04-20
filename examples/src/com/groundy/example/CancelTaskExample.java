@@ -1,25 +1,30 @@
-/*
- * Copyright 2013 Telly Inc.
+/**
+ * Copyright Telly, Inc. and other Groundy contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the
+ * following conditions:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+ * NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+ * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.groundy.example;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.ResultReceiver;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -29,9 +34,13 @@ import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.Groundy;
 import com.telly.groundy.GroundyManager;
 import com.telly.groundy.GroundyService;
+import com.telly.groundy.TaskProxy;
+import com.telly.groundy.annotations.OnCancel;
+import com.telly.groundy.annotations.OnProgress;
+import com.telly.groundy.annotations.OnSuccess;
+import com.telly.groundy.annotations.Param;
 import com.telly.groundy.example.R;
 import com.telly.groundy.util.Bundler;
-
 import java.util.Random;
 import java.util.Set;
 
@@ -79,20 +88,20 @@ public class CancelTaskExample extends Activity implements View.OnClickListener,
 
   @Override
   public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-    GroundyManager.cancelTaskById(this, id, new GroundyManager.SingleCancelListener() {
-        @Override
-        public void onCancelResult(long id, int result) {
-            ProgressItem item = findItem(id);
-            switch (result) {
-                case GroundyService.INTERRUPTED:
-                    item.setState(ProgressItem.INTERRUPTED);
-                    break;
-                case GroundyService.NOT_EXECUTED:
-                    item.setState(ProgressItem.CANCELLED);
-                    break;
-            }
-            mAdapter.notifyDataSetChanged();
+    final ProgressItem item = findItem(id);
+    item.getTaskProxy().cancel(this, FOO_CANCEL_REASON, new GroundyManager.SingleCancelListener() {
+      @Override
+      public void onCancelResult(long id, int result) {
+        switch (result) {
+          case GroundyService.INTERRUPTED:
+            item.setState(ProgressItem.INTERRUPTED);
+            break;
+          case GroundyService.NOT_EXECUTED:
+            item.setState(ProgressItem.CANCELLED);
+            break;
         }
+        mAdapter.notifyDataSetChanged();
+      }
     });
   }
 
@@ -100,25 +109,24 @@ public class CancelTaskExample extends Activity implements View.OnClickListener,
     GroundyManager.cancelTasksByGroup(this, taskGroup, FOO_CANCEL_REASON, listener);
   }
 
-  private long queueTask(int groupId) {
+  private void queueTask(int groupId) {
     // configure task parameters
     int time = new Random().nextInt(10000);
     Bundle params = new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time).build();
 
     // queue task
-    long taskId = Groundy.create(this, CancelableTask.class)
-      .receiver(resultReceiver)
-      .group(groupId)
-      .params(params)
-      .queue();
+    TaskProxy taskProxy = Groundy.create(CancelableTask.class)
+        .callback(this)
+        .group(groupId)
+        .params(params)
+        .queue(CancelTaskExample.this);
 
     ProgressItem progressItem = new ProgressItem();
-    progressItem.setId(taskId);
+    progressItem.setTaskProxy(taskProxy);
     progressItem.setProgress(0);
     progressItem.setEstimated(time / 1000);
     progressItem.setColor(groupId);
     mAdapter.addItem(progressItem);
-    return taskId;
   }
 
   private ProgressItem findItem(long id) {
@@ -130,24 +138,24 @@ public class CancelTaskExample extends Activity implements View.OnClickListener,
     return null;
   }
 
-  private final ResultReceiver resultReceiver = new ResultReceiver(new Handler()) {
-    @Override
-    protected void onReceiveResult(int resultCode, Bundle resultData) {
-      super.onReceiveResult(resultCode, resultData);
-      long id = resultData.getLong(Groundy.KEY_TASK_ID);
-      ProgressItem item = findItem(id);
-      if (resultCode == Groundy.STATUS_PROGRESS) {
-        int progress = resultData.getInt(Groundy.KEY_PROGRESS);
-        item.setProgress(progress);
-      } else if (resultCode == Groundy.STATUS_ERROR && resultData.getInt(Groundy.KEY_CANCEL_REASON,
-        0) == FOO_CANCEL_REASON) {
-        item.setState(ProgressItem.INTERRUPTED);
-      } else if (resultCode == Groundy.STATUS_FINISHED) {
-        item.setState(ProgressItem.DONE);
-      }
-      mAdapter.notifyDataSetChanged();
-    }
-  };
+  @OnProgress(CancelableTask.class)
+  public void onProgressUpdate(@Param(Groundy.TASK_ID) long id,
+                               @Param(Groundy.KEY_PROGRESS) int progress) {
+    findItem(id).setProgress(progress);
+    mAdapter.notifyDataSetChanged();
+  }
+
+  @OnCancel(CancelableTask.class)
+  public void onCancel(@Param(Groundy.TASK_ID) long id) {
+    findItem(id).setState(ProgressItem.INTERRUPTED);
+    mAdapter.notifyDataSetChanged();
+  }
+
+  @OnSuccess(CancelableTask.class)
+  public void onSuccess(@Param(Groundy.TASK_ID) long id) {
+    findItem(id).setState(ProgressItem.DONE);
+    mAdapter.notifyDataSetChanged();
+  }
 
   private final GroundyManager.CancelListener listener = new GroundyManager.CancelListener() {
     @Override
