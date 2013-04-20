@@ -1,17 +1,24 @@
-/*
- * Copyright 2013 Telly Inc.
+/**
+ * Copyright Telly, Inc. and other Groundy contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the
+ * following conditions:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+ * NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+ * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.telly.groundy;
@@ -22,7 +29,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.*;
-
+import com.telly.groundy.annotations.OnCancel;
+import com.telly.groundy.annotations.OnFailed;
+import com.telly.groundy.annotations.OnStart;
+import com.telly.groundy.annotations.OnSuccess;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -35,19 +45,17 @@ public class GroundyService extends Service {
 
   public static final int DEFAULT_GROUP_ID = 0;
   /**
-   * To be returned by cancelTaskById. It means the task was not cancelled at all. It could happen for two reasons:
-   * the task had already been completed; or the task didn't even existed.
+   * To be returned by cancelTaskById. It means the task was not cancelled at all. It could happen
+   * for two reasons: the task had already been completed; or the task didn't even existed.
    */
   public static final int COULD_NOT_CANCEL = 0;
   /**
-   * To be returned by cancelTaskById. It means the task was already running and {@link GroundyTask#stopTask(int)}
-   * was called on it. It depends on the task implementation to react to in such cases; thus, this does not
-   * mean the task was completely stopped.
+   * To be returned by cancelTaskById. It means the task was already running and {@link
+   * GroundyTask#stopTask(int)} was called on it. It depends on the task implementation to react to
+   * in such cases; thus, this does not mean the task was completely stopped.
    */
   public static final int INTERRUPTED = 1;
-  /**
-   * To be returned by cancelTaskById. It means the task was not even executed, but it was queued.
-   */
+  /** To be returned by cancelTaskById. It means the task was not even executed, but it was queued. */
   public static final int NOT_EXECUTED = 2;
 
   private static enum GroundyMode {QUEUE, ASYNC}
@@ -63,16 +71,13 @@ public class GroundyService extends Service {
   private GroundyMode mMode = GroundyMode.QUEUE;
   private int mStartBehavior = START_NOT_STICKY;
   private final WakeLockHelper mWakeLockHelper;
-  private boolean mRunning;
   private AtomicInteger mLastStartId = new AtomicInteger();
 
   // this help us keep track of the tasks that are scheduled to be executed
   private volatile SortedMap<Long, TaskInfo> mTasksInfoSet;
-  private volatile SortedMap<String, Set<ResultReceiver>> mAttachedReceivers;
 
   public GroundyService() {
     mWakeLockHelper = new WakeLockHelper(this);
-    mAttachedReceivers = Collections.synchronizedSortedMap(new TreeMap<String, Set<ResultReceiver>>());
     mTasksInfoSet = Collections.synchronizedSortedMap(new TreeMap<Long, TaskInfo>());
   }
 
@@ -100,7 +105,6 @@ public class GroundyService extends Service {
     if (intent == null) {
       // we should not have received a null intent... kill the service just in case
       stopSelf(startId);
-      mRunning = false;
       return mStartBehavior;
     }
 
@@ -123,7 +127,6 @@ public class GroundyService extends Service {
       throw new UnsupportedOperationException("Wrong intent received: " + intent);
     }
 
-    mRunning = true;
     return mStartBehavior;
   }
 
@@ -146,7 +149,7 @@ public class GroundyService extends Service {
     msg.obj = intent;
     int groupId = intent.getIntExtra(Groundy.KEY_GROUP_ID, DEFAULT_GROUP_ID);
     msg.what = groupId;
-    long taskId = intent.getLongExtra(Groundy.KEY_TASK_ID, 0);
+    long taskId = intent.getLongExtra(Groundy.TASK_ID, 0);
     if (taskId == 0) {
       throw new RuntimeException("Task id cannot be 0. What kind of sorcery is this?");
     }
@@ -154,51 +157,6 @@ public class GroundyService extends Service {
     mTasksInfoSet.put(taskId, new TaskInfo(startId, groupId));
     if (!groundyHandler.sendMessage(msg)) {
       mTasksInfoSet.remove(taskId);
-    }
-  }
-
-  private void attachReceiver(String token, ResultReceiver resultReceiver) {
-    if (!mRunning) {
-      return;
-    }
-    synchronized (mTasksInfoSet) {
-      for (Map.Entry<Long, TaskInfo> taskInfoEntry : mTasksInfoSet.entrySet()) {
-        TaskInfo taskInfo = taskInfoEntry.getValue();
-        GroundyTask task = taskInfo.task;
-        if (task != null && token.equals(task.getToken())) {
-          task.addReceiver(resultReceiver);
-        }
-      }
-    }
-
-    Set<ResultReceiver> resultReceivers;
-    if (mAttachedReceivers.containsKey(token)) {
-      resultReceivers = mAttachedReceivers.get(token);
-    } else {
-      resultReceivers = new HashSet<ResultReceiver>();
-      mAttachedReceivers.put(token, resultReceivers);
-    }
-
-    resultReceivers.add(resultReceiver);
-  }
-
-  private void detachReceiver(String token, ResultReceiver resultReceiver) {
-    if (!mRunning) {
-      return;
-    }
-    for (Map.Entry<Long, TaskInfo> taskInfoEntry : mTasksInfoSet.entrySet()) {
-      TaskInfo taskInfo = taskInfoEntry.getValue();
-      GroundyTask task = taskInfo.task;
-      if (task != null) {
-        if (token.equals(task.getToken())) {
-          task.removeReceiver(resultReceiver);
-        }
-      }
-    }
-
-    if (mAttachedReceivers.containsKey(token)) {
-      Set<ResultReceiver> resultReceivers = mAttachedReceivers.get(token);
-      resultReceivers.remove(resultReceiver);
     }
   }
 
@@ -212,15 +170,15 @@ public class GroundyService extends Service {
   /**
    * @param id     task to cancel
    * @param reason the reason to cancel this task. can be anything but 0
-   * @return either {@link GroundyService#COULD_NOT_CANCEL}, {@link GroundyService#INTERRUPTED}
-   *         and {@link GroundyService#NOT_EXECUTED}
+   * @return either {@link GroundyService#COULD_NOT_CANCEL}, {@link GroundyService#INTERRUPTED} and
+   *         {@link GroundyService#NOT_EXECUTED}
    */
   private int cancelTaskById(long id, int reason) {
     if (id == 0) {
       throw new IllegalArgumentException("id cannot be null");
     }
-    if (reason == 0) {
-      throw new IllegalArgumentException("reason cannot be zero");
+    if (reason == Integer.MIN_VALUE) {
+      throw new IllegalArgumentException("reason cannot be Integer.MIN_VALUE");
     }
     TaskInfo taskInfo = mTasksInfoSet.remove(id);
     if (taskInfo == null) {
@@ -346,7 +304,8 @@ public class GroundyService extends Service {
     executeGroundyTask(groundyTask);
   }
 
-  private GroundyTask buildGroundyTask(Intent intent, int groupId, int startId, boolean redelivery) {
+  private GroundyTask buildGroundyTask(Intent intent, int groupId, int startId,
+                                       boolean redelivery) {
     Bundle extras = intent.getExtras();
     extras = (extras == null) ? new Bundle() : extras;
 
@@ -357,25 +316,15 @@ public class GroundyService extends Service {
       L.e(TAG, "Groundy task no provided");
       return null;
     }
-    final long taskId = extras.getLong(Groundy.KEY_TASK_ID);
+    final long taskId = extras.getLong(Groundy.TASK_ID);
     groundyTask.setId(taskId);
 
     // set up the result receiver(s)
     ResultReceiver receiver = (ResultReceiver) extras.get(Groundy.KEY_RECEIVER);
     if (receiver != null) {
-      groundyTask.addReceiver(receiver);
+      groundyTask.setReceiver(receiver);
     }
-    String token = intent.getStringExtra(Groundy.KEY_TOKEN);
-    if (token == null) {
-      token = "";
-    }
-    if (mAttachedReceivers.containsKey(token)) {
-      for (ResultReceiver resultReceiver : mAttachedReceivers.get(token)) {
-        groundyTask.addReceiver(resultReceiver);
-      }
-    }
-    groundyTask.setToken(token);
-    groundyTask.send(Groundy.STATUS_RUNNING, new Bundle());
+    groundyTask.send(OnStart.class, new Bundle());
 
     groundyTask.setStartId(startId);
     groundyTask.setGroupId(groupId);
@@ -394,21 +343,42 @@ public class GroundyService extends Service {
       // this can be null if the task is cancelled before this
       return;
     }
+
     taskInfo.task = groundyTask;
     L.d(TAG, "Executing task: " + groundyTask);
-    groundyTask.execute();
+    TaskResult taskResult;
+
+    try {
+      taskResult = groundyTask.doInBackground();
+    } catch (Exception e) {
+      e.printStackTrace();
+
+      taskResult = new Failed();
+      taskResult.add(Groundy.CRASH_MESSAGE, String.valueOf(e.getMessage()));
+    }
+
     taskInfo.task = null;
     if (requiresWifi) {
       mWakeLockHelper.release();
     }
 
     //Lets try to send back the response
-    Bundle resultData = groundyTask.getResultData();
-    resultData.putBundle(Groundy.ORIGINAL_PARAMS, groundyTask.getParameters());
-    if (groundyTask.isQuitting()) {
-      resultData.putInt(Groundy.KEY_CANCEL_REASON, groundyTask.getQuittingReason());
+    Bundle returnParams = taskResult.getReturnParams();
+    returnParams.putBundle(Groundy.ORIGINAL_PARAMS, groundyTask.getParameters());
+
+
+    switch (taskResult.getType()) {
+      case SUCCESS:
+        groundyTask.send(OnSuccess.class, returnParams);
+        break;
+      case FAIL:
+        groundyTask.send(OnFailed.class, returnParams);
+        break;
+      case CANCEL:
+        returnParams.putInt(Groundy.CANCEL_REASON, groundyTask.getQuittingReason());
+        groundyTask.send(OnCancel.class, returnParams);
+        break;
     }
-    groundyTask.send(groundyTask.getResultCode(), resultData);
   }
 
   private void updateModeFromMetadata() {
@@ -456,7 +426,7 @@ public class GroundyService extends Service {
     public void handleMessage(Message msg) {
       Intent intent = (Intent) msg.obj;
       if (intent != null) {
-        long taskId = intent.getLongExtra(Groundy.KEY_TASK_ID, 0);
+        long taskId = intent.getLongExtra(Groundy.TASK_ID, 0);
         if (taskId == 0) {
           throw new RuntimeException("Task id cannot be 0. What kind of sorcery is this?");
         }
@@ -477,20 +447,11 @@ public class GroundyService extends Service {
       if (mTasksInfoSet.isEmpty()) {
         // stop the service by calling stopSelf with the latest startId
         stopSelf(mLastStartId.get());
-        mRunning = false;
       }
     }
   }
 
   final class GroundyServiceBinder extends Binder {
-    void attachReceiver(String token, ResultReceiver resultReceiver) {
-      GroundyService.this.attachReceiver(token, resultReceiver);
-    }
-
-    void detachReceiver(String token, ResultReceiver resultReceiver) {
-      GroundyService.this.detachReceiver(token, resultReceiver);
-    }
-
     void cancelAllTasks() {
       GroundyService.this.cancelAllTasks();
     }

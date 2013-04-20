@@ -31,6 +31,8 @@
   <string name="task_finished">Task finished :) enabling button</string>
   <string name="simple_example">Simple example</string>
   <string name="execute_some_random_task">Execute some random task</string>
+  <string name="attach_toaster">Showing toast on complete</string>
+  <string name="attach_toaster_off">Not showing toast on complete</string>
   <string name="queue_blue_task">Queue blue task</string>
   <string name="cancel_blue_task">Cancel blue tasks</string>
   <string name="queue_orange_task">Queue orange task</string>
@@ -55,4 +57,10 @@
   <string name="task_completed">Task completed</string>
   <string name="groundy_examples">Groundy Examples</string>
   <string name="download_url">http://goo.gl/hQyDu</string>
+  <string name="chuck_norris_kicked">Chuck norris kicked your %s</string>
+  <string name="chuck_kick_explanation">Click to see how much things Chuck Norris does before knocking you out.</string>
+  <string name="sayonara">Sayonara</string>
+  <string name="you_were_kicked">You were successfully knocked out</string>
+  <string name="lifespan">You can live %d more minutes</string>
+  <string name="callback_test">Custom callbacks</string>
 </resources>
