@@ -75,4 +75,11 @@
     android:layout_height="wrap_content"
     android:onClick="onButtonClick"
     android:text="@string/download_example" />
+
+  <Button
+    android:id="@+id/callback_test"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:onClick="onButtonClick"
+    android:text="@string/callback_test" />
 </LinearLayout>

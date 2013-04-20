@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright 2012 Twitvid Inc.
-  ~ Copyright 2013 Cristian Castiblanco
+  ~ Copyright 2013 Telly Inc.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
   ~ You may obtain a copy of the License at
   ~
-  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~   http://www.apache.org/licenses/LICENSE-2.0
   ~
   ~ Unless required by applicable law or agreed to in writing, software
   ~ distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,11 +32,11 @@
       </intent-filter>
     </activity>
     <activity
-      android:name="com.groundy.example.SimpleTaskExample"
+      android:name="com.groundy.example.SimpleExample"
       android:label="@string/simple_example"
       android:configChanges="orientation"
       android:screenOrientation="portrait" />
-    <activity android:name="com.groundy.example.SafeSimpleTaskTest" android:label="@string/safe_simple_example" />
+    <activity android:name="com.groundy.example.SafeSimpleTask" android:label="@string/safe_simple_example" />
     <activity android:name="com.groundy.example.AttachReceiverExample" android:label="@string/attach_receiver_example"/>
     <activity
       android:name="com.groundy.example.ChuckNorrisActivity"
@@ -55,7 +54,7 @@
       android:label="@string/queue_example"
       android:screenOrientation="portrait" />
     <activity
-      android:name="com.groundy.example.ExecuteExample"
+      android:name="com.groundy.example.AsyncExample"
       android:configChanges="orientation"
       android:label="@string/execute_example"
       android:screenOrientation="portrait" />
@@ -63,6 +62,12 @@
       android:name="com.groundy.example.CancelTaskExample"
       android:configChanges="orientation"
       android:label="@string/cancel_example"
+      android:screenOrientation="portrait" />
+
+    <activity
+      android:name="com.groundy.example.CallbackTest"
+      android:configChanges="orientation"
+      android:label="@string/callback_test"
       android:screenOrientation="portrait" />
 
     <service android:name="com.telly.groundy.GroundyService" />
