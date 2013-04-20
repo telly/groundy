@@ -23,8 +23,6 @@
 
 package com.telly.groundy;
 
-import android.os.Bundle;
-
 /**
  * Use this {@link TaskResult} if the task succeeded to do its job. You can optionally pass a bundle
  * with some return parameters; those parameters will be match with the method callback parameters.
@@ -35,10 +33,6 @@ import android.os.Bundle;
  */
 public final class Succeeded extends TaskResult {
   public Succeeded() {
-    this(new Bundle());
-  }
-
-  public Succeeded(Bundle bundle) {
-    super(bundle, ResultType.SUCCESS);
+    super(ResultType.SUCCESS);
   }
 }

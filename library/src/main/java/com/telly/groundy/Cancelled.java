@@ -23,8 +23,6 @@
 
 package com.telly.groundy;
 
-import android.os.Bundle;
-
 /**
  * Use this {@link TaskResult} if you are handling task cancellation. You must check whether the
  * task must be cancelled by checking the {@link com.telly.groundy.GroundyTask#isQuitting()} method;
@@ -33,10 +31,6 @@ import android.os.Bundle;
  */
 public final class Cancelled extends TaskResult {
   public Cancelled() {
-    this(new Bundle());
-  }
-
-  public Cancelled(Bundle returnParams) {
-    super(returnParams, ResultType.CANCEL);
+    super(ResultType.CANCEL);
   }
 }

@@ -26,21 +26,19 @@ package com.telly.groundy.util;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.SparseArray;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 
-/**
- * Bundle creator brikie
- *
- * @author Cristian <cristian@elhacker.net>
- */
 public class Bundler {
 
-  private final Bundle mBundle;
+  protected final Bundle mBundle;
 
   public Bundler() {
     mBundle = new Bundle();
+  }
+
+  public Bundler(Bundle bundle) {
+    mBundle = bundle;
   }
 
   public Bundle build() {
@@ -48,8 +46,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a Boolean value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts a Boolean value into the mapping of this Bundle, replacing any existing value for the
+   * given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value a Boolean, or null
@@ -60,19 +58,20 @@ public class Bundler {
   }
 
   /**
-   * Inserts a byte value into the mapping of this Bundle, replacing
-   * any existing value for the given key.
+   * Inserts a byte value into the mapping of this Bundle, replacing any existing value for the
+   * given key.
    *
    * @param key   a String, or null
    * @param value a byte
    */
   public Bundler add(String key, byte value) {
+    mBundle.putByte(key, value);
     return this;
   }
 
   /**
-   * Inserts a char value into the mapping of this Bundle, replacing
-   * any existing value for the given key.
+   * Inserts a char value into the mapping of this Bundle, replacing any existing value for the
+   * given key.
    *
    * @param key   a String, or null
    * @param value a char, or null
@@ -83,8 +82,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a short value into the mapping of this Bundle, replacing
-   * any existing value for the given key.
+   * Inserts a short value into the mapping of this Bundle, replacing any existing value for the
+   * given key.
    *
    * @param key   a String, or null
    * @param value a short
@@ -95,8 +94,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts an int value into the mapping of this Bundle, replacing
-   * any existing value for the given key.
+   * Inserts an int value into the mapping of this Bundle, replacing any existing value for the
+   * given key.
    *
    * @param key   a String, or null
    * @param value an int, or null
@@ -107,8 +106,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a long value into the mapping of this Bundle, replacing
-   * any existing value for the given key.
+   * Inserts a long value into the mapping of this Bundle, replacing any existing value for the
+   * given key.
    *
    * @param key   a String, or null
    * @param value a long
@@ -119,8 +118,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a float value into the mapping of this Bundle, replacing
-   * any existing value for the given key.
+   * Inserts a float value into the mapping of this Bundle, replacing any existing value for the
+   * given key.
    *
    * @param key   a String, or null
    * @param value a float
@@ -131,8 +130,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a double value into the mapping of this Bundle, replacing
-   * any existing value for the given key.
+   * Inserts a double value into the mapping of this Bundle, replacing any existing value for the
+   * given key.
    *
    * @param key   a String, or null
    * @param value a double
@@ -143,8 +142,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a String value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts a String value into the mapping of this Bundle, replacing any existing value for the
+   * given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value a String, or null
@@ -155,8 +154,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a CharSequence value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts a CharSequence value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value a CharSequence, or null
@@ -167,8 +166,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a Parcelable value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts a Parcelable value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value a Parcelable object, or null
@@ -179,9 +178,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts an array of Parcelable values into the mapping of this Bundle,
-   * replacing any existing value for the given key.  Either key or value may
-   * be null.
+   * Inserts an array of Parcelable values into the mapping of this Bundle, replacing any existing
+   * value for the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value an array of Parcelable objects, or null
@@ -192,9 +190,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a List of Parcelable values into the mapping of this Bundle,
-   * replacing any existing value for the given key.  Either key or value may
-   * be null.
+   * Inserts a List of Parcelable values into the mapping of this Bundle, replacing any existing
+   * value for the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value an ArrayList of Parcelable objects, or null
@@ -205,22 +202,20 @@ public class Bundler {
   }
 
   /**
-   * Inserts a SparseArray of Parcelable values into the mapping of this
-   * Bundle, replacing any existing value for the given key.  Either key
-   * or value may be null.
+   * Inserts a SparseArray of Parcelable values into the mapping of this Bundle, replacing any
+   * existing value for the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value a SparseArray of Parcelable objects, or null
    */
-  public Bundler add(String key,
-                     SparseArray<? extends Parcelable> value) {
+  public Bundler add(String key, SparseArray<? extends Parcelable> value) {
     mBundle.putSparseParcelableArray(key, value);
     return this;
   }
 
   /**
-   * Inserts an ArrayList<Integer> value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts an ArrayList<Integer> value into the mapping of this Bundle, replacing any existing
+   * value for the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value an ArrayList<Integer> object, or null
@@ -231,8 +226,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts an ArrayList<String> value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts an ArrayList<String> value into the mapping of this Bundle, replacing any existing
+   * value for the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value an ArrayList<String> object, or null
@@ -243,8 +238,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts an ArrayList<CharSequence> value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts an ArrayList<CharSequence> value into the mapping of this Bundle, replacing any
+   * existing value for the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value an ArrayList<CharSequence> object, or null
@@ -255,8 +250,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a Serializable value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts a Serializable value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value a Serializable object, or null
@@ -267,8 +262,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a boolean array value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts a boolean array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value a boolean array object, or null
@@ -279,8 +274,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a byte array value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts a byte array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value a byte array object, or null
@@ -291,8 +286,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a short array value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts a short array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value a short array object, or null
@@ -303,8 +298,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a char array value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts a char array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value a char array object, or null
@@ -315,8 +310,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts an int array value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts an int array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value an int array object, or null
@@ -327,8 +322,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a long array value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts a long array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value a long array object, or null
@@ -339,8 +334,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a float array value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts a float array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value a float array object, or null
@@ -351,8 +346,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a double array value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts a double array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value a double array object, or null
@@ -363,8 +358,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a String array value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts a String array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value a String array object, or null
@@ -375,8 +370,8 @@ public class Bundler {
   }
 
   /**
-   * Inserts a CharSequence array value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts a CharSequence array value into the mapping of this Bundle, replacing any existing
+   * value for the given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value a CharSequence array object, or null
@@ -387,14 +382,26 @@ public class Bundler {
   }
 
   /**
-   * Inserts a Bundle value into the mapping of this Bundle, replacing
-   * any existing value for the given key.  Either key or value may be null.
+   * Inserts a Bundle value into the mapping of this Bundle, replacing any existing value for the
+   * given key.  Either key or value may be null.
    *
    * @param key   a String, or null
    * @param value a Bundle object, or null
+   * @return itself
    */
   public Bundler add(String key, Bundle value) {
     mBundle.putBundle(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts all mappings from the given Bundle into this Bundle.
+   *
+   * @param bundle the bundle to map
+   * @return itself
+   */
+  public Bundler addAll(Bundle bundle) {
+    mBundle.putAll(bundle);
     return this;
   }
 }

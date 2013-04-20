@@ -30,7 +30,6 @@ import com.telly.groundy.GroundyTask;
 import com.telly.groundy.Succeeded;
 import com.telly.groundy.TaskResult;
 import com.telly.groundy.example.R;
-import com.telly.groundy.util.Bundler;
 import java.util.Random;
 
 @OnChuckNorris
@@ -54,7 +53,9 @@ public class ChuckNorrisKick extends GroundyTask {
     }
 
     if (!random.nextBoolean()) {
-      return new Failed(new Bundler().add("lifeExpectation", random.nextInt(10) + 1).build());
+      Failed failed = new Failed();
+      failed.add("lifeExpectation", random.nextInt(10) + 1);
+      return failed;
     }
     return new Succeeded();
   }

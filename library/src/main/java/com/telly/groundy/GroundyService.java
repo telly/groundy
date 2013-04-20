@@ -353,10 +353,10 @@ public class GroundyService extends Service {
     } catch (Exception e) {
       e.printStackTrace();
 
-      Bundle crashBundle = new Bundle();
-      crashBundle.putString(Groundy.CRASH_MESSAGE, String.valueOf(e.getMessage()));
-      taskResult = new Failed(crashBundle);
+      taskResult = new Failed();
+      taskResult.add(Groundy.CRASH_MESSAGE, String.valueOf(e.getMessage()));
     }
+
     taskInfo.task = null;
     if (requiresWifi) {
       mWakeLockHelper.release();

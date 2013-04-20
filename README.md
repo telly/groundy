@@ -4,8 +4,8 @@ Groundy library for Android
 ![Groundy](http://i.imgur.com/fgC2aaw.png)
 
 Groundy is a fun, sexy way to do background work on your Android app; it's specially useful for
-running tasks that must be executed even if your activities rotated or even quited. It allows
-you to receive notifications from the background task directly to your activity.
+running tasks that must be executed even if your activities are rotated or even quited. It allows
+you to receive notifications from the background task directly to your activity or any object.
 
 It is useful for several scenarios like executing calls to external services (e.g. RESTful web
 services), download and/or process files, encoding audio/video and any kind of task that could
@@ -27,9 +27,9 @@ public class ExampleTask extends GroundyTask {
 
     // return a TaskResult depending on the success of your task
     // and optionally pass some results back
-    Bundle results = new Bundler().add("the_result", "some result").build();
-
-    return new Success(results);
+    Succeeded result = new Succeeded();
+    result.add("the_result", "some result");
+    return result;
   }
 }
 ```
@@ -48,7 +48,7 @@ Groundy.create(this, ExampleTask.class)
 You will get results in your result receiver (in the main thread):
 
 ```java
-@OnSuccess
+@OnSuccess(ExampleTask.class)
 public void onSuccess(@Param("the_result") String result) {
   // do something with the result
 }

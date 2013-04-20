@@ -24,25 +24,21 @@
 package com.telly.groundy;
 
 import android.os.Bundle;
+import com.telly.groundy.util.Bundler;
 
 /**
  * To be returned by {@link com.telly.groundy.GroundyTask#doInBackground()}. It must be either
  * {@link Succeeded}, {@link Failed} or {@link Cancelled}
  */
-public class TaskResult {
+public class TaskResult extends Bundler {
   private final ResultType type;
-  private final Bundle returnParams;
 
-  TaskResult(Bundle returnParams, ResultType type) {
-    if (returnParams == null) {
-      returnParams = new Bundle();
-    }
-    this.returnParams = returnParams;
+  TaskResult(ResultType type) {
     this.type = type;
   }
 
   Bundle getReturnParams() {
-    return returnParams;
+    return mBundle;
   }
 
   ResultType getType() {

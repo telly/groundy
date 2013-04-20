@@ -23,18 +23,12 @@
 
 package com.telly.groundy;
 
-import android.os.Bundle;
-
 /**
  * Use this {@link TaskResult} if the task failed to do its job. You can optionally pass a bundle
  * with some return parameters.
  */
 public final class Failed extends TaskResult {
   public Failed() {
-    this(new Bundle());
-  }
-
-  public Failed(Bundle bundle) {
-    super(bundle, ResultType.FAIL);
+    super(ResultType.FAIL);
   }
 }

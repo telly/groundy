@@ -28,7 +28,6 @@ import com.telly.groundy.Failed;
 import com.telly.groundy.GroundyTask;
 import com.telly.groundy.Succeeded;
 import com.telly.groundy.TaskResult;
-import com.telly.groundy.util.Bundler;
 import org.json.JSONObject;
 
 public class ChuckNorrisTask extends GroundyTask {
@@ -38,7 +37,9 @@ public class ChuckNorrisTask extends GroundyTask {
       String jsonBody = HttpRequest.get("http://api.icndb.com/jokes/random").body();
       JSONObject jsonObject = new JSONObject(jsonBody);
       String fact = jsonObject.getJSONObject("value").getString("joke");
-      return new Succeeded(new Bundler().add("fact", fact).build());
+      Succeeded succeeded = new Succeeded();
+      succeeded.add("fact", fact);
+      return succeeded;
     } catch (Exception e) {
       return new Failed();
     }
