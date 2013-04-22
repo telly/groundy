@@ -39,10 +39,10 @@ Whenever you want to execute the task, just do this:
 ```java
 // this is usually performed from within an Activity
 Bundle params = new Bundler().add("key_name", "foo").build();
-Groundy.create(this, ExampleTask.class)
+Groundy.create(ExampleTask.class)
     .callback(YourActivity.this)  // required if you want to get notified of your task lifecycle
     .params(params)               // optional
-    .queue();
+    .queue(YourActivity.this);
 ```
 
 You will get results in your result receiver (in the main thread):
