@@ -29,6 +29,7 @@ import android.os.ResultReceiver;
 import com.telly.groundy.annotations.OnCancel;
 import com.telly.groundy.annotations.OnFailed;
 import com.telly.groundy.annotations.OnSuccess;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -107,11 +108,35 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
 
   private Object[] getReturnParams(Bundle resultData, MethodSpec methodSpec) {
     Object[] values = new Object[methodSpec.paramNames.size()];
+    Class<?>[] parameterTypes = methodSpec.method.getParameterTypes();
+
     List<String> paramNames = methodSpec.paramNames;
     for (int i = 0; i < paramNames.size(); i++) {
+      Class<?> parameterType = parameterTypes[i];
       String paramName = paramNames.get(i);
       values[i] = resultData.get(paramName);
+      if (values[i] == null) {
+        values[i] = defaultValue(parameterType);
+      } else {
+        if (!parameterType.isAssignableFrom(values[i].getClass())) {
+          throw new RuntimeException(
+            paramName + " parameter is " + values[i].getClass().getSimpleName() + " but the method (" + methodSpec.method + ") expects " + parameterType.getSimpleName());
+        }
+      }
     }
     return values;
+  }
+
+  private static Object defaultValue(Class<?> parameterType) {
+    if (parameterType == int.class || parameterType == Integer.class
+      || parameterType == float.class || parameterType == Float.class
+      || parameterType == Double.class || parameterType == Double.class
+      || parameterType == byte.class || parameterType == Byte.class
+      || parameterType == short.class || parameterType == Short.class) {
+      return 0;
+    } else if (parameterType == boolean.class || parameterType == Boolean.class) {
+      return false;
+    }
+    return null;
   }
 }

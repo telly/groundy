@@ -83,6 +83,10 @@ public abstract class GroundyTask {
     return mId;
   }
 
+  protected TaskResult boolToResult(boolean success) {
+    return success ? new Succeeded() : new Failed();
+  }
+
   /**
    * @return true if the task was run after a service was killed and force_queue_completion was
    *         used.
