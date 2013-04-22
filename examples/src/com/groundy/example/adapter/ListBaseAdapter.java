@@ -21,7 +21,7 @@
  * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.telly.groundy.adapter;
+package com.groundy.example.adapter;
 
 import android.content.Context;
 import android.content.res.Resources;

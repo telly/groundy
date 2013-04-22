@@ -21,26 +21,18 @@
  * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.telly.groundy.adapter;
+package com.groundy.example.adapter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface ResourceId {
-  /**
-   * @return android resource id of the widget representing this field
-   */
+@Retention(RetentionPolicy.RUNTIME) @Target(ElementType.TYPE)
+public @interface Layout {
+  /** @return android resource id of the layout representing this view holder */
   int value() default 0;
 
-  /**
-   * @return true if you want to ignore this field
-   */
-  boolean ignore() default false;
+  /** @return android resource id array of the layout representing this view holder */
+  int[] ids() default 0;
 }
