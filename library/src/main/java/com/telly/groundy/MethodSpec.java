@@ -26,7 +26,7 @@ package com.telly.groundy;
 import java.lang.reflect.Method;
 import java.util.List;
 
-public class MethodSpec {
+class MethodSpec {
   final Object handler;
   final Method method;
   final List<String> paramNames;

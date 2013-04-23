@@ -24,6 +24,7 @@
 package com.telly.groundy;
 
 import com.telly.groundy.annotations.*;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -35,6 +36,8 @@ import java.util.Map;
 class ReflectHandler implements ResponseHandler {
 
   private static final Class<?>[] GROUNDY_CALLBACKS = {OnStart.class, OnSuccess.class, OnFailed.class, OnCancel.class, OnProgress.class};
+  private static final Map<Class<?>, Method[]> METHODS_CACHE = new HashMap<Class<?>, Method[]>();
+  private static final Map<Class<?>, Annotation[]> ANNOTATIONS_CACHE = new HashMap<Class<?>, Annotation[]>();
   private final Map<Class<? extends Annotation>, List<MethodSpec>> callbacksMap;
 
   ReflectHandler(Class<? extends GroundyTask> groundyTaskType, Object... callbackHandlers) {
@@ -85,7 +88,7 @@ class ReflectHandler implements ResponseHandler {
 
   private void appendMethodSpec(Class<? extends GroundyTask> groundyTaskType, Object handler,
                                 Class<?> type) {
-    for (Method method : type.getDeclaredMethods()) {
+    for (Method method : getDeclaredMethods(type)) {
       // register groundy callbacks
       for (Class<?> groundyCallback : GROUNDY_CALLBACKS) {
         //noinspection unchecked
@@ -93,7 +96,7 @@ class ReflectHandler implements ResponseHandler {
         appendMethodCallback(groundyTaskType, annotation, handler, method);
       }
 
-      Annotation[] annotations = groundyTaskType.getDeclaredAnnotations();
+      Annotation[] annotations = getDeclaredAnnotations(groundyTaskType);
       if (annotations != null) {
         for (Annotation annotation : annotations) {
           Class<? extends Annotation> callbackAnnotation = annotation.annotationType();
@@ -103,6 +106,20 @@ class ReflectHandler implements ResponseHandler {
         }
       }
     }
+  }
+
+  private Annotation[] getDeclaredAnnotations(Class<?> type) {
+    if (!ANNOTATIONS_CACHE.containsKey(type)) {
+      ANNOTATIONS_CACHE.put(type, type.getDeclaredAnnotations());
+    }
+    return ANNOTATIONS_CACHE.get(type);
+  }
+
+  private static Method[] getDeclaredMethods(Class<?> type) {
+    if (!METHODS_CACHE.containsKey(type)) {
+      METHODS_CACHE.put(type, type.getDeclaredMethods());
+    }
+    return METHODS_CACHE.get(type);
   }
 
   @Override public List<MethodSpec> getMethodSpecs(Class<? extends Annotation> callbackAnnotation) {

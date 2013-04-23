@@ -31,7 +31,6 @@ import com.telly.groundy.annotations.OnFailed;
 import com.telly.groundy.annotations.OnSuccess;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 class InternalReceiver extends ResultReceiver implements HandlersHolder {
@@ -98,10 +97,8 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
           groundyProxy.onTaskEnded();
         }
         methodSpec.method.invoke(methodSpec.handler, values);
-      } catch (IllegalAccessException e) {
-        e.printStackTrace();
-      } catch (InvocationTargetException e) {
-        e.printStackTrace();
+      } catch (Exception pokemon) {
+        pokemon.printStackTrace();
       }
     }
   }
@@ -118,13 +115,38 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
       if (values[i] == null) {
         values[i] = defaultValue(parameterType);
       } else {
-        if (!parameterType.isAssignableFrom(values[i].getClass())) {
+        if (!isTypeValid(parameterType, values[i].getClass())) {
           throw new RuntimeException(
             paramName + " parameter is " + values[i].getClass().getSimpleName() + " but the method (" + methodSpec.method + ") expects " + parameterType.getSimpleName());
         }
       }
     }
     return values;
+  }
+
+  private static boolean isTypeValid(Class<?> expected, Class<?> actual) {
+    if (expected == Double.class || expected == double.class) {
+      return isAnyOf(actual, long.class, Long.class, int.class, Integer.class,
+        double.class, Double.class, float.class, Float.class);
+    } else if (expected == Float.class || expected == float.class) {
+      return isAnyOf(actual, int.class, Integer.class, float.class, Float.class);
+    } else if (expected == Long.class || expected == long.class) {
+      return isAnyOf(actual, int.class, Integer.class, Long.class, long.class);
+    } else if (expected == Integer.class || expected == int.class) {
+      return isAnyOf(actual, int.class, Integer.class);
+    } else if (expected == Boolean.class || expected == boolean.class) {
+      return isAnyOf(actual, boolean.class, Boolean.class);
+    }
+    return expected.isAssignableFrom(actual);
+  }
+
+  private static boolean isAnyOf(Class<?> foo, Class<?>... bars) {
+    for (Class<?> bar : bars) {
+      if (foo == bar) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static Object defaultValue(Class<?> parameterType) {
