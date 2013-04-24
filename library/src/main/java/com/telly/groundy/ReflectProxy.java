@@ -244,8 +244,10 @@ class ReflectProxy implements ResultProxy {
   private static Object defaultValue(Class<?> parameterType) {
     if (parameterType == int.class || parameterType == Integer.class
       || parameterType == float.class || parameterType == Float.class
-      || parameterType == Double.class || parameterType == Double.class
+      || parameterType == double.class || parameterType == Double.class
+      || parameterType == long.class || parameterType == Long.class
       || parameterType == byte.class || parameterType == Byte.class
+      || parameterType == char.class || parameterType == Character.class
       || parameterType == short.class || parameterType == Short.class) {
       return 0;
     } else if (parameterType == boolean.class || parameterType == Boolean.class) {

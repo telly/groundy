@@ -154,13 +154,22 @@ public class GroundyAnnotationsProcessor extends AbstractProcessor {
           NameAndType nameAndType = proxyImpl.paramNames.get(i);
           String paramInsertionName = "groundyCallbackParam" + i;
 
+          String valName = "groundyValue" + i;
+          String assignation = "resultData.get(\"" + nameAndType.name + "\")";
+          javaWriter.emitStatement("Object " + valName + " = " + assignation);
+
+          javaWriter.beginControlFlow("if(" + valName + " == null)");
+          javaWriter.emitStatement(valName + " = " + defaultValue(nameAndType.type));
+          javaWriter.endControlFlow();
+
           String declaration = nameAndType.type + " " + paramInsertionName;
           String casting = " = (" + cleanCasting(nameAndType.type) + ") ";
-          String assignation = "resultData.get(\"" + nameAndType.name + "\")";
-          javaWriter.emitStatement(declaration + casting + assignation);
+          javaWriter.emitStatement(declaration + casting + valName);
 
           invocation.append(separator).append(paramInsertionName);
           separator = ", ";
+
+          javaWriter.emitEmptyLine();
         }
 
         String castTarget = "((" + fullTargetClassName + ")target).";
@@ -188,6 +197,21 @@ public class GroundyAnnotationsProcessor extends AbstractProcessor {
       e.printStackTrace();
       System.exit(-1);
     }
+  }
+
+  private static String defaultValue(String parameterType) {
+    if (parameterType.equals(int.class.getName()) || parameterType.equals("Integer")
+      || parameterType.equals(float.class.getName()) || parameterType.equals("Float")
+      || parameterType.equals(double.class.getName()) || parameterType.equals("Double")
+      || parameterType.equals(long.class.getName()) || parameterType.equals("Long")
+      || parameterType.equals(byte.class.getName()) || parameterType.equals("Byte")
+      || parameterType.equals(char.class.getName()) || parameterType.equals("Character")
+      || parameterType.equals(short.class.getName()) || parameterType.equals("Short")) {
+      return "0";
+    } else if (parameterType.equals(boolean.class.getName()) || parameterType.equals("Boolean")) {
+      return "false";
+    }
+    return "null";
   }
 
   private String cleanCasting(String type) {
