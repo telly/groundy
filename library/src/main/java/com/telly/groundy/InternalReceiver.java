@@ -26,22 +26,34 @@ package com.telly.groundy;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.util.Log;
 import com.telly.groundy.annotations.OnCancel;
 import com.telly.groundy.annotations.OnFailed;
 import com.telly.groundy.annotations.OnSuccess;
-
 import java.lang.annotation.Annotation;
-import java.util.List;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class InternalReceiver extends ResultReceiver implements HandlersHolder {
 
-  private ResponseHandler handlerProxy;
+  private static final String TAG = "groundy:receiver";
+  private final List<Object> callbackHandlers;
+  private final Class<? extends GroundyTask> groundyTaskType;
   private TaskProxy groundyProxy;
+  public static final Pattern INNER_PATTERN = Pattern.compile("^.+?\\$\\d$");
+  private static final Map<TaskAndHandler, ResultProxy> proxies;
 
-  InternalReceiver(Class<? extends GroundyTask> groundyTaskType, Object callbackHandler,
-                   Object... callbackHandlers) {
-    super(new Handler());
-    setupHandler(groundyTaskType, callbackHandler, callbackHandlers);
+  static {
+    proxies = Collections.synchronizedMap(new HashMap<TaskAndHandler, ResultProxy>());
+  }
+
+  InternalReceiver(Class<? extends GroundyTask> taskType, Object... handlers) {
+    super(new Handler()); // TODO make sure we are in the main thread
+    callbackHandlers = new ArrayList<Object>();
+    groundyTaskType = taskType;
+    appendCallbackHandlers(handlers);
   }
 
   @Override
@@ -53,112 +65,124 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
     }
   }
 
-  @Override public void appendCallbackHandlers(Class<? extends GroundyTask> groundyTaskClass,
-                                               Object... extraCallbackHandlers) {
-    handlerProxy.appendCallbackHandlers(groundyTaskClass, extraCallbackHandlers);
+  @Override public void appendCallbackHandlers(Object... handlers) {
+    if (handlers != null) {
+      for (Object callbackHandler : handlers) {
+        callbackHandlers.add(callbackHandler);
+      }
+    }
   }
 
   @Override public void removeCallbackHandlers(Class<? extends GroundyTask> groundyTaskClass,
-                                               Object... callbackHandlers) {
-    handlerProxy.removeCallbackHandlers(groundyTaskClass, callbackHandlers);
+                                               Object... handlers) {
+    if (handlers != null) {
+      for (Object callbackHandler : handlers) {
+        callbackHandlers.remove(callbackHandler);
+      }
+    }
   }
 
   @Override public void clearHandlers() {
-    handlerProxy.clearHandlers();
+    callbackHandlers.clear();
   }
 
-  public void setCallbackHandlers(Class<? extends GroundyTask> groundyTaskClass,
-                                  Object... extraCallbackHandlers) {
-    setupHandler(groundyTaskClass, extraCallbackHandlers);
+  @Override public void handleCallback(Class<? extends Annotation> callbackAnnotation,
+                                       Bundle resultData) {
+    boolean isEndingAnnotation = callbackAnnotation == OnSuccess.class ||
+        callbackAnnotation == OnFailed.class ||
+        callbackAnnotation == OnCancel.class;
+    if (isEndingAnnotation && groundyProxy != null) {
+      groundyProxy.onTaskEnded();
+    }
+
+    for (Object callbackHandler : callbackHandlers) {
+      ResultProxy methodProxy = getMethodProxy(callbackHandler);
+      if (methodProxy != null) {
+        methodProxy.apply(callbackHandler, callbackAnnotation, resultData);
+      }
+    }
+  }
+
+  private ResultProxy getMethodProxy(Object handler) {
+    if (handler == null) {
+      return null;
+    }
+
+    Class<?> handlerType = handler.getClass();
+    TaskAndHandler taskAndHandler = new TaskAndHandler(groundyTaskType, handlerType);
+    synchronized (proxies) {
+      if (proxies.containsKey(taskAndHandler)) {
+        return proxies.get(taskAndHandler);
+      }
+    }
+
+    ResultProxy resultProxy;
+    boolean isNotPublic = !Modifier.isPublic(handlerType.getModifiers());
+    if (isInner(handlerType) || isNotPublic) {
+      if (isNotPublic) {
+        Log.d(TAG,
+            "Using reflection for " + handlerType + " because its not public. It's recommended to use public callbacks which enables code generation which makes things way faster.");
+      }
+      resultProxy = new ReflectProxy(groundyTaskType, handlerType);
+    } else {
+      try {
+        String pkg = "com.telly.groundy.generated.";
+        String callbackClassName = handlerType.getSimpleName();
+        String taskName = groundyTaskType.getName().replaceAll("\\.", "\\$");
+        Class<?> proxyClass = Class.forName(pkg + callbackClassName + "$" + taskName + "$Proxy");
+        resultProxy = (ResultProxy) proxyClass.newInstance();
+        if (resultProxy == null) {
+          throw new NullPointerException("Could not create proxy: " + proxyClass);
+        }
+        Log.d(TAG, "Using fast proxy for: " + handlerType);
+      } catch (Exception e) {
+        e.printStackTrace();
+        resultProxy = new ReflectProxy(groundyTaskType, handlerType);
+        Log.d(TAG, "Using reflection proxy for " + handlerType);
+      }
+    }
+
+    proxies.put(taskAndHandler, resultProxy);
+    return resultProxy;
+  }
+
+  private static boolean isInner(Class<?> type) {
+    Matcher matcher = INNER_PATTERN.matcher(type.getName());
+    return matcher.matches();
   }
 
   public void setOnFinishedListener(TaskProxyImpl<? extends GroundyTask> groundyProxy) {
     this.groundyProxy = groundyProxy;
   }
 
-  private void setupHandler(Class<? extends GroundyTask> groundyTaskType,
-                            Object... extraCallbackHandlers) {
-    handlerProxy = new ReflectHandler(groundyTaskType, extraCallbackHandlers);
-  }
+  private static class TaskAndHandler {
+    final Class<? extends GroundyTask> taskType;
+    final Class<?> handlerType;
 
-  private void handleCallback(Class<? extends Annotation> callbackAnnotation, Bundle resultData) {
-    List<MethodSpec> methodSpecs = handlerProxy.getMethodSpecs(callbackAnnotation);
-    if (methodSpecs == null || methodSpecs.isEmpty()) {
-      return;
+    private TaskAndHandler(Class<? extends GroundyTask> taskType, Class<?> handlerType) {
+      this.taskType = taskType;
+      this.handlerType = handlerType;
     }
 
-    for (MethodSpec methodSpec : methodSpecs) {
-      Object[] values = getReturnParams(resultData, methodSpec);
-      try {
-        boolean isEndingAnnotation = callbackAnnotation == OnSuccess.class ||
-            callbackAnnotation == OnFailed.class ||
-            callbackAnnotation == OnCancel.class;
-        if (isEndingAnnotation && groundyProxy != null) {
-          groundyProxy.onTaskEnded();
-        }
-        methodSpec.method.invoke(methodSpec.handler, values);
-      } catch (Exception pokemon) {
-        pokemon.printStackTrace();
-      }
-    }
-  }
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
 
-  private Object[] getReturnParams(Bundle resultData, MethodSpec methodSpec) {
-    Object[] values = new Object[methodSpec.paramNames.size()];
-    Class<?>[] parameterTypes = methodSpec.method.getParameterTypes();
+      TaskAndHandler that = (TaskAndHandler) o;
 
-    List<String> paramNames = methodSpec.paramNames;
-    for (int i = 0; i < paramNames.size(); i++) {
-      Class<?> parameterType = parameterTypes[i];
-      String paramName = paramNames.get(i);
-      values[i] = resultData.get(paramName);
-      if (values[i] == null) {
-        values[i] = defaultValue(parameterType);
-      } else {
-        if (!isTypeValid(parameterType, values[i].getClass())) {
-          throw new RuntimeException(
-            paramName + " parameter is " + values[i].getClass().getSimpleName() + " but the method (" + methodSpec.method + ") expects " + parameterType.getSimpleName());
-        }
-      }
-    }
-    return values;
-  }
+      if (handlerType != null ? !handlerType.equals(that.handlerType) : that.handlerType != null)
+        return false;
+      if (taskType != null ? !taskType.equals(that.taskType) : that.taskType != null) return false;
 
-  private static boolean isTypeValid(Class<?> expected, Class<?> actual) {
-    if (expected == Double.class || expected == double.class) {
-      return isAnyOf(actual, long.class, Long.class, int.class, Integer.class,
-        double.class, Double.class, float.class, Float.class);
-    } else if (expected == Float.class || expected == float.class) {
-      return isAnyOf(actual, int.class, Integer.class, float.class, Float.class);
-    } else if (expected == Long.class || expected == long.class) {
-      return isAnyOf(actual, int.class, Integer.class, Long.class, long.class);
-    } else if (expected == Integer.class || expected == int.class) {
-      return isAnyOf(actual, int.class, Integer.class);
-    } else if (expected == Boolean.class || expected == boolean.class) {
-      return isAnyOf(actual, boolean.class, Boolean.class);
+      return true;
     }
-    return expected.isAssignableFrom(actual);
-  }
 
-  private static boolean isAnyOf(Class<?> foo, Class<?>... bars) {
-    for (Class<?> bar : bars) {
-      if (foo == bar) {
-        return true;
-      }
+    @Override
+    public int hashCode() {
+      int result = taskType != null ? taskType.hashCode() : 0;
+      result = 31 * result + (handlerType != null ? handlerType.hashCode() : 0);
+      return result;
     }
-    return false;
-  }
-
-  private static Object defaultValue(Class<?> parameterType) {
-    if (parameterType == int.class || parameterType == Integer.class
-      || parameterType == float.class || parameterType == Float.class
-      || parameterType == Double.class || parameterType == Double.class
-      || parameterType == byte.class || parameterType == Byte.class
-      || parameterType == short.class || parameterType == Short.class) {
-      return 0;
-    } else if (parameterType == boolean.class || parameterType == Boolean.class) {
-      return false;
-    }
-    return null;
   }
 }

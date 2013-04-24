@@ -23,17 +23,10 @@
 
 package com.telly.groundy;
 
-import java.lang.reflect.Method;
-import java.util.List;
+import android.os.Bundle;
 
-class MethodSpec {
-  final Object handler;
-  final Method method;
-  final List<String> paramNames;
+import java.lang.annotation.Annotation;
 
-  MethodSpec(Object handler, Method method, List<String> paramNames) {
-    this.handler = handler;
-    this.method = method;
-    this.paramNames = paramNames;
-  }
+public interface ResultProxy {
+  void apply(Object target, Class<? extends Annotation> callbackAnnotation, Bundle resultData);
 }

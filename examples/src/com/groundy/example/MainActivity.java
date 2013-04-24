@@ -29,7 +29,6 @@ import android.os.Bundle;
 import android.view.View;
 import com.telly.groundy.GroundyManager;
 import com.telly.groundy.example.R;
-
 import java.util.SortedMap;
 import java.util.TreeMap;
 
