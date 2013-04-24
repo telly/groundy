@@ -21,7 +21,7 @@
  * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.telly.groundy.adapter;
+package com.groundy.example.adapter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

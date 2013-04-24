@@ -65,7 +65,7 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   /**
    * Creates a new Groundy instance ready to be queued or executed. You can configure it by adding
    * parameters ({@link #params(android.os.Bundle)}), setting a group id ({@link #group(int)}) or
-   * providing a callback ({@link #callback(Object, Object...)}).
+   * providing a callback ({@link #callback(Object...)}).
    * <p/>
    * You must configure the task <b>before</b> queueing or executing it.
    *
@@ -93,13 +93,15 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   }
 
   /**
-   * @param callback       callback to register for this task
-   * @param extraCallbacks more callbacks to register for this task
+   * @param callbacks callbacks to register for this task
    * @return itself
    */
-  public Groundy callback(Object callback, Object... extraCallbacks) {
+  public Groundy callback(Object... callbacks) {
+    if (callbacks == null || callbacks.length == 0) {
+      throw new IllegalArgumentException("You must pass at least one callback handler");
+    }
     checkAlreadyProcessed();
-    mResultReceiver = new InternalReceiver(mGroundyTask, callback, extraCallbacks);
+    mResultReceiver = new InternalReceiver(mGroundyTask, callbacks);
     return this;
   }
 
@@ -160,6 +162,22 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
    * @return a unique number assigned to this task
    */
   public TaskProxy queue(Context context) {
+    boolean async = false;
+    return internalQueueOrExecute(context, async);
+  }
+
+  /**
+   * Execute a task right away
+   *
+   * @param context used to start the groundy service
+   * @return a unique number assigned to this task
+   */
+  public TaskProxyImpl<T> execute(Context context) {
+    boolean async = true;
+    return internalQueueOrExecute(context, async);
+  }
+
+  private TaskProxyImpl<T> internalQueueOrExecute(Context context, boolean async) {
     markAsProcessed();
     TaskProxyImpl<T> taskProxy = new TaskProxyImpl<T>(this);
     if (callbacksManager != null) {
@@ -170,22 +188,8 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
       mResultReceiver.setOnFinishedListener(taskProxy);
     }
 
-    boolean async = false;
     startApiService(context, async);
     return taskProxy;
-  }
-
-  /**
-   * Execute a task right away
-   *
-   * @param context used to start the groundy service
-   * @return a unique number assigned to this task
-   */
-  public TaskProxyImpl<T> execute(Context context) {
-    markAsProcessed();
-    boolean async = true;
-    startApiService(context, async);
-    return new TaskProxyImpl<T>(this);
   }
 
   long getId() {
