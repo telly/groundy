@@ -38,7 +38,8 @@ class TaskProxyImpl<T extends GroundyTask> implements TaskProxy {
   @Override public void updateCallbackHandlers(Object... callbackHandlers) {
     if (mIsValid && callbackHandlers != null) {
       InternalReceiver internalReceiver = groundy.getReceiver();
-      internalReceiver.setCallbackHandlers(groundy.getGroundyTaskClass(), callbackHandlers);
+      internalReceiver.clearHandlers();
+      internalReceiver.appendCallbackHandlers(callbackHandlers);
     }
   }
 
@@ -69,7 +70,7 @@ class TaskProxyImpl<T extends GroundyTask> implements TaskProxy {
 
   @Override public void appendCallbackHandlers(Object... handlers) {
     InternalReceiver internalReceiver = groundy.getReceiver();
-    internalReceiver.appendCallbackHandlers(groundy.getGroundyTaskClass(), handlers);
+    internalReceiver.appendCallbackHandlers(handlers);
   }
 
   @Override public void removeCallbackHandlers(Object... handlers) {

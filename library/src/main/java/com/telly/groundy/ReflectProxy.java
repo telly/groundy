@@ -23,7 +23,9 @@
 
 package com.telly.groundy;
 
+import android.os.Bundle;
 import com.telly.groundy.annotations.*;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -32,24 +34,44 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class ReflectHandler implements ResponseHandler {
+class ReflectProxy implements ResultProxy {
 
   private static final Class<?>[] GROUNDY_CALLBACKS = {OnStart.class, OnSuccess.class, OnFailed.class, OnCancel.class, OnProgress.class};
-  private final Map<Class<? extends Annotation>, List<MethodSpec>> callbacksMap;
+  private static final Map<Class<?>, Method[]> METHODS_CACHE = new HashMap<Class<?>, Method[]>();
+  private static final Map<Class<?>, Annotation[]> ANNOTATIONS_CACHE = new HashMap<Class<?>, Annotation[]>();
 
-  ReflectHandler(Class<? extends GroundyTask> groundyTaskType, Object... callbackHandlers) {
+  private final Map<Class<? extends Annotation>, List<MethodSpec>> callbacksMap;
+  private final Class<? extends GroundyTask> groundyTaskType;
+  private final Class<?> handlerType;
+
+  ReflectProxy(Class<? extends GroundyTask> groundyTaskType, Class<?> handlerType) {
+    this.groundyTaskType = groundyTaskType;
+    this.handlerType = handlerType;
     callbacksMap = new HashMap<Class<? extends Annotation>, List<MethodSpec>>();
-    if (callbackHandlers != null) {
-      for (Object callbackHandler : callbackHandlers) {
-        appendMethodSpec(groundyTaskType, callbackHandler);
+
+    fillMethodSpecMap();
+  }
+
+  @Override public void apply(Object target, Class<? extends Annotation> callbackAnnotation, Bundle resultData) {
+    List<MethodSpec> methodSpecs = callbacksMap.get(callbackAnnotation);
+    if (methodSpecs == null || methodSpecs.isEmpty()) {
+      return;
+    }
+
+    for (MethodSpec methodSpec : methodSpecs) {
+      Object[] values = getReturnParams(resultData, methodSpec);
+      try {
+        methodSpec.method.invoke(target, values);
+      } catch (Exception pokemon) {
+        pokemon.printStackTrace();
       }
     }
   }
 
-  private void appendMethodSpec(Class<? extends GroundyTask> groundyTaskType, Object handler) {
-    Class<?> type = handler.getClass();
+  private void fillMethodSpecMap() {
+    Class<?> type = handlerType;
     while (type != Object.class) {
-      appendMethodSpec(groundyTaskType, handler, type);
+      fillMethodSpecMapWith(type);
       if (!groundyTaskType.isAnnotationPresent(Traverse.class)) {
         // traverse class hierarchy when @Traverse annotation is present only
         break;
@@ -58,81 +80,43 @@ class ReflectHandler implements ResponseHandler {
     }
   }
 
-  private void removeMethodSpec(Class<? extends GroundyTask> groundyTaskType, Object handler) {
-    for (List<MethodSpec> methodSpecs : new ArrayList<List<MethodSpec>>(callbacksMap.values())) {
-      for (MethodSpec methodSpec : methodSpecs) {
-        boolean handlerAnnotationMatched = false;
-        for (Annotation annotation : methodSpec.method.getDeclaredAnnotations()) {
-          if (isValid(groundyTaskType, annotation)) {
-            handlerAnnotationMatched = true;
-            break;
-          }
-
-          Class<? extends Annotation> annotationType = annotation.annotationType();
-          boolean customCallback = annotationType.isAnnotationPresent(Callback.class);
-          if (customCallback && groundyTaskType.isAnnotationPresent(annotationType)) {
-            handlerAnnotationMatched = true;
-            break;
-          }
-        }
-
-        if (handlerAnnotationMatched && methodSpec.handler == handler) {
-          methodSpecs.remove(methodSpec);
-        }
-      }
-    }
-  }
-
-  private void appendMethodSpec(Class<? extends GroundyTask> groundyTaskType, Object handler,
-                                Class<?> type) {
-    for (Method method : type.getDeclaredMethods()) {
+  private void fillMethodSpecMapWith(Class<?> type) {
+    for (Method method : getDeclaredMethods(type)) {
       // register groundy callbacks
       for (Class<?> groundyCallback : GROUNDY_CALLBACKS) {
         //noinspection unchecked
         Class<? extends Annotation> annotation = (Class<? extends Annotation>) groundyCallback;
-        appendMethodCallback(groundyTaskType, annotation, handler, method);
+        appendMethodCallback(groundyTaskType, annotation, method);
       }
 
-      Annotation[] annotations = groundyTaskType.getDeclaredAnnotations();
+      Annotation[] annotations = getDeclaredAnnotations(groundyTaskType);
       if (annotations != null) {
         for (Annotation annotation : annotations) {
           Class<? extends Annotation> callbackAnnotation = annotation.annotationType();
           if (callbackAnnotation.isAnnotationPresent(Callback.class)) {
-            appendMethodCallback(groundyTaskType, callbackAnnotation, handler, method);
+            appendMethodCallback(groundyTaskType, callbackAnnotation, method);
           }
         }
       }
     }
   }
 
-  @Override public List<MethodSpec> getMethodSpecs(Class<? extends Annotation> callbackAnnotation) {
-    return callbacksMap.get(callbackAnnotation);
-  }
-
-  @Override public void appendCallbackHandlers(Class<? extends GroundyTask> groundyTaskClass,
-                                               Object[] callbackHandlers) {
-    if (callbackHandlers != null) {
-      for (Object callbackHandler : callbackHandlers) {
-        appendMethodSpec(groundyTaskClass, callbackHandler);
-      }
+  private Annotation[] getDeclaredAnnotations(Class<?> type) {
+    if (!ANNOTATIONS_CACHE.containsKey(type)) {
+      ANNOTATIONS_CACHE.put(type, type.getDeclaredAnnotations());
     }
+    return ANNOTATIONS_CACHE.get(type);
   }
 
-  @Override public void removeCallbackHandlers(Class<? extends GroundyTask> groundyTaskClass,
-                                               Object... callbackHandlers) {
-    if (callbackHandlers != null) {
-      for (Object callbackHandler : callbackHandlers) {
-        removeMethodSpec(groundyTaskClass, callbackHandler);
-      }
+  private static Method[] getDeclaredMethods(Class<?> type) {
+    if (!METHODS_CACHE.containsKey(type)) {
+      METHODS_CACHE.put(type, type.getDeclaredMethods());
     }
-  }
-
-  @Override public void clearHandlers() {
-    callbacksMap.clear();
+    return METHODS_CACHE.get(type);
   }
 
   private void appendMethodCallback(Class<? extends GroundyTask> groundyTaskType,
-                                    Class<? extends Annotation> phaseAnnotation, Object handler,
+                                    Class<? extends Annotation> phaseAnnotation,
                                     Method method) {
     Annotation methodAnnotation = method.getAnnotation(phaseAnnotation);
     if (methodAnnotation == null || !isValid(groundyTaskType, methodAnnotation)) {
@@ -175,7 +159,7 @@ class ReflectHandler implements ResponseHandler {
       methodSpecs = new ArrayList<MethodSpec>();
       callbacksMap.put(annotationType, methodSpecs);
     }
-    methodSpecs.add(new MethodSpec(handler, method, paramNames));
+    methodSpecs.add(new MethodSpec(method, paramNames));
   }
 
   private boolean isValid(Class<? extends GroundyTask> groundyTaskType,
@@ -207,5 +191,78 @@ class ReflectHandler implements ResponseHandler {
       }
     }
     return true;
+  }
+
+  private static Object[] getReturnParams(Bundle resultData, MethodSpec methodSpec) {
+    Method method = methodSpec.method;
+
+    Object[] values = new Object[methodSpec.paramNames.size()];
+    Class<?>[] parameterTypes = method.getParameterTypes();
+
+    List<String> paramNames = methodSpec.paramNames;
+    for (int i = 0; i < paramNames.size(); i++) {
+      Class<?> parameterType = parameterTypes[i];
+      String paramName = paramNames.get(i);
+      values[i] = resultData.get(paramName);
+      if (values[i] == null) {
+        values[i] = defaultValue(parameterType);
+      } else {
+        if (!isTypeValid(parameterType, values[i].getClass())) {
+          throw new RuntimeException(
+            paramName + " parameter is " + values[i].getClass().getSimpleName() + " but the method (" + method + ") expects " + parameterType.getSimpleName());
+        }
+      }
+    }
+    return values;
+  }
+
+  private static boolean isTypeValid(Class<?> expected, Class<?> actual) {
+    if (expected == Double.class || expected == double.class) {
+      return isAnyOf(actual, long.class, Long.class, int.class, Integer.class,
+        double.class, Double.class, float.class, Float.class);
+    } else if (expected == Float.class || expected == float.class) {
+      return isAnyOf(actual, int.class, Integer.class, float.class, Float.class);
+    } else if (expected == Long.class || expected == long.class) {
+      return isAnyOf(actual, int.class, Integer.class, Long.class, long.class);
+    } else if (expected == Integer.class || expected == int.class) {
+      return isAnyOf(actual, int.class, Integer.class);
+    } else if (expected == Boolean.class || expected == boolean.class) {
+      return isAnyOf(actual, boolean.class, Boolean.class);
+    }
+    return expected.isAssignableFrom(actual);
+  }
+
+  private static boolean isAnyOf(Class<?> foo, Class<?>... bars) {
+    for (Class<?> bar : bars) {
+      if (foo == bar) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static Object defaultValue(Class<?> parameterType) {
+    if (parameterType == int.class || parameterType == Integer.class
+      || parameterType == float.class || parameterType == Float.class
+      || parameterType == double.class || parameterType == Double.class
+      || parameterType == long.class || parameterType == Long.class
+      || parameterType == byte.class || parameterType == Byte.class
+      || parameterType == char.class || parameterType == Character.class
+      || parameterType == short.class || parameterType == Short.class) {
+      return 0;
+    } else if (parameterType == boolean.class || parameterType == Boolean.class) {
+      return false;
+    }
+    return null;
+  }
+
+  static class MethodSpec {
+    final Method method;
+    final List<String> paramNames;
+
+    MethodSpec(Method method, List<String> paramNames) {
+      this.method = method;
+      this.paramNames = paramNames;
+    }
   }
 }

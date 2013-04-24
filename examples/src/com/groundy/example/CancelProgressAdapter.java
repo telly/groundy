@@ -28,9 +28,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import com.telly.groundy.adapter.Layout;
-import com.telly.groundy.adapter.ListBaseAdapter;
-import com.telly.groundy.adapter.ResourceId;
+import com.groundy.example.adapter.Layout;
+import com.groundy.example.adapter.ListBaseAdapter;
+import com.groundy.example.adapter.ResourceId;
 import com.telly.groundy.example.R;
 
 public class CancelProgressAdapter extends ListBaseAdapter<ProgressItem, CancelProgressAdapter.ViewHolder> {

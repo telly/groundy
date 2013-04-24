@@ -47,6 +47,7 @@
     <android.platform>16</android.platform>
     <android.support.version>r7</android.support.version>
     <android-maven.version>3.3.0</android-maven.version>
+    <java.writer.version>1.0.4</java.writer.version>
   </properties>
 
   <licenses>
@@ -93,6 +94,11 @@
         <artifactId>support-v4</artifactId>
         <version>${android.support.version}</version>
         <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.squareup</groupId>
+        <artifactId>javawriter</artifactId>
+        <version>${java.writer.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -173,6 +179,7 @@
 
   <modules>
     <module>library</module>
+    <module>compiler</module>
     <module>examples</module>
   </modules>
 </project>

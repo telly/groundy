@@ -27,6 +27,8 @@ import android.os.Bundle;
 import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.Groundy;
 import com.telly.groundy.TaskProxy;
+import com.telly.groundy.annotations.OnProgress;
+import com.telly.groundy.annotations.Param;
 
 public class AsyncExample extends QueueExample {
   @Override
@@ -36,5 +38,11 @@ public class AsyncExample extends QueueExample {
         .service(AsyncGroundyService.class)
         .callback(this)
         .execute(this);
+  }
+
+  @OnProgress(RandomTimeTask.class) @Override
+  public void onProgress(@Param(Groundy.TASK_ID) long taskId,
+                         @Param(Groundy.KEY_PROGRESS) int progress) {
+    super.onProgress(taskId, progress);
   }
 }

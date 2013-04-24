@@ -49,6 +49,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.telly</groupId>
+      <artifactId>groundy-compiler</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.github.kevinsawicki</groupId>
       <artifactId>http-request</artifactId>
       <version>4.0</version>

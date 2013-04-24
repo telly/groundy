@@ -21,19 +21,18 @@
  * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.telly.groundy;
+package com.groundy.example.adapter;
 
-import java.lang.reflect.Method;
-import java.util.List;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class MethodSpec {
-  final Object handler;
-  final Method method;
-  final List<String> paramNames;
+@Retention(RetentionPolicy.RUNTIME) @Target(ElementType.TYPE)
+public @interface Layout {
+  /** @return android resource id of the layout representing this view holder */
+  int value() default 0;
 
-  MethodSpec(Object handler, Method method, List<String> paramNames) {
-    this.handler = handler;
-    this.method = method;
-    this.paramNames = paramNames;
-  }
+  /** @return android resource id array of the layout representing this view holder */
+  int[] ids() default 0;
 }
