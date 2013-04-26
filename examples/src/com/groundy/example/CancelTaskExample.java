@@ -34,7 +34,7 @@ import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.Groundy;
 import com.telly.groundy.GroundyManager;
 import com.telly.groundy.GroundyService;
-import com.telly.groundy.TaskProxy;
+import com.telly.groundy.TaskHandler;
 import com.telly.groundy.annotations.OnCancel;
 import com.telly.groundy.annotations.OnProgress;
 import com.telly.groundy.annotations.OnSuccess;
@@ -115,14 +115,14 @@ public class CancelTaskExample extends Activity implements View.OnClickListener,
     Bundle params = new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time).build();
 
     // queue task
-    TaskProxy taskProxy = Groundy.create(CancelableTask.class)
+    TaskHandler taskHandler = Groundy.create(CancelableTask.class)
         .callback(this)
         .group(groupId)
         .params(params)
         .queue(CancelTaskExample.this);
 
     ProgressItem progressItem = new ProgressItem();
-    progressItem.setTaskProxy(taskProxy);
+    progressItem.setTaskProxy(taskHandler);
     progressItem.setProgress(0);
     progressItem.setEstimated(time / 1000);
     progressItem.setColor(groupId);

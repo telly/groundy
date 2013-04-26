@@ -26,26 +26,18 @@ package com.telly.groundy;
 import android.content.Context;
 import android.os.Parcel;
 
-class TaskProxyImpl<T extends GroundyTask> implements TaskProxy {
+class TaskHandlerImpl<T extends GroundyTask> implements TaskHandler {
 
   private final Groundy<T> groundy;
-  private boolean mIsValid = true;
+  private boolean mTaskEnded = false;
 
-  TaskProxyImpl(Groundy<T> groundy) {
+  TaskHandlerImpl(Groundy<T> groundy) {
     this.groundy = groundy;
-  }
-
-  @Override public void updateCallbackHandlers(Object... callbackHandlers) {
-    if (mIsValid && callbackHandlers != null) {
-      InternalReceiver internalReceiver = groundy.getReceiver();
-      internalReceiver.clearHandlers();
-      internalReceiver.appendCallbackHandlers(callbackHandlers);
-    }
   }
 
   @Override public void cancel(Context context, int reason,
                                GroundyManager.SingleCancelListener cancelListener) {
-    if (mIsValid) {
+    if (!mTaskEnded) {
       GroundyManager.cancelTaskById(context, groundy.getId(), reason, cancelListener,
           groundy.getGroundyServiceClass());
     } else {
@@ -53,27 +45,23 @@ class TaskProxyImpl<T extends GroundyTask> implements TaskProxy {
     }
   }
 
-  @Override public void clearCallbackHandlers() {
+  @Override public void clearCallbacks() {
     InternalReceiver internalReceiver = groundy.getReceiver();
     if (internalReceiver != null) {
       internalReceiver.clearHandlers();
     }
   }
 
-  @Override public void onTaskEnded() {
-    mIsValid = false;
+  @Override public boolean taskAlreadyEnded() {
+    return mTaskEnded;
   }
 
-  @Override public boolean shouldRecycle() {
-    return !mIsValid;
-  }
-
-  @Override public void appendCallbackHandlers(Object... handlers) {
+  @Override public void appendCallbacks(Object... handlers) {
     InternalReceiver internalReceiver = groundy.getReceiver();
     internalReceiver.appendCallbackHandlers(handlers);
   }
 
-  @Override public void removeCallbackHandlers(Object... handlers) {
+  @Override public void removeCallbacks(Object... handlers) {
     InternalReceiver internalReceiver = groundy.getReceiver();
     internalReceiver.removeCallbackHandlers(groundy.getGroundyTaskClass(), handlers);
   }
@@ -82,16 +70,21 @@ class TaskProxyImpl<T extends GroundyTask> implements TaskProxy {
     return groundy.getId();
   }
 
+  public void onTaskEnded() {
+    mTaskEnded = true;
+    clearCallbacks();
+  }
+
   @SuppressWarnings("UnusedDeclaration")
-  public static final Creator<TaskProxyImpl> CREATOR = new Creator<TaskProxyImpl>() {
-    @Override public TaskProxyImpl createFromParcel(Parcel source) {
+  public static final Creator<TaskHandlerImpl> CREATOR = new Creator<TaskHandlerImpl>() {
+    @Override public TaskHandlerImpl createFromParcel(Parcel source) {
       Groundy groundy = source.readParcelable(Groundy.class.getClassLoader());
       //noinspection unchecked
-      return new TaskProxyImpl(groundy);
+      return new TaskHandlerImpl(groundy);
     }
 
-    @Override public TaskProxyImpl[] newArray(int size) {
-      return new TaskProxyImpl[size];
+    @Override public TaskHandlerImpl[] newArray(int size) {
+      return new TaskHandlerImpl[size];
     }
   };
 

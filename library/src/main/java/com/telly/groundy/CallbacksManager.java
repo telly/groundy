@@ -48,7 +48,7 @@ public class CallbacksManager {
   public static final String GROUNDY_PROXY_KEY_PREFIX = "com.telly.groundy.key.GROUNDY_PROXY_KEY:";
   private static final String TASK_PROXY_LIST = "com.telly.groundy.key.TASK_PROXY_LIST";
 
-  private final ArrayList<TaskProxy> proxyTasks = new ArrayList<TaskProxy>();
+  private final ArrayList<TaskHandler> proxyTasks = new ArrayList<TaskHandler>();
 
   private CallbacksManager() {
   }
@@ -66,17 +66,18 @@ public class CallbacksManager {
     }
 
     CallbacksManager callbacksManager = new CallbacksManager();
-    ArrayList<TaskProxy> taskProxies = bundle.getParcelableArrayList(TASK_PROXY_LIST);
+    ArrayList<TaskHandler> taskProxies = bundle.getParcelableArrayList(TASK_PROXY_LIST);
     if (taskProxies != null) {
       callbacksManager.proxyTasks.addAll(taskProxies);
     }
 
     if (callbackHandlers != null) {
-      for (TaskProxy proxyTask : new ArrayList<TaskProxy>(callbacksManager.proxyTasks)) {
-        if (proxyTask.shouldRecycle()) {
+      for (TaskHandler proxyTask : new ArrayList<TaskHandler>(callbacksManager.proxyTasks)) {
+        if (proxyTask.taskAlreadyEnded()) {
           callbacksManager.proxyTasks.remove(proxyTask);
         } else {
-          proxyTask.updateCallbackHandlers(callbackHandlers);
+          proxyTask.clearCallbacks();
+          proxyTask.appendCallbacks(callbackHandlers);
         }
       }
     }
@@ -90,11 +91,12 @@ public class CallbacksManager {
    */
   public void linkCallbacks(Object... callbackHandlers) {
     if (callbackHandlers != null) {
-      for (TaskProxy proxyTask : new ArrayList<TaskProxy>(proxyTasks)) {
-        if (proxyTask.shouldRecycle()) {
+      for (TaskHandler proxyTask : new ArrayList<TaskHandler>(proxyTasks)) {
+        if (proxyTask.taskAlreadyEnded()) {
           proxyTasks.remove(proxyTask);
         } else {
-          proxyTask.updateCallbackHandlers(callbackHandlers);
+          proxyTask.clearCallbacks();
+          proxyTask.appendCallbacks(callbackHandlers);
         }
       }
     }
@@ -109,19 +111,19 @@ public class CallbacksManager {
    */
   public void onSaveInstanceState(Bundle bundle) {
     bundle.putParcelableArrayList(TASK_PROXY_LIST, proxyTasks);
-    for (TaskProxy proxyTask : proxyTasks) {
+    for (TaskHandler proxyTask : proxyTasks) {
       bundle.putParcelable(GROUNDY_PROXY_KEY_PREFIX + proxyTask.getTaskId(), proxyTask);
     }
   }
 
   /** Frees all callback handlers from their current tasks. */
   public void onDestroy() {
-    for (TaskProxy proxyTask : proxyTasks) {
-      proxyTask.clearCallbackHandlers();
+    for (TaskHandler proxyTask : proxyTasks) {
+      proxyTask.clearCallbacks();
     }
   }
 
-  void register(TaskProxy taskProxy) {
-    proxyTasks.add(taskProxy);
+  void register(TaskHandler taskHandler) {
+    proxyTasks.add(taskHandler);
   }
 }

@@ -30,7 +30,7 @@ import android.widget.*;
 import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.CallbacksManager;
 import com.telly.groundy.Groundy;
-import com.telly.groundy.TaskProxy;
+import com.telly.groundy.TaskHandler;
 import com.telly.groundy.annotations.OnSuccess;
 import com.telly.groundy.example.R;
 import com.telly.groundy.util.Bundler;
@@ -41,7 +41,7 @@ public class AttachReceiverExample extends Activity {
   private Button mAddTaskBtn;
   private ToggleButton mAttachToastBtn;
   private CallbacksManager callbacksManager;
-  private TaskProxy mTaskProxy;
+  private TaskHandler mTaskHandler;
 
   @Override
   protected void onCreate(Bundle saved) {
@@ -62,9 +62,9 @@ public class AttachReceiverExample extends Activity {
     mAttachToastBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
       @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {
-          mTaskProxy.appendCallbackHandlers(mToastCallback);
+          mTaskHandler.appendCallbacks(mToastCallback);
         } else {
-          mTaskProxy.removeCallbackHandlers(mToastCallback);
+          mTaskHandler.removeCallbacks(mToastCallback);
         }
       }
     });
@@ -82,7 +82,7 @@ public class AttachReceiverExample extends Activity {
             Toast.LENGTH_SHORT).show();
 
         // queue task
-        mTaskProxy = Groundy.create(RandomTimeTask.class)
+        mTaskHandler = Groundy.create(RandomTimeTask.class)
             .callback(AttachReceiverExample.this)
             .callbackManager(callbacksManager)
             .params(params)

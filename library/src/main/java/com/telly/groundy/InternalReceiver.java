@@ -30,18 +30,27 @@ import android.util.Log;
 import com.telly.groundy.annotations.OnCancel;
 import com.telly.groundy.annotations.OnFailed;
 import com.telly.groundy.annotations.OnSuccess;
+import java.io.IOException;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.AbstractSet;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class InternalReceiver extends ResultReceiver implements HandlersHolder {
 
   private static final String TAG = "groundy:receiver";
-  private final List<Object> callbackHandlers;
   private final Class<? extends GroundyTask> groundyTaskType;
-  private TaskProxy groundyProxy;
+  private final SetFromMap<Object> callbackHandlers;
+  private TaskHandler groundyProxy;
   public static final Pattern INNER_PATTERN = Pattern.compile("^.+?\\$\\d$");
   private static final Map<TaskAndHandler, ResultProxy> proxies;
 
@@ -50,8 +59,8 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
   }
 
   InternalReceiver(Class<? extends GroundyTask> taskType, Object... handlers) {
-    super(new Handler()); // TODO make sure we are in the main thread
-    callbackHandlers = new ArrayList<Object>();
+    super(new Handler());
+    callbackHandlers = new SetFromMap<Object>(new WeakHashMap<Object, Boolean>());
     groundyTaskType = taskType;
     appendCallbackHandlers(handlers);
   }
@@ -91,8 +100,8 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
     boolean isEndingAnnotation = callbackAnnotation == OnSuccess.class ||
         callbackAnnotation == OnFailed.class ||
         callbackAnnotation == OnCancel.class;
-    if (isEndingAnnotation && groundyProxy != null) {
-      groundyProxy.onTaskEnded();
+    if (isEndingAnnotation && groundyProxy != null && groundyProxy instanceof TaskHandlerImpl) {
+      ((TaskHandlerImpl) groundyProxy).onTaskEnded();
     }
 
     for (Object callbackHandler : callbackHandlers) {
@@ -151,7 +160,7 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
     return matcher.matches();
   }
 
-  public void setOnFinishedListener(TaskProxyImpl<? extends GroundyTask> groundyProxy) {
+  public void setOnFinishedListener(TaskHandlerImpl<? extends GroundyTask> groundyProxy) {
     this.groundyProxy = groundyProxy;
   }
 
@@ -183,6 +192,89 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
       int result = taskType != null ? taskType.hashCode() : 0;
       result = 31 * result + (handlerType != null ? handlerType.hashCode() : 0);
       return result;
+    }
+  }
+
+  private static class SetFromMap<E> extends AbstractSet<E>
+      implements Set<E>, Serializable {
+    private final Map<E, Boolean> m;  // The backing map
+    private transient Set<E> s;       // Its keySet
+
+    SetFromMap(Map<E, Boolean> map) {
+      if (!map.isEmpty()) {
+        throw new IllegalArgumentException("Map is non-empty");
+      }
+      m = map;
+      s = map.keySet();
+    }
+
+    public void clear() {
+      m.clear();
+    }
+
+    public int size() {
+      return m.size();
+    }
+
+    public boolean isEmpty() {
+      return m.isEmpty();
+    }
+
+    public boolean contains(Object o) {
+      return m.containsKey(o);
+    }
+
+    public boolean remove(Object o) {
+      return m.remove(o) != null;
+    }
+
+    public boolean add(E e) {
+      return m.put(e, Boolean.TRUE) == null;
+    }
+
+    public Iterator<E> iterator() {
+      return s.iterator();
+    }
+
+    public Object[] toArray() {
+      return s.toArray();
+    }
+
+    public <T> T[] toArray(T[] a) {
+      return s.toArray(a);
+    }
+
+    public String toString() {
+      return s.toString();
+    }
+
+    public int hashCode() {
+      return s.hashCode();
+    }
+
+    public boolean equals(Object o) {
+      return o == this || s.equals(o);
+    }
+
+    public boolean containsAll(Collection<?> c) {
+      return s.containsAll(c);
+    }
+
+    public boolean removeAll(Collection<?> c) {
+      return s.removeAll(c);
+    }
+
+    public boolean retainAll(Collection<?> c) {
+      return s.retainAll(c);
+    }
+    // addAll is the only inherited implementation
+
+    private static final long serialVersionUID = 2454657854757543876L;
+
+    private void readObject(java.io.ObjectInputStream stream)
+        throws IOException, ClassNotFoundException {
+      stream.defaultReadObject();
+      s = m.keySet();
     }
   }
 }

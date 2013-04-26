@@ -26,6 +26,7 @@ package com.telly.groundy;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ResultReceiver;
@@ -51,6 +52,7 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   private boolean mAlreadyProcessed = false;
   private CallbacksManager callbacksManager;
   private Class<? extends GroundyService> mGroundyClass = GroundyService.class;
+  private boolean mAllowNonUIThreadCallbacks = false;
 
   private Groundy(Class<T> groundyTask) {
     mGroundyTask = groundyTask;
@@ -93,6 +95,16 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   }
 
   /**
+   * Allows this task to receive callback messages on non UI threads.
+   * @return itself
+   */
+  public Groundy allowNonUiCallbacks() {
+    checkAlreadyProcessed();
+    mAllowNonUIThreadCallbacks = true;
+    return this;
+  }
+
+  /**
    * @param callbacks callbacks to register for this task
    * @return itself
    */
@@ -100,7 +112,14 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
     if (callbacks == null || callbacks.length == 0) {
       throw new IllegalArgumentException("You must pass at least one callback handler");
     }
+    if (mResultReceiver != null) {
+      throw new IllegalStateException("callback method can only be called once");
+    }
     checkAlreadyProcessed();
+    if (!mAllowNonUIThreadCallbacks && Looper.myLooper() != Looper.getMainLooper()) {
+      throw new IllegalStateException(
+          "callbacks can only be set on the UI thread. If you are sure you can handle callbacks from a non UI thread, call Groundy#allowNonUiCallbacks() method first");
+    }
     mResultReceiver = new InternalReceiver(mGroundyTask, callbacks);
     return this;
   }
@@ -161,7 +180,7 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
    * @param context used to start the groundy service
    * @return a unique number assigned to this task
    */
-  public TaskProxy queue(Context context) {
+  public TaskHandler queue(Context context) {
     boolean async = false;
     return internalQueueOrExecute(context, async);
   }
@@ -172,14 +191,14 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
    * @param context used to start the groundy service
    * @return a unique number assigned to this task
    */
-  public TaskProxyImpl<T> execute(Context context) {
+  public TaskHandler execute(Context context) {
     boolean async = true;
     return internalQueueOrExecute(context, async);
   }
 
-  private TaskProxyImpl<T> internalQueueOrExecute(Context context, boolean async) {
+  private TaskHandlerImpl<T> internalQueueOrExecute(Context context, boolean async) {
     markAsProcessed();
-    TaskProxyImpl<T> taskProxy = new TaskProxyImpl<T>(this);
+    TaskHandlerImpl<T> taskProxy = new TaskHandlerImpl<T>(this);
     if (callbacksManager != null) {
       callbacksManager.register(taskProxy);
     }
@@ -282,6 +301,7 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
       groundy.mGroupId = source.readInt();
       groundy.mAlreadyProcessed = source.readByte() == 1;
       groundy.mGroundyClass = (Class) source.readSerializable();
+      groundy.mAllowNonUIThreadCallbacks = source.readByte() == 1;
       return groundy;
     }
 
@@ -302,5 +322,6 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
     dest.writeInt(mGroupId);
     dest.writeByte((byte) (mAlreadyProcessed ? 1 : 0));
     dest.writeSerializable(mGroundyClass);
+    dest.writeByte((byte) (mAllowNonUIThreadCallbacks ? 1 : 0));
   }
 }

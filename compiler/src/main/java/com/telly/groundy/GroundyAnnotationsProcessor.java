@@ -25,19 +25,34 @@ package com.telly.groundy;
 
 import com.squareup.java.JavaWriter;
 import com.telly.groundy.annotations.Param;
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.*;
-import javax.lang.model.type.TypeKind;
-import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
-import java.util.*;
-import java.util.logging.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
+import javax.tools.JavaFileObject;
 
 @SupportedAnnotationTypes(
     {GroundyAnnotationsProcessor.SUCCESS, GroundyAnnotationsProcessor.FAILED, GroundyAnnotationsProcessor.START, GroundyAnnotationsProcessor.CANCEL, GroundyAnnotationsProcessor.PROGRESS})
@@ -125,7 +140,7 @@ public class GroundyAnnotationsProcessor extends AbstractProcessor {
     StringWriter classContent = new StringWriter();
     JavaWriter javaWriter = new JavaWriter(classContent);
     try {
-      javaWriter.emitEndOfLineComment("File generated using black magic. Do not fucking touch");
+      javaWriter.emitEndOfLineComment("auto-generated file; don't modify");
       javaWriter.emitPackage("com.telly.groundy.generated");
       javaWriter.emitImports("android.os.Bundle", Annotation.class.getName(),
           "com.telly.groundy.*");

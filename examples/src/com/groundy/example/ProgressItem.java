@@ -23,7 +23,8 @@
 
 package com.groundy.example;
 
-import com.telly.groundy.TaskProxy;
+import com.telly.groundy.TaskHandler;
+import com.telly.groundy.TaskHandler;
 
 public class ProgressItem {
   public static final int DEFAULT = 0;
@@ -31,26 +32,26 @@ public class ProgressItem {
   public static final int CANCELLED = 2;
   public static final int DONE = 3;
 
-  private TaskProxy mTaskProxy;
+  private TaskHandler mTaskHandler;
   private int mProgress;
   private int mEstimated;
   private int mState = DEFAULT;
   private int mColor;
 
   public long getId() {
-    return mTaskProxy.getTaskId();
+    return mTaskHandler.getTaskId();
   }
 
-  public TaskProxy getTaskProxy() {
-    return mTaskProxy;
+  public TaskHandler getTaskProxy() {
+    return mTaskHandler;
   }
 
   public int getEstimated() {
     return mEstimated;
   }
 
-  public void setTaskProxy(TaskProxy taskProxy) {
-    mTaskProxy = taskProxy;
+  public void setTaskProxy(TaskHandler taskHandler) {
+    mTaskHandler = taskHandler;
   }
 
   public int getProgress() {
@@ -80,7 +81,7 @@ public class ProgressItem {
 
     ProgressItem that = (ProgressItem) o;
 
-    if (mTaskProxy != null ? !mTaskProxy.equals(that.mTaskProxy) : that.mTaskProxy != null)
+    if (mTaskHandler != null ? !mTaskHandler.equals(that.mTaskHandler) : that.mTaskHandler != null)
       return false;
 
     return true;
@@ -88,13 +89,13 @@ public class ProgressItem {
 
   @Override
   public int hashCode() {
-    return mTaskProxy != null ? mTaskProxy.hashCode() : 0;
+    return mTaskHandler != null ? mTaskHandler.hashCode() : 0;
   }
 
   @Override
   public String toString() {
     return "ProgressItem{" +
-        "mTaskProxy=" + mTaskProxy +
+        "mTaskHandler=" + mTaskHandler +
         ", mProgress=" + mProgress +
         '}';
   }

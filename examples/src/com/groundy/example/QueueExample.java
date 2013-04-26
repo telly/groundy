@@ -30,7 +30,8 @@ import android.widget.Button;
 import android.widget.ListView;
 import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.Groundy;
-import com.telly.groundy.TaskProxy;
+import com.telly.groundy.TaskHandler;
+import com.telly.groundy.TaskHandler;
 import com.telly.groundy.annotations.OnProgress;
 import com.telly.groundy.annotations.Param;
 import com.telly.groundy.example.R;
@@ -60,11 +61,11 @@ public class QueueExample extends Activity {
           time = 1000;
         }
 
-        TaskProxy taskProxy = processTask(
+        TaskHandler taskHandler = processTask(
             new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time).build());
 
         ProgressItem progressItem = new ProgressItem();
-        progressItem.setTaskProxy(taskProxy);
+        progressItem.setTaskProxy(taskHandler);
         progressItem.setProgress(0);
         progressItem.setEstimated(time / 1000);
         mAdapter.addItem(progressItem);
@@ -72,7 +73,7 @@ public class QueueExample extends Activity {
     });
   }
 
-  protected TaskProxy processTask(Bundle params) {
+  protected TaskHandler processTask(Bundle params) {
     return Groundy.create(RandomTimeTask.class).params(params).callback(this).queue(this);
   }
 

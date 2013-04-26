@@ -27,23 +27,10 @@ import android.content.Context;
 import android.os.Parcelable;
 
 /** Allows to get information about, cancel it, */
-public interface TaskProxy extends Parcelable {
+public interface TaskHandler extends Parcelable {
 
   /** @return the associated task id */
   long getTaskId();
-
-  /**
-   * Replace the current callback handlers with the specified ones.
-   *
-   * @param callbackHandlers an array of callback handlers
-   */
-  void updateCallbackHandlers(Object... callbackHandlers);
-
-  /**
-   * Called internally when a task is finished, either after a success, fail or cancellation. You
-   * should never call this method directly (poor design; shame on me).
-   */
-  void onTaskEnded();
 
   /**
    * Cancels this task if possible.
@@ -55,22 +42,22 @@ public interface TaskProxy extends Parcelable {
   void cancel(Context context, int reason, GroundyManager.SingleCancelListener cancelListener);
 
   /** Removes this tasks callback handlers. */
-  void clearCallbackHandlers();
-
-  /** @return true if the task was already ended */
-  boolean shouldRecycle();
+  void clearCallbacks();
 
   /**
    * Add more callback handlers to this task
    *
    * @param handlers an array of callback handlers to add
    */
-  void appendCallbackHandlers(Object... handlers);
+  void appendCallbacks(Object... handlers);
 
   /**
    * Remove the specified callback handlers from this task
    *
    * @param handlers the callback handlers to remove
    */
-  void removeCallbackHandlers(Object... handlers);
+  void removeCallbacks(Object... handlers);
+
+  /** @return true if the task was already ended */
+  boolean taskAlreadyEnded();
 }
