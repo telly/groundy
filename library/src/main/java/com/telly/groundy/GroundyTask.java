@@ -175,6 +175,7 @@ public abstract class GroundyTask {
 
   protected void send(Class<? extends Annotation> callbackAnnotation, Bundle resultData) {
     if (mReceiver != null) {
+      if(resultData == null) resultData = new Bundle();
       resultData.putLong(Groundy.TASK_ID, getId());
       resultData.putSerializable(Groundy.KEY_CALLBACK_ANNOTATION, callbackAnnotation);
       mReceiver.send(Groundy.RESULT_CODE_CALLBACK_ANNOTATION, resultData);
