@@ -24,7 +24,7 @@
 package com.telly.groundy;
 
 /**
- * Use this {@link TaskResult} if the task succeeded to do its job. You can optionally pass a bundle
+ * Use this {@link TaskResult} if the value succeeded to do its job. You can optionally pass a bundle
  * with some return parameters; those parameters will be match with the method callback parameters.
  * <p/>
  * For instance, if you pass a Bundle with a long param whose key is "time", you must annotate your

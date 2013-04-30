@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 
 /**
  * Methods with this annotation will receive the OnSuccess callbacks which are sent when you return
- * {@link com.telly.groundy.Succeeded} from within the task.
+ * {@link com.telly.groundy.Succeeded} from within the value.
  */
 @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.METHOD)
 public @interface OnSuccess {

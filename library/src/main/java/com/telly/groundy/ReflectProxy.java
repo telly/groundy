@@ -24,8 +24,14 @@
 package com.telly.groundy;
 
 import android.os.Bundle;
-import com.telly.groundy.annotations.*;
-
+import com.telly.groundy.annotations.OnCallback;
+import com.telly.groundy.annotations.OnCancel;
+import com.telly.groundy.annotations.OnFailed;
+import com.telly.groundy.annotations.OnProgress;
+import com.telly.groundy.annotations.OnStart;
+import com.telly.groundy.annotations.OnSuccess;
+import com.telly.groundy.annotations.Param;
+import com.telly.groundy.annotations.Traverse;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -36,9 +42,11 @@ import java.util.Map;
 
 class ReflectProxy implements ResultProxy {
 
-  private static final Class<?>[] GROUNDY_CALLBACKS = {OnStart.class, OnSuccess.class, OnFailed.class, OnCancel.class, OnProgress.class};
+  private static final Class<?>[] GROUNDY_CALLBACKS = {
+      OnStart.class, OnSuccess.class, OnFailed.class, OnCancel.class, OnProgress.class,
+      OnCallback.class
+  };
   private static final Map<Class<?>, Method[]> METHODS_CACHE = new HashMap<Class<?>, Method[]>();
-  private static final Map<Class<?>, Annotation[]> ANNOTATIONS_CACHE = new HashMap<Class<?>, Annotation[]>();
 
   private final Map<Class<? extends Annotation>, List<MethodSpec>> callbacksMap;
   private final Class<? extends GroundyTask> groundyTaskType;
@@ -58,7 +66,13 @@ class ReflectProxy implements ResultProxy {
       return;
     }
 
+    String callbackName = resultData.getString(Groundy.KEY_CALLBACK_NAME);
+
     for (MethodSpec methodSpec : methodSpecs) {
+      if (callbackName != null && !callbackName.equals(methodSpec.name)) {
+        // ignore method specs whose callback is not the same that is being applied right now
+        continue;
+      }
       Object[] values = getReturnParams(resultData, methodSpec);
       try {
         methodSpec.method.invoke(target, values);
@@ -88,24 +102,7 @@ class ReflectProxy implements ResultProxy {
         Class<? extends Annotation> annotation = (Class<? extends Annotation>) groundyCallback;
         appendMethodCallback(groundyTaskType, annotation, method);
       }
-
-      Annotation[] annotations = getDeclaredAnnotations(groundyTaskType);
-      if (annotations != null) {
-        for (Annotation annotation : annotations) {
-          Class<? extends Annotation> callbackAnnotation = annotation.annotationType();
-          if (callbackAnnotation.isAnnotationPresent(Callback.class)) {
-            appendMethodCallback(groundyTaskType, callbackAnnotation, method);
-          }
-        }
-      }
     }
-  }
-
-  private Annotation[] getDeclaredAnnotations(Class<?> type) {
-    if (!ANNOTATIONS_CACHE.containsKey(type)) {
-      ANNOTATIONS_CACHE.put(type, type.getDeclaredAnnotations());
-    }
-    return ANNOTATIONS_CACHE.get(type);
   }
 
   private static Method[] getDeclaredMethods(Class<?> type) {
@@ -159,7 +156,16 @@ class ReflectProxy implements ResultProxy {
       methodSpecs = new ArrayList<MethodSpec>();
       callbacksMap.put(annotationType, methodSpecs);
     }
-    methodSpecs.add(new MethodSpec(method, paramNames));
+
+    String name = null; // used only for @OnCallback annotations
+    if (methodAnnotation instanceof OnCallback) {
+      OnCallback onCallback = (OnCallback) methodAnnotation;
+      name = onCallback.name();
+      if (name == null) {
+        throw new NullPointerException("@OnCallback's name cannot be null");
+      }
+    }
+    methodSpecs.add(new MethodSpec(method, paramNames, name));
   }
 
   private boolean isValid(Class<? extends GroundyTask> groundyTaskType,
@@ -187,6 +193,11 @@ class ReflectProxy implements ResultProxy {
     } else if (methodAnnotation instanceof OnCancel) {
       OnCancel onCancel = (OnCancel) methodAnnotation;
       if (onCancel.value() != groundyTaskType) {
+        return false;
+      }
+    } else if (methodAnnotation instanceof OnCallback) {
+      OnCallback onCallback = (OnCallback) methodAnnotation;
+      if (onCallback.value() != groundyTaskType) {
         return false;
       }
     }
@@ -259,10 +270,12 @@ class ReflectProxy implements ResultProxy {
   static class MethodSpec {
     final Method method;
     final List<String> paramNames;
+    final String name;
 
-    MethodSpec(Method method, List<String> paramNames) {
+    MethodSpec(Method method, List<String> paramNames, String name) {
       this.method = method;
       this.paramNames = paramNames;
+      this.name = name;
     }
   }
 }

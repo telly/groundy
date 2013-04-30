@@ -29,6 +29,7 @@ import android.view.View;
 import android.widget.Toast;
 import com.groundy.example.tasks.ChuckNorrisKick;
 import com.telly.groundy.Groundy;
+import com.telly.groundy.annotations.OnCallback;
 import com.telly.groundy.annotations.OnFailed;
 import com.telly.groundy.annotations.OnSuccess;
 import com.telly.groundy.annotations.Param;
@@ -53,9 +54,15 @@ public class CallbackTest extends Activity {
     });
   }
 
-  @OnChuckNorris
+  @OnCallback(value = ChuckNorrisKick.class, name = "kick")
   public void onChuckNorrisAttack(@Param("target") String target) {
     Toast.makeText(CallbackTest.this, getString(R.string.chuck_norris_kicked, target),
+        Toast.LENGTH_SHORT).show();
+  }
+
+  @OnCallback(value = ChuckNorrisKick.class, name = "punch")
+  public void onChuckNorrisPunch(@Param("target") String target) {
+    Toast.makeText(CallbackTest.this, getString(R.string.chuck_norris_punched, target),
         Toast.LENGTH_SHORT).show();
   }
 

@@ -63,16 +63,17 @@ Do not forget to add `GroundyService` to the `AndroidManifest.xml` file:
 Extending callback system
 =========================
 
-There are some already defined callback annotations: `@OnSuccess`, `@OnFailed`, `@OnCancel`,
-`@OnProgress` and `@OnStart`, but you can also create your own callback types. Take a look
-at the Custom callbacks example and learn how you can write callbacks like:
+There are some already defined onCallback annotations: `@OnSuccess`, `@OnFailed`, `@OnCancel`,
+`@OnProgress` and `@OnStart`, but you can also create your own onCallback types like:
 
 ```java
-@OnChuckNorris
+@OnCallback(task = ChuckTask.class, name = "kick")
 public void onChuckNorrisAttack(@Param("target") String target) {
   Toast.makeText(this, "Chuck Norris kicked your " + target, Toast.LENGTH_SHORT).show();
 }
 ```
+
+Take a look at the custom callbacks example for details on this.
 
 Maven integration
 =================

@@ -24,7 +24,7 @@
 package com.telly.groundy;
 
 /**
- * Use this {@link TaskResult} if the task failed to do its job. You can optionally pass a bundle
+ * Use this {@link TaskResult} if the value failed to do its job. You can optionally pass a bundle
  * with some return parameters.
  */
 public final class Failed extends TaskResult {

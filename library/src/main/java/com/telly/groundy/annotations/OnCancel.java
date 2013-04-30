@@ -30,7 +30,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Methods with this annotation will receive the OnCancel callbacks which is fired when a task was
+ * Methods with this annotation will receive the OnCancel callbacks which is fired when a value was
  * explicitly cancelled by returning {@link com.telly.groundy.Cancelled}. You can add an integer
  * param to receive the cancel reason, and you must mark it with the {@link Param} annotation using
  * this value: {@link com.telly.groundy.Groundy#CANCEL_REASON}

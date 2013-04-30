@@ -70,9 +70,8 @@ class TaskHandlerImpl<T extends GroundyTask> implements TaskHandler {
     return groundy.getId();
   }
 
-  public void onTaskEnded() {
+  void onTaskEnded() {
     mTaskEnded = true;
-    clearCallbacks();
   }
 
   @SuppressWarnings("UnusedDeclaration")

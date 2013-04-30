@@ -88,7 +88,7 @@ public class GroundyManager {
    * Cancels all tasks of the specified group w/ the specified reason.
    *
    * @param context        used to interact with the service
-   * @param id             the task to cancel
+   * @param id             the value to cancel
    * @param cancelListener callback for cancel result
    */
   public static void cancelTaskById(Context context, final long id, final int reason,
@@ -181,7 +181,7 @@ public class GroundyManager {
 
   public static interface SingleCancelListener {
     /**
-     * @param id     the id of the cancelled task
+     * @param id     the id of the cancelled value
      * @param result either {@link GroundyService#COULD_NOT_CANCEL}, {@link
      *               GroundyService#INTERRUPTED} and {@link GroundyService#NOT_EXECUTED}
      */

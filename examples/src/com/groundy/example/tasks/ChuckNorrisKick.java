@@ -24,7 +24,6 @@
 package com.groundy.example.tasks;
 
 import android.os.Bundle;
-import com.groundy.example.OnChuckNorris;
 import com.telly.groundy.Failed;
 import com.telly.groundy.GroundyTask;
 import com.telly.groundy.Succeeded;
@@ -32,7 +31,6 @@ import com.telly.groundy.TaskResult;
 import com.telly.groundy.example.R;
 import java.util.Random;
 
-@OnChuckNorris
 public class ChuckNorrisKick extends GroundyTask {
 
   @Override
@@ -44,7 +42,10 @@ public class ChuckNorrisKick extends GroundyTask {
       int currentTarget = random.nextInt(targets.length);
       Bundle resultData = new Bundle();
       resultData.putString("target", targets[currentTarget]);
-      send(OnChuckNorris.class, resultData);
+
+      String callbackName = random.nextBoolean() ? "kick" : "punch";
+      callback(callbackName, resultData);
+
       try {
         Thread.sleep(2000);
       } catch (InterruptedException e) {

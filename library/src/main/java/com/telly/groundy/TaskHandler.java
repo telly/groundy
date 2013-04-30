@@ -29,15 +29,15 @@ import android.os.Parcelable;
 /** Allows to get information about, cancel it, */
 public interface TaskHandler extends Parcelable {
 
-  /** @return the associated task id */
+  /** @return the associated value id */
   long getTaskId();
 
   /**
-   * Cancels this task if possible.
+   * Cancels this value if possible.
    *
    * @param context        used to communicate with the groundy service
-   * @param reason         the reason to cancel this task if any.
-   * @param cancelListener a listener to get the result of the task cancellation
+   * @param reason         the reason to cancel this value if any.
+   * @param cancelListener a listener to get the result of the value cancellation
    */
   void cancel(Context context, int reason, GroundyManager.SingleCancelListener cancelListener);
 
@@ -45,19 +45,19 @@ public interface TaskHandler extends Parcelable {
   void clearCallbacks();
 
   /**
-   * Add more callback handlers to this task
+   * Add more callback handlers to this value
    *
    * @param handlers an array of callback handlers to add
    */
   void appendCallbacks(Object... handlers);
 
   /**
-   * Remove the specified callback handlers from this task
+   * Remove the specified callback handlers from this value
    *
    * @param handlers the callback handlers to remove
    */
   void removeCallbacks(Object... handlers);
 
-  /** @return true if the task was already ended */
+  /** @return true if the value was already ended */
   boolean taskAlreadyEnded();
 }

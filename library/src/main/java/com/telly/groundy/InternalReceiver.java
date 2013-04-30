@@ -100,7 +100,8 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
     boolean isEndingAnnotation = callbackAnnotation == OnSuccess.class ||
         callbackAnnotation == OnFailed.class ||
         callbackAnnotation == OnCancel.class;
-    if (isEndingAnnotation && groundyProxy != null && groundyProxy instanceof TaskHandlerImpl) {
+    boolean endTask = isEndingAnnotation && groundyProxy instanceof TaskHandlerImpl;
+    if (endTask) {
       ((TaskHandlerImpl) groundyProxy).onTaskEnded();
     }
 
@@ -109,6 +110,10 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
       if (methodProxy != null) {
         methodProxy.apply(callbackHandler, callbackAnnotation, resultData);
       }
+    }
+
+    if (endTask) {
+      groundyProxy.clearCallbacks();
     }
   }
 

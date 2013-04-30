@@ -75,13 +75,13 @@ public class AttachReceiverExample extends Activity {
         mAddTaskBtn.setEnabled(false);
         mAttachToastBtn.setEnabled(true);
 
-        // configure task parameters
+        // configure value parameters
         int time = new Random().nextInt(10000);
         Bundle params = new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time).build();
         Toast.makeText(AttachReceiverExample.this, getString(R.string.task_will_take_x, time),
             Toast.LENGTH_SHORT).show();
 
-        // queue task
+        // queue value
         mTaskHandler = Groundy.create(RandomTimeTask.class)
             .callback(AttachReceiverExample.this)
             .callbackManager(callbacksManager)

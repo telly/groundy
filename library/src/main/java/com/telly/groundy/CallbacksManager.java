@@ -39,7 +39,7 @@ import java.util.ArrayList;
  * onSaveInstanceState method. Also, it's a good idea to call {@link #onDestroy()} from within your
  * activity or fragment onDestroy method.
  * <p/>
- * When you create a Groundy task, you must call {@link Groundy#callbackManager(CallbacksManager)}
+ * When you create a Groundy value, you must call {@link Groundy#callbackManager(CallbacksManager)}
  * method and pass the instance of this class. This is important; otherwise the callback manager
  * won't know which tasks it should manage.
  */

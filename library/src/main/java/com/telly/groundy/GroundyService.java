@@ -45,17 +45,17 @@ public class GroundyService extends Service {
 
   public static final int DEFAULT_GROUP_ID = 0;
   /**
-   * To be returned by cancelTaskById. It means the task was not cancelled at all. It could happen
-   * for two reasons: the task had already been completed; or the task didn't even existed.
+   * To be returned by cancelTaskById. It means the value was not cancelled at all. It could happen
+   * for two reasons: the value had already been completed; or the value didn't even existed.
    */
   public static final int COULD_NOT_CANCEL = 0;
   /**
-   * To be returned by cancelTaskById. It means the task was already running and {@link
-   * GroundyTask#stopTask(int)} was called on it. It depends on the task implementation to react to
-   * in such cases; thus, this does not mean the task was completely stopped.
+   * To be returned by cancelTaskById. It means the value was already running and {@link
+   * GroundyTask#stopTask(int)} was called on it. It depends on the value implementation to react to
+   * in such cases; thus, this does not mean the value was completely stopped.
    */
   public static final int INTERRUPTED = 1;
-  /** To be returned by cancelTaskById. It means the task was not even executed, but it was queued. */
+  /** To be returned by cancelTaskById. It means the value was not even executed, but it was queued. */
   public static final int NOT_EXECUTED = 2;
 
   private static enum GroundyMode {QUEUE, ASYNC}
@@ -168,8 +168,8 @@ public class GroundyService extends Service {
   }
 
   /**
-   * @param id     task to cancel
-   * @param reason the reason to cancel this task. can be anything but 0
+   * @param id     value to cancel
+   * @param reason the reason to cancel this value. can be anything but 0
    * @return either {@link GroundyService#COULD_NOT_CANCEL}, {@link GroundyService#INTERRUPTED} and
    *         {@link GroundyService#NOT_EXECUTED}
    */
@@ -195,7 +195,7 @@ public class GroundyService extends Service {
   }
 
   /**
-   * @param groupId group id identifying the kind of task
+   * @param groupId group id identifying the kind of value
    * @param reason  reason to cancel this group
    * @return number of tasks cancelled
    */
@@ -228,9 +228,9 @@ public class GroundyService extends Service {
         TaskInfo taskInfo = mTasksInfoSet.get(taskId);
         if (taskInfo.groupId == groupId) {
           GroundyTask groundyTask = taskInfo.task;
-          if (groundyTask == null) { // task didn't even run
+          if (groundyTask == null) { // value didn't even run
             notExecutedTasks.add(taskId);
-          } else { // task was already created and executed
+          } else { // value was already created and executed
             groundyTask.stopTask(reason);
             interruptedTasks.add(taskId);
           }
@@ -294,8 +294,8 @@ public class GroundyService extends Service {
    * the same IntentService, but it will not hold up anything else.
    *
    * @param intent     The value passed to {@link android.content.Context#startService(android.content.Intent)}.
-   * @param groupId    group id identifying the kind of task
-   * @param startId    the service start id given when the task was schedule
+   * @param groupId    group id identifying the kind of value
+   * @param startId    the service start id given when the value was schedule
    * @param redelivery true if this intent was redelivered by the system
    */
   private void onHandleIntent(Intent intent, int groupId, int startId, boolean redelivery) {
@@ -313,7 +313,7 @@ public class GroundyService extends Service {
     //noinspection unchecked
     GroundyTask groundyTask = GroundyTaskFactory.get((Class<? extends GroundyTask>) taskName, this);
     if (groundyTask == null) {
-      L.e(TAG, "Groundy task no provided");
+      L.e(TAG, "Groundy value no provided");
       return null;
     }
     final long taskId = extras.getLong(Groundy.TASK_ID);
@@ -340,12 +340,12 @@ public class GroundyService extends Service {
     }
     TaskInfo taskInfo = mTasksInfoSet.get(groundyTask.getId());
     if (taskInfo == null) {
-      // this can be null if the task is cancelled before this
+      // this can be null if the value is cancelled before this
       return;
     }
 
     taskInfo.task = groundyTask;
-    L.d(TAG, "Executing task: " + groundyTask);
+    L.d(TAG, "Executing value: " + groundyTask);
     TaskResult taskResult;
 
     try {
@@ -435,7 +435,7 @@ public class GroundyService extends Service {
           onHandleIntent(intent, msg.what, msg.arg1, msg.arg2 == START_FLAG_REDELIVERY);
           mTasksInfoSet.remove(taskId);
         } else {
-          L.d(TAG, "Ignoring task since it was removed: " + taskId);
+          L.d(TAG, "Ignoring value since it was removed: " + taskId);
         }
 
         if (mMode == GroundyMode.QUEUE) {
@@ -457,7 +457,7 @@ public class GroundyService extends Service {
     }
 
     /**
-     * @param groupId group id identifying the kind of task
+     * @param groupId group id identifying the kind of value
      * @param reason  reason to cancel this group
      * @return number of cancelled tasks (before they were ran)
      */
@@ -466,7 +466,7 @@ public class GroundyService extends Service {
     }
 
     /**
-     * @param id     task id
+     * @param id     value id
      * @param reason reason to cancel this group
      * @return either {@link GroundyService#COULD_NOT_CANCEL}, {@link GroundyService#INTERRUPTED}
      *         and {@link GroundyService#NOT_EXECUTED}

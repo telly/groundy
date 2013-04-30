@@ -42,6 +42,7 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   public static final String CANCEL_REASON = "com.telly.groundy.key.CANCEL_REASON";
   public static final String ORIGINAL_PARAMS = "com.telly.groundy.key.ORIGINAL_PARAMS";
   static final String KEY_CALLBACK_ANNOTATION = "com.telly.groundy.key.CALLBACK_ANNOTATION";
+  static final String KEY_CALLBACK_NAME = "com.telly.groundy.key.CALLBACK_NAME";
   static final int RESULT_CODE_CALLBACK_ANNOTATION = 888;
 
   private final Class<? extends GroundyTask> mGroundyTask;
@@ -69,9 +70,9 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
    * parameters ({@link #params(android.os.Bundle)}), setting a group id ({@link #group(int)}) or
    * providing a callback ({@link #callback(Object...)}).
    * <p/>
-   * You must configure the task <b>before</b> queueing or executing it.
+   * You must configure the value <b>before</b> queueing or executing it.
    *
-   * @param groundyTask reference of the groundy task implementation
+   * @param groundyTask reference of the groundy value implementation
    * @return new Groundy instance (does not execute anything)
    */
   public static <T extends GroundyTask> Groundy<? extends GroundyTask> create(
@@ -83,7 +84,7 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   }
 
   /**
-   * Set the parameters that the task needs in order to run
+   * Set the parameters that the value needs in order to run
    *
    * @param params a bundle of params
    * @return itself
@@ -95,7 +96,7 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   }
 
   /**
-   * Allows this task to receive callback messages on non UI threads.
+   * Allows this value to receive callback messages on non UI threads.
    * @return itself
    */
   public Groundy allowNonUiCallbacks() {
@@ -105,7 +106,7 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   }
 
   /**
-   * @param callbacks callbacks to register for this task
+   * @param callbacks callbacks to register for this value
    * @return itself
    */
   public Groundy callback(Object... callbacks) {
@@ -125,12 +126,12 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   }
 
   /**
-   * This allows you to set an identification groupId to the task which can be later used to cancel
+   * This allows you to set an identification groupId to the value which can be later used to cancel
    * it. Group ids can be shared by several groundy tasks even if their implementation is different.
    * If cancelling tasks using a groupId, all tasks created with this groupId will be cancelled
    * and/or removed from the queue.
    *
-   * @param groupId groupId for this task
+   * @param groupId groupId for this value
    * @return itself
    */
   public Groundy group(int groupId) {
@@ -159,7 +160,7 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   }
 
   /**
-   * Sets a callback manager for this task. It allows you to easily attach/detach your callbacks on
+   * Sets a callback manager for this value. It allows you to easily attach/detach your callbacks on
    * configuration change. This is important if you are not handling the configuration changes by
    * your self, since it will prevent leaks or wrong results when callbacks are invoked.
    *
@@ -173,12 +174,12 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   }
 
   /**
-   * Queues a task to the Groundy Service. This task won't be executed until the previous queued
-   * tasks are done. If you need your task to execute right away use the {@link
+   * Queues a value to the Groundy Service. This value won't be executed until the previous queued
+   * tasks are done. If you need your value to execute right away use the {@link
    * Groundy#execute(Context)} method.
    *
    * @param context used to start the groundy service
-   * @return a unique number assigned to this task
+   * @return a unique number assigned to this value
    */
   public TaskHandler queue(Context context) {
     boolean async = false;
@@ -186,10 +187,10 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   }
 
   /**
-   * Execute a task right away
+   * Execute a value right away
    *
    * @param context used to start the groundy service
-   * @return a unique number assigned to this task
+   * @return a unique number assigned to this value
    */
   public TaskHandler execute(Context context) {
     boolean async = true;

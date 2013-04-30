@@ -39,8 +39,8 @@ class GroundyTaskFactory {
   /**
    * Builds a GroundyTask based on call
    *
-   * @param taskClass groundy task implementation class
-   * @param context   used to instantiate the task
+   * @param taskClass groundy value implementation class
+   * @param context   used to instantiate the value
    * @return An instance of a GroundyTask if a given call is valid null otherwise
    */
   static GroundyTask get(Class<? extends GroundyTask> taskClass, Context context) {
@@ -61,7 +61,7 @@ class GroundyTaskFactory {
       groundyTask.onCreate();
       return groundyTask;
     } catch (Exception e) {
-      L.e(TAG, "Unable to create task for call " + taskClass, e);
+      L.e(TAG, "Unable to create value for call " + taskClass, e);
     }
     return groundyTask;
   }

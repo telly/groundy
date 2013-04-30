@@ -26,12 +26,11 @@ package com.telly.groundy;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.ResultReceiver;
+import com.telly.groundy.annotations.OnCallback;
 import com.telly.groundy.annotations.OnProgress;
 import java.lang.annotation.Annotation;
 
-/**
- * Implementation of this class get executed by the {@link GroundyService}
- */
+/** Implementation of this class get executed by the {@link GroundyService} */
 public abstract class GroundyTask {
   protected static final int CANCEL_ALL = -1;
   protected static final int SERVICE_DESTROYED = -2;
@@ -88,7 +87,7 @@ public abstract class GroundyTask {
   }
 
   /**
-   * @return true if the task was run after a service was killed and force_queue_completion was
+   * @return true if the value was run after a service was killed and force_queue_completion was
    *         used.
    */
   public boolean isRedelivered() {
@@ -173,9 +172,9 @@ public abstract class GroundyTask {
     mReceiver = receiver;
   }
 
-  protected void send(Class<? extends Annotation> callbackAnnotation, Bundle resultData) {
+  void send(Class<? extends Annotation> callbackAnnotation, Bundle resultData) {
     if (mReceiver != null) {
-      if(resultData == null) resultData = new Bundle();
+      if (resultData == null) resultData = new Bundle();
       resultData.putLong(Groundy.TASK_ID, getId());
       resultData.putSerializable(Groundy.KEY_CALLBACK_ANNOTATION, callbackAnnotation);
       mReceiver.send(Groundy.RESULT_CODE_CALLBACK_ANNOTATION, resultData);
@@ -183,11 +182,32 @@ public abstract class GroundyTask {
   }
 
   /**
-   * This must be checked every time you want to check whether the task is in quitting state. In
-   * such cases you must make sure the task is stopped immediately. To know the reason causing the
-   * task to be quited use the {@link GroundyTask#getQuittingReason()} method.
+   * Sends this data to the callback methods annotated with the specified name
    *
-   * @return true if the groundy task is in quitting state
+   * @param name the name of the callback to invoke
+   */
+  protected void callback(String name) {
+    callback(name, new Bundle());
+  }
+
+  /**
+   * Sends this data to the callback methods annotated with the specified name
+   *
+   * @param name the name of the callback to invoke
+   * @param resultData optional params to send
+   */
+  protected void callback(String name, Bundle resultData) {
+    if (resultData == null) resultData = new Bundle();
+    resultData.putString(Groundy.KEY_CALLBACK_NAME, name);
+    send(OnCallback.class, resultData);
+  }
+
+  /**
+   * This must be checked every time you want to check whether the value is in quitting state. In
+   * such cases you must make sure the value is stopped immediately. To know the reason causing the
+   * value to be quited use the {@link GroundyTask#getQuittingReason()} method.
+   *
+   * @return true if the groundy value is in quitting state
    */
   protected boolean isQuitting() {
     return mQuittingReason != Integer.MIN_VALUE;
@@ -204,16 +224,16 @@ public abstract class GroundyTask {
   }
 
   /**
-   * Mark this task as quitting
+   * Mark this value as quitting
    *
-   * @param reason the reason to stop this task
+   * @param reason the reason to stop this value
    */
   void stopTask(int reason) {
     mQuittingReason = reason;
   }
 
   /**
-   * Prepare and sends a progress update to the current receiver. Callback used is {@link
+   * Prepare and sends a progress update to the current receiver. OnCallback used is {@link
    * com.telly.groundy.annotations.OnProgress} and it will contain a bundle with an integer extra
    * called {@link Groundy#KEY_PROGRESS}
    *
@@ -295,8 +315,7 @@ public abstract class GroundyTask {
     return toString;
   }
 
-  /** Called once the task has been instantiated and it has a valid context */
+  /** Called once the value has been instantiated and it has a valid context */
   protected void onCreate() {
   }
-
 }

@@ -110,11 +110,11 @@ public class CancelTaskExample extends Activity implements View.OnClickListener,
   }
 
   private void queueTask(int groupId) {
-    // configure task parameters
+    // configure value parameters
     int time = new Random().nextInt(10000);
     Bundle params = new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time).build();
 
-    // queue task
+    // queue value
     TaskHandler taskHandler = Groundy.create(CancelableTask.class)
         .callback(this)
         .group(groupId)

@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 
 /**
  * Methods with this annotation will receive the OnStart callbacks which are sent right when the
- * task has been executed.
+ * value has been executed.
  */
 @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.METHOD)
 public @interface OnStart {

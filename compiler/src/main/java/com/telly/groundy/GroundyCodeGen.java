@@ -41,11 +41,11 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -54,9 +54,11 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileObject;
 
-@SupportedAnnotationTypes(
-    {GroundyAnnotationsProcessor.SUCCESS, GroundyAnnotationsProcessor.FAILED, GroundyAnnotationsProcessor.START, GroundyAnnotationsProcessor.CANCEL, GroundyAnnotationsProcessor.PROGRESS})
-public class GroundyAnnotationsProcessor extends AbstractProcessor {
+@SupportedAnnotationTypes({
+    GroundyCodeGen.SUCCESS, GroundyCodeGen.FAILED, GroundyCodeGen.START, GroundyCodeGen.CANCEL,
+    GroundyCodeGen.PROGRESS, GroundyCodeGen.CALLBACK
+})
+public class GroundyCodeGen extends AbstractProcessor {
 
   private static final Logger logger = setupLogger();
   public static final String SUCCESS = "com.telly.groundy.annotations.OnSuccess";
@@ -64,8 +66,10 @@ public class GroundyAnnotationsProcessor extends AbstractProcessor {
   public static final String START = "com.telly.groundy.annotations.OnStart";
   public static final String CANCEL = "com.telly.groundy.annotations.OnCancel";
   public static final String PROGRESS = "com.telly.groundy.annotations.OnProgress";
+  public static final String CALLBACK = "com.telly.groundy.annotations.OnCallback";
 
-  private final Map<String, Set<ProxyImplContent>> implMap = new HashMap<String, Set<ProxyImplContent>>();
+  private final Map<String, Set<ProxyImplContent>> implMap =
+      new HashMap<String, Set<ProxyImplContent>>();
 
   @Override public SourceVersion getSupportedSourceVersion() {
     return SourceVersion.latestSupported();
@@ -77,38 +81,11 @@ public class GroundyAnnotationsProcessor extends AbstractProcessor {
     }
     for (TypeElement annotationElement : typeElements) {
       Set<? extends Element> annotatedElements = env.getElementsAnnotatedWith(annotationElement);
-      for (Element callbackMethod : annotatedElements) {
-        // ignore inner classes and non public classes
-        Element callbackElement = callbackMethod.getEnclosingElement();
-        if (!callbackElement.getModifiers().contains(Modifier.PUBLIC)) {
-          logger.info(
-              callbackElement + " is not public. Reflection will be used and it can slow things down.");
-          continue;
+      for (Element annotatedElement : annotatedElements) {
+        if (annotatedElement instanceof ExecutableElement) {
+          ExecutableElement callbackMethod = (ExecutableElement) annotatedElement;
+          processCallback(annotationElement, callbackMethod);
         }
-
-        String groundyTaskName = getGroundyTaskNameFrom(annotationElement, callbackMethod);
-        if (groundyTaskName == null) {
-          logger.info("Could not found task for " + annotationElement);
-          System.exit(1);
-        }
-
-        String genClassName = callbackElement.getSimpleName().toString();
-        String proxyClassName = genClassName + "$" + groundyTaskName + "$Proxy";
-
-        Set<ProxyImplContent> proxyImplContents;
-        if (implMap.containsKey(proxyClassName)) {
-          proxyImplContents = implMap.get(proxyClassName);
-        } else {
-          implMap.put(proxyClassName, proxyImplContents = new HashSet<ProxyImplContent>());
-        }
-
-        ProxyImplContent proxyImplContent = new ProxyImplContent();
-        proxyImplContent.annotation = annotationElement.toString();
-        proxyImplContent.paramNames = getParamNames(callbackMethod);
-        proxyImplContent.methodName = callbackMethod.getSimpleName().toString();
-        proxyImplContent.fullTargetClassName = callbackElement.toString();
-
-        proxyImplContents.add(proxyImplContent);
       }
     }
 
@@ -121,19 +98,63 @@ public class GroundyAnnotationsProcessor extends AbstractProcessor {
     return true;
   }
 
-  private String getGroundyTaskNameFrom(TypeElement annotationElement, Element callbackMethod) {
-    String groundyTaskName = null;
-    List<? extends AnnotationMirror> annotationMirrors = callbackMethod.getAnnotationMirrors();
-    for (AnnotationMirror annotationMirror : annotationMirrors) {
+  private void processCallback(TypeElement annotationElement, ExecutableElement callbackMethod) {
+    // ignore inner classes and non public classes
+    Element callbackElement = callbackMethod.getEnclosingElement();
+    if (!callbackElement.getModifiers().contains(Modifier.PUBLIC)) {
+      logger.info(
+          callbackElement + " is not public. Reflection will be used and it can slow things down.");
+      return;
+    }
+
+    Object value = getAnnotationValue(callbackMethod, annotationElement, "value");
+    if (value == null) {
+      logger.info("Could not found task for " + annotationElement);
+      System.exit(1);
+    }
+
+    Object callbackName = getAnnotationValue(callbackMethod, annotationElement, "name");
+    String groundyTaskName = value.toString().replaceAll("\\.", "\\$");
+    String genClassName = callbackElement.getSimpleName().toString();
+    String proxyClassName = genClassName + "$" + groundyTaskName + "$Proxy";
+
+    Set<ProxyImplContent> proxyImplContents;
+    if (implMap.containsKey(proxyClassName)) {
+      proxyImplContents = implMap.get(proxyClassName);
+    } else {
+      implMap.put(proxyClassName, proxyImplContents = new HashSet<ProxyImplContent>());
+    }
+
+    ProxyImplContent proxyImplContent = new ProxyImplContent();
+    proxyImplContent.annotation = annotationElement.toString();
+    proxyImplContent.paramNames = getParamNames(callbackMethod);
+    proxyImplContent.methodName = callbackMethod.getSimpleName().toString();
+    proxyImplContent.fullTargetClassName = callbackElement.toString();
+    proxyImplContent.callbackName = callbackName != null ? callbackName.toString() : null;
+
+    proxyImplContents.add(proxyImplContent);
+  }
+
+  private Object getAnnotationValue(Element callbackMethod, TypeElement annotationElement,
+      String executable) {
+    AnnotationMirror annotation = null;
+    for (AnnotationMirror annotationMirror : callbackMethod.getAnnotationMirrors()) {
       if (annotationMirror.getAnnotationType().equals(annotationElement.asType())) {
-        for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> u : annotationMirror.getElementValues()
-            .entrySet()) {
-          AnnotationValue value = u.getValue();
-          groundyTaskName = value.getValue().toString().replaceAll("\\.", "\\$");
-        }
+        annotation = annotationMirror;
+        break;
       }
     }
-    return groundyTaskName;
+
+    if (annotation == null) {
+      return null;
+    }
+
+    for (ExecutableElement executableElement : annotation.getElementValues().keySet()) {
+      if (executableElement.getSimpleName().toString().equals(executable)) {
+        return annotation.getElementValues().get(executableElement).getValue();
+      }
+    }
+    return null;
   }
 
   private void generateProxy(String proxyClassName, Set<ProxyImplContent> callbacks) {
@@ -159,9 +180,17 @@ public class GroundyAnnotationsProcessor extends AbstractProcessor {
       javaWriter.emitStatement("return");
       javaWriter.endControlFlow();
 
+      javaWriter.emitStatement(
+          "String callbackName = resultData.getString(\"" + Groundy.KEY_CALLBACK_NAME + "\")");
+
       for (ProxyImplContent proxyImpl : callbacks) {
-        javaWriter.beginControlFlow(
-            "if (callbackAnnotation == " + proxyImpl.annotation + ".class)");
+        System.out.println("::::!! " + proxyImpl.callbackName);
+        String shouldHandleAnnotation = "callbackAnnotation == " + proxyImpl.annotation + ".class";
+        if (proxyImpl.callbackName != null) {
+          String callbackNameCheck = '\"' + proxyImpl.callbackName + "\".equals(callbackName)";
+          shouldHandleAnnotation += " && " + callbackNameCheck;
+        }
+        javaWriter.beginControlFlow("if (" + shouldHandleAnnotation + ")");
 
         StringBuilder invocation = new StringBuilder();
         String separator = "";
@@ -202,8 +231,8 @@ public class GroundyAnnotationsProcessor extends AbstractProcessor {
       String fileContent = classContent.toString();
       System.out.println(fileContent);
 
-      JavaFileObject sourceFile = processingEnv.getFiler()
-          .createSourceFile(proxyClassName, (Element) null);
+      Filer filer = processingEnv.getFiler();
+      JavaFileObject sourceFile = filer.createSourceFile(proxyClassName, (Element) null);
       Writer writer = sourceFile.openWriter();
       writer.write(fileContent);
       writer.flush();
@@ -215,13 +244,20 @@ public class GroundyAnnotationsProcessor extends AbstractProcessor {
   }
 
   private static String defaultValue(String parameterType) {
-    if (parameterType.equals(int.class.getName()) || parameterType.equals("Integer")
-      || parameterType.equals(float.class.getName()) || parameterType.equals("Float")
-      || parameterType.equals(double.class.getName()) || parameterType.equals("Double")
-      || parameterType.equals(long.class.getName()) || parameterType.equals("Long")
-      || parameterType.equals(byte.class.getName()) || parameterType.equals("Byte")
-      || parameterType.equals(char.class.getName()) || parameterType.equals("Character")
-      || parameterType.equals(short.class.getName()) || parameterType.equals("Short")) {
+    if (parameterType.equals(int.class.getName())
+        || parameterType.equals("Integer")
+        || parameterType.equals(float.class.getName())
+        || parameterType.equals("Float")
+        || parameterType.equals(double.class.getName())
+        || parameterType.equals("Double")
+        || parameterType.equals(long.class.getName())
+        || parameterType.equals("Long")
+        || parameterType.equals(byte.class.getName())
+        || parameterType.equals("Byte")
+        || parameterType.equals(char.class.getName())
+        || parameterType.equals("Character")
+        || parameterType.equals(short.class.getName())
+        || parameterType.equals("Short")) {
       return "0";
     } else if (parameterType.equals(boolean.class.getName()) || parameterType.equals("Boolean")) {
       return "false";
@@ -248,7 +284,6 @@ public class GroundyAnnotationsProcessor extends AbstractProcessor {
       System.exit(-1);
     }
 
-
     if (method.getReturnType().getKind() != TypeKind.VOID) {
       logger.info(methodFullInfo + " must return void.");
       System.exit(-1);
@@ -258,8 +293,9 @@ public class GroundyAnnotationsProcessor extends AbstractProcessor {
     for (VariableElement param : method.getParameters()) {
       Param paramAnnotation = param.getAnnotation(Param.class);
       if (paramAnnotation == null) {
-        logger.info(
-            methodFullInfo + ": all parameters must be annotated with the @" + Param.class.getName());
+        logger.info(methodFullInfo
+            + ": all parameters must be annotated with the @"
+            + Param.class.getName());
         System.exit(-1);
       }
       paramNames.add(new NameAndType(paramAnnotation.value(), param.asType().toString()));
@@ -298,6 +334,7 @@ public class GroundyAnnotationsProcessor extends AbstractProcessor {
     List<NameAndType> paramNames;
     String methodName;
     String fullTargetClassName;
+    String callbackName;
 
     @Override
     public boolean equals(Object o) {
@@ -306,15 +343,22 @@ public class GroundyAnnotationsProcessor extends AbstractProcessor {
 
       ProxyImplContent that = (ProxyImplContent) o;
 
-      if (annotation != null ? !annotation.equals(that.annotation) : that.annotation != null)
+      if (annotation != null ? !annotation.equals(that.annotation) : that.annotation != null) {
         return false;
+      }
+      if (callbackName != null ? !callbackName.equals(that.callbackName)
+          : that.callbackName != null) {
+        return false;
+      }
 
       return true;
     }
 
     @Override
     public int hashCode() {
-      return annotation != null ? annotation.hashCode() : 0;
+      int result = annotation != null ? annotation.hashCode() : 0;
+      result = 31 * result + (callbackName != null ? callbackName.hashCode() : 0);
+      return result;
     }
   }
 

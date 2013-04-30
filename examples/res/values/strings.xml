@@ -58,6 +58,7 @@
   <string name="groundy_examples">Groundy Examples</string>
   <string name="download_url">http://goo.gl/hQyDu</string>
   <string name="chuck_norris_kicked">Chuck norris kicked your %s</string>
+  <string name="chuck_norris_punched">Chuck norris punched your %s</string>
   <string name="chuck_kick_explanation">Click to see how much things Chuck Norris does before knocking you out.</string>
   <string name="sayonara">Sayonara</string>
   <string name="you_were_kicked">You were successfully knocked out</string>
