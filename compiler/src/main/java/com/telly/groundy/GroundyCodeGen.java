@@ -25,34 +25,21 @@ package com.telly.groundy;
 
 import com.squareup.java.JavaWriter;
 import com.telly.groundy.annotations.Param;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
+
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileObject;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.lang.annotation.Annotation;
+import java.util.*;
+import java.util.logging.*;
 
 @SupportedAnnotationTypes({
     GroundyCodeGen.SUCCESS, GroundyCodeGen.FAILED, GroundyCodeGen.START, GroundyCodeGen.CANCEL,
@@ -184,7 +171,6 @@ public class GroundyCodeGen extends AbstractProcessor {
           "String callbackName = resultData.getString(\"" + Groundy.KEY_CALLBACK_NAME + "\")");
 
       for (ProxyImplContent proxyImpl : callbacks) {
-        System.out.println("::::!! " + proxyImpl.callbackName);
         String shouldHandleAnnotation = "callbackAnnotation == " + proxyImpl.annotation + ".class";
         if (proxyImpl.callbackName != null) {
           String callbackNameCheck = '\"' + proxyImpl.callbackName + "\".equals(callbackName)";
@@ -229,7 +215,6 @@ public class GroundyCodeGen extends AbstractProcessor {
       javaWriter.close();
 
       String fileContent = classContent.toString();
-      System.out.println(fileContent);
 
       Filer filer = processingEnv.getFiler();
       JavaFileObject sourceFile = filer.createSourceFile(proxyClassName, (Element) null);
