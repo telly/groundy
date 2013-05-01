@@ -168,6 +168,14 @@ public abstract class GroundyTask {
     return mParameters.getBoolean(key, defValue);
   }
 
+  protected long getLongParam(String key) {
+    return getLongParam(key, 0);
+  }
+
+  protected long getLongParam(String key, long defValue) {
+    return mParameters.getLong(key, defValue);
+  }
+
   void setReceiver(ResultReceiver receiver) {
     mReceiver = receiver;
   }
