@@ -27,7 +27,7 @@ public class ExampleTask extends GroundyTask {
 
     // return a TaskResult depending on the success of your task
     // and optionally pass some results back
-    Succeeded result = new Succeeded();
+    TaskResult result = success();
     result.add("the_result", "some result");
     return result;
   }
@@ -38,14 +38,14 @@ Whenever you want to execute the task, just do this:
 
 ```java
 // this is usually performed from within an Activity
-Bundle params = new Bundler().add("key_name", "foo").build();
+Bundle args = new Bundler().add("key_name", "foo").build();
 Groundy.create(ExampleTask.class)
-    .callback(YourActivity.this)  // required if you want to get notified of your task lifecycle
-    .params(params)               // optional
+    .callback(callbackObj)        // required if you want to get notified of your task lifecycle
+    .args(args)                   // optional
     .queue(YourActivity.this);
 ```
 
-You will get results in your result receiver (in the main thread):
+You will get results in your callback object(s) (in the main thread):
 
 ```java
 @OnSuccess(ExampleTask.class)
@@ -64,7 +64,7 @@ Extending callback system
 =========================
 
 There are some already defined onCallback annotations: `@OnSuccess`, `@OnFailed`, `@OnCancel`,
-`@OnProgress` and `@OnStart`, but you can also create your own onCallback types like:
+`@OnProgress` and `@OnStart`, but you can also create your own callback types like:
 
 ```java
 @OnCallback(task = ChuckTask.class, name = "kick")

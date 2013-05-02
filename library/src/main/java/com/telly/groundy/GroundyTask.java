@@ -260,16 +260,29 @@ public abstract class GroundyTask {
   }
 
   /**
-   * Prepare and sends a progress update to the current receiver. OnCallback used is {@link
+   * Prepare and sends a progress update to the current receiver. Callback used is {@link
    * com.telly.groundy.annotations.OnProgress} and it will contain a bundle with an integer extra
    * called {@link Groundy#KEY_PROGRESS}
    *
    * @param progress percentage to send to receiver
    */
-  public void updateProgress(int progress) {
+  protected void updateProgress(int progress) {
+    updateProgress(progress, null);
+  }
+
+  /**
+   * Prepare and sends a progress update to the current receiver. Callback used is {@link
+   * com.telly.groundy.annotations.OnProgress} and it will contain a bundle with an integer extra
+   * called {@link Groundy#KEY_PROGRESS}
+   *
+   * @param extraData additional information to send to the progress callback
+   * @param progress percentage to send to receiver
+   */
+  protected void updateProgress(int progress, Bundle extraData) {
     if (mReceiver != null) {
       Bundle resultData = new Bundle();
       resultData.putInt(Groundy.KEY_PROGRESS, progress);
+      if (extraData != null) resultData.putAll(extraData);
       send(OnProgress.class, resultData);
     }
   }
