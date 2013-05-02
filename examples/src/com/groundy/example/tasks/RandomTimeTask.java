@@ -53,6 +53,6 @@ public class RandomTimeTask extends GroundyTask {
         e.printStackTrace();
       }
     }
-    return success();
+    return succeeded();
   }
 }

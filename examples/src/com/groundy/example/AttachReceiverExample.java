@@ -26,14 +26,17 @@ package com.groundy.example;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ToggleButton;
 import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.CallbacksManager;
 import com.telly.groundy.Groundy;
 import com.telly.groundy.TaskHandler;
 import com.telly.groundy.annotations.OnSuccess;
 import com.telly.groundy.example.R;
-import com.telly.groundy.util.Bundler;
 import java.util.Random;
 
 public class AttachReceiverExample extends Activity {
@@ -77,7 +80,6 @@ public class AttachReceiverExample extends Activity {
 
         // configure value parameters
         int time = new Random().nextInt(10000);
-        Bundle params = new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time).build();
         Toast.makeText(AttachReceiverExample.this, getString(R.string.task_will_take_x, time),
             Toast.LENGTH_SHORT).show();
 
@@ -85,7 +87,7 @@ public class AttachReceiverExample extends Activity {
         mTaskHandler = Groundy.create(RandomTimeTask.class)
             .callback(AttachReceiverExample.this)
             .callbackManager(callbacksManager)
-            .args(params)
+            .arg(RandomTimeTask.KEY_ESTIMATED, time)
             .queue(AttachReceiverExample.this);
       }
     });

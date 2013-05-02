@@ -30,6 +30,8 @@ import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ResultReceiver;
+import java.io.Serializable;
+import java.util.ArrayList;
 
 public class Groundy implements Parcelable {
   /**
@@ -81,7 +83,7 @@ public class Groundy implements Parcelable {
   private final Class<? extends GroundyTask> mGroundyTask;
   private final long mId;
   private CallbacksReceiver mReceiver;
-  private Bundle mArgs;
+  private final Bundle mArgs = new Bundle();
   private int mGroupId;
   private boolean mAlreadyProcessed = false;
   private CallbacksManager callbacksManager;
@@ -123,7 +125,7 @@ public class Groundy implements Parcelable {
    */
   public Groundy args(Bundle arguments) {
     checkAlreadyProcessed();
-    mArgs = arguments;
+    mArgs.putAll(arguments);
     return this;
   }
 
@@ -335,7 +337,7 @@ public class Groundy implements Parcelable {
       //noinspection unchecked
       Groundy groundy = new Groundy(groundyTask, id);
       groundy.mReceiver = source.readParcelable(ResultReceiver.class.getClassLoader());
-      groundy.mArgs = source.readBundle();
+      groundy.mArgs.putAll(source.readBundle());
       groundy.mGroupId = source.readInt();
       groundy.mAlreadyProcessed = source.readByte() == 1;
       //noinspection unchecked
@@ -362,5 +364,331 @@ public class Groundy implements Parcelable {
     dest.writeByte((byte) (mAlreadyProcessed ? 1 : 0));
     dest.writeSerializable(mGroundyClass);
     dest.writeByte((byte) (mAllowNonUIThreadCallbacks ? 1 : 0));
+  }
+
+  /**
+   * Inserts a Boolean value into the mapping of this Bundle, replacing any existing value for the
+   * given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value a Boolean, or null
+   */
+  public Groundy arg(String key, boolean value) {
+    mArgs.putBoolean(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a byte value into the mapping of this Bundle, replacing any existing value for the
+   * given key.
+   *
+   * @param key a String, or null
+   * @param value a byte
+   */
+  public Groundy arg(String key, byte value) {
+    mArgs.putByte(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a char value into the mapping of this Bundle, replacing any existing value for the
+   * given key.
+   *
+   * @param key a String, or null
+   * @param value a char, or null
+   */
+  public Groundy arg(String key, char value) {
+    mArgs.putChar(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a short value into the mapping of this Bundle, replacing any existing value for the
+   * given key.
+   *
+   * @param key a String, or null
+   * @param value a short
+   */
+  public Groundy arg(String key, short value) {
+    mArgs.putShort(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts an int value into the mapping of this Bundle, replacing any existing value for the
+   * given key.
+   *
+   * @param key a String, or null
+   * @param value an int, or null
+   */
+  public Groundy arg(String key, int value) {
+    mArgs.putInt(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a long value into the mapping of this Bundle, replacing any existing value for the
+   * given key.
+   *
+   * @param key a String, or null
+   * @param value a long
+   */
+  public Groundy arg(String key, long value) {
+    mArgs.putLong(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a float value into the mapping of this Bundle, replacing any existing value for the
+   * given key.
+   *
+   * @param key a String, or null
+   * @param value a float
+   */
+  public Groundy arg(String key, float value) {
+    mArgs.putFloat(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a double value into the mapping of this Bundle, replacing any existing value for the
+   * given key.
+   *
+   * @param key a String, or null
+   * @param value a double
+   */
+  public Groundy arg(String key, double value) {
+    mArgs.putDouble(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a String value into the mapping of this Bundle, replacing any existing value for the
+   * given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value a String, or null
+   */
+  public Groundy arg(String key, String value) {
+    mArgs.putString(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a CharSequence value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value a CharSequence, or null
+   */
+  public Groundy arg(String key, CharSequence value) {
+    mArgs.putCharSequence(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a Parcelable value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value a Parcelable object, or null
+   */
+  public Groundy arg(String key, Parcelable value) {
+    mArgs.putParcelable(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts an array of Parcelable values into the mapping of this Bundle, replacing any existing
+   * value for the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value an array of Parcelable objects, or null
+   */
+  public Groundy arg(String key, Parcelable[] value) {
+    mArgs.putParcelableArray(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts an ArrayList<Integer> value into the mapping of this Bundle, replacing any existing
+   * value for the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value an ArrayList<Integer> object, or null
+   */
+  public Groundy addIntegerArrayList(String key, ArrayList<Integer> value) {
+    mArgs.putIntegerArrayList(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts an ArrayList<String> value into the mapping of this Bundle, replacing any existing
+   * value for the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value an ArrayList<String> object, or null
+   */
+  public Groundy addStringArrayList(String key, ArrayList<String> value) {
+    mArgs.putStringArrayList(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts an ArrayList<CharSequence> value into the mapping of this Bundle, replacing any
+   * existing value for the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value an ArrayList<CharSequence> object, or null
+   */
+  public Groundy arg(String key, ArrayList<CharSequence> value) {
+    mArgs.putCharSequenceArrayList(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a Serializable value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value a Serializable object, or null
+   */
+  public Groundy arg(String key, Serializable value) {
+    mArgs.putSerializable(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a boolean array value into the mapping of this Bundle, replacing any existing value
+   * for
+   * the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value a boolean array object, or null
+   */
+  public Groundy arg(String key, boolean[] value) {
+    mArgs.putBooleanArray(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a byte array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value a byte array object, or null
+   */
+  public Groundy arg(String key, byte[] value) {
+    mArgs.putByteArray(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a short array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value a short array object, or null
+   */
+  public Groundy arg(String key, short[] value) {
+    mArgs.putShortArray(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a char array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value a char array object, or null
+   */
+  public Groundy arg(String key, char[] value) {
+    mArgs.putCharArray(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts an int array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value an int array object, or null
+   */
+  public Groundy arg(String key, int[] value) {
+    mArgs.putIntArray(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a long array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value a long array object, or null
+   */
+  public Groundy arg(String key, long[] value) {
+    mArgs.putLongArray(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a float array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value a float array object, or null
+   */
+  public Groundy arg(String key, float[] value) {
+    mArgs.putFloatArray(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a double array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value a double array object, or null
+   */
+  public Groundy arg(String key, double[] value) {
+    mArgs.putDoubleArray(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a String array value into the mapping of this Bundle, replacing any existing value for
+   * the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value a String array object, or null
+   */
+  public Groundy arg(String key, String[] value) {
+    mArgs.putStringArray(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a CharSequence array value into the mapping of this Bundle, replacing any existing
+   * value for the given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value a CharSequence array object, or null
+   */
+  public Groundy arg(String key, CharSequence[] value) {
+    mArgs.putCharSequenceArray(key, value);
+    return this;
+  }
+
+  /**
+   * Inserts a Bundle value into the mapping of this Bundle, replacing any existing value for the
+   * given key.  Either key or value may be null.
+   *
+   * @param key a String, or null
+   * @param value a Bundle object, or null
+   * @return itself
+   */
+  public Groundy arg(String key, Bundle value) {
+    mArgs.putBundle(key, value);
+    return this;
   }
 }

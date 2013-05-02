@@ -34,7 +34,6 @@ import com.telly.groundy.TaskHandler;
 import com.telly.groundy.annotations.OnProgress;
 import com.telly.groundy.annotations.Param;
 import com.telly.groundy.example.R;
-import com.telly.groundy.util.Bundler;
 import java.util.Random;
 
 public class QueueExample extends Activity {
@@ -60,8 +59,7 @@ public class QueueExample extends Activity {
           time = 1000;
         }
 
-        TaskHandler taskHandler = processTask(
-            new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time).build());
+        TaskHandler taskHandler = processTask(time);
 
         ProgressItem progressItem = new ProgressItem();
         progressItem.setTaskProxy(taskHandler);
@@ -72,13 +70,16 @@ public class QueueExample extends Activity {
     });
   }
 
-  protected TaskHandler processTask(Bundle params) {
-    return Groundy.create(RandomTimeTask.class).args(params).callback(this).queue(this);
+  protected TaskHandler processTask(int time) {
+    return Groundy.create(RandomTimeTask.class)
+        .arg(RandomTimeTask.KEY_ESTIMATED, time)
+        .callback(this)
+        .queue(this);
   }
 
   @OnProgress(RandomTimeTask.class)
   public void onProgress(@Param(Groundy.TASK_ID) long taskId,
-                         @Param(Groundy.KEY_PROGRESS) int progress) {
+      @Param(Groundy.KEY_PROGRESS) int progress) {
     findItem(taskId).setProgress(progress);
     mAdapter.notifyDataSetChanged();
   }

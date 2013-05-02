@@ -33,7 +33,6 @@ import com.telly.groundy.CallbacksManager;
 import com.telly.groundy.Groundy;
 import com.telly.groundy.annotations.OnSuccess;
 import com.telly.groundy.example.R;
-import com.telly.groundy.util.Bundler;
 import java.util.Random;
 
 public class SafeSimpleTask extends Activity {
@@ -64,7 +63,6 @@ public class SafeSimpleTask extends Activity {
 
         // configure value parameters
         int time = new Random().nextInt(10000);
-        Bundle params = new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time).build();
         Toast.makeText(SafeSimpleTask.this, getString(R.string.task_will_take_x, time),
             Toast.LENGTH_SHORT).show();
 
@@ -72,7 +70,7 @@ public class SafeSimpleTask extends Activity {
         Groundy.create(RandomTimeTask.class)
             .callback(SafeSimpleTask.this)
             .callbackManager(mCallbacksManager)
-            .args(params)
+            .arg(RandomTimeTask.KEY_ESTIMATED, time)
             .queue(SafeSimpleTask.this);
       }
     });

@@ -35,11 +35,11 @@ public class ChuckNorrisTask extends GroundyTask {
       String jsonBody = HttpRequest.get("http://api.icndb.com/jokes/random").body();
       JSONObject jsonObject = new JSONObject(jsonBody);
       String fact = jsonObject.getJSONObject("value").getString("joke");
-      TaskResult succeeded = success();
+      TaskResult succeeded = succeeded();
       succeeded.add("fact", fact);
       return succeeded;
     } catch (Exception e) {
-      return fail();
+      return failed();
     }
   }
 }

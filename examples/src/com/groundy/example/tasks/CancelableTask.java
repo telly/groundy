@@ -43,13 +43,13 @@ public class CancelableTask extends GroundyTask {
         // let's fake some work ^_^
         Thread.sleep(interval);
         if (isQuitting()) {
-          return cancel();
+          return cancelled();
         }
         currentPercentage++;
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
     }
-    return success();
+    return succeeded();
   }
 }

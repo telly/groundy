@@ -21,7 +21,7 @@ public class ExampleTask extends GroundyTask {
   @Override
   protected TaskResult doInBackground() {
     // you can send parameters to the task using a Bundle (optional)
-    String exampleParam = getStringParam("key_name");
+    String exampleParam = getStringArg("arg_name");
 
     // lots of code
 
@@ -38,10 +38,9 @@ Whenever you want to execute the task, just do this:
 
 ```java
 // this is usually performed from within an Activity
-Bundle args = new Bundler().add("key_name", "foo").build();
 Groundy.create(ExampleTask.class)
     .callback(callbackObj)        // required if you want to get notified of your task lifecycle
-    .args(args)                   // optional
+    .arg("arg_name", "foo")       // optional
     .queue(YourActivity.this);
 ```
 

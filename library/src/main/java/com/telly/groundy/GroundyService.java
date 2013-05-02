@@ -386,6 +386,11 @@ public class GroundyService extends Service {
       taskResult.add(Groundy.CRASH_MESSAGE, String.valueOf(e.getMessage()));
     }
 
+    if (taskResult == null) {
+      throw new NullPointerException(
+          "Task " + groundyTask + " returned null from the doInBackground method");
+    }
+
     taskInfo.task = null;
     if (requiresWifi) {
       mWakeLockHelper.release();

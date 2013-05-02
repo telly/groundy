@@ -36,7 +36,6 @@ import com.telly.groundy.annotations.OnProgress;
 import com.telly.groundy.annotations.OnSuccess;
 import com.telly.groundy.annotations.Param;
 import com.telly.groundy.example.R;
-import com.telly.groundy.util.Bundler;
 
 public class DownloadExample extends Activity {
 
@@ -59,10 +58,9 @@ public class DownloadExample extends Activity {
         mProgressDialog.show();
 
         String url = mEditUrl.getText().toString().trim();
-        Bundle extras = new Bundler().add(DownloadTask.PARAM_URL, url).build();
         Groundy.create(DownloadTask.class)
             .callback(mCallback)
-            .args(extras)
+            .arg(DownloadTask.PARAM_URL, url)
             .queue(DownloadExample.this);
       }
     });

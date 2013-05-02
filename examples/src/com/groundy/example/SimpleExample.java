@@ -31,7 +31,6 @@ import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.Groundy;
 import com.telly.groundy.annotations.OnSuccess;
 import com.telly.groundy.example.R;
-import com.telly.groundy.util.Bundler;
 import java.util.Random;
 
 public class SimpleExample extends Activity {
@@ -48,14 +47,13 @@ public class SimpleExample extends Activity {
 
         // configure value parameters
         int time = new Random().nextInt(10000);
-        Bundle params = new Bundler().add(RandomTimeTask.KEY_ESTIMATED, time).build();
         Toast.makeText(SimpleExample.this, getString(R.string.task_will_take_x, time),
             Toast.LENGTH_SHORT).show();
 
         // queue value
         Groundy.create(RandomTimeTask.class)
             .callback(SimpleExample.this)
-            .args(params)
+            .arg(RandomTimeTask.KEY_ESTIMATED, time)
             .queue(SimpleExample.this);
       }
     });

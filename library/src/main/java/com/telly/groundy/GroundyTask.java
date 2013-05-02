@@ -87,21 +87,21 @@ public abstract class GroundyTask {
    * @return a task result instance. {@link Succeeded} if true, {@link Failed} if false.
    */
   protected TaskResult boolToResult(boolean success) {
-    return success ? success() : fail();
+    return success ? succeeded() : failed();
   }
 
   /** @return a succeeded task result */
-  protected TaskResult success() {
+  protected TaskResult succeeded() {
     return new Succeeded();
   }
 
   /** @return a failed task result */
-  protected TaskResult fail() {
+  protected TaskResult failed() {
     return new Failed();
   }
 
   /** @return a cancelled task result */
-  protected TaskResult cancel() {
+  protected TaskResult cancelled() {
     return new Cancelled();
   }
 
@@ -266,7 +266,7 @@ public abstract class GroundyTask {
    *
    * @param progress percentage to send to receiver
    */
-  protected void updateProgress(int progress) {
+  public void updateProgress(int progress) {
     updateProgress(progress, null);
   }
 
@@ -278,7 +278,7 @@ public abstract class GroundyTask {
    * @param extraData additional information to send to the progress callback
    * @param progress percentage to send to receiver
    */
-  protected void updateProgress(int progress, Bundle extraData) {
+  public void updateProgress(int progress, Bundle extraData) {
     if (mReceiver != null) {
       Bundle resultData = new Bundle();
       resultData.putInt(Groundy.KEY_PROGRESS, progress);
@@ -287,6 +287,10 @@ public abstract class GroundyTask {
     }
   }
 
+  /**
+   * @return override and return true if you want to setup a {@link android.os.PowerManager.WakeLock}
+   *         on the wireless connection.
+   */
   protected boolean keepWifiOn() {
     return false;
   }
@@ -305,7 +309,11 @@ public abstract class GroundyTask {
   /**
    * This must do all the background work.
    *
-   * @return true if the job finished successfully; false otherwise.
+   * @return a {@link TaskResult} instance with optional data to send to the callback. If your task
+   *         finished successfully, use the {@link #succeeded()} method to get a new instance of
+   *         {@link TaskResult}; if the task failed use the {@link #failed()} method instead. If
+   *         you are handling cases in which the task is cancelled, you can return {@link
+   *         #cancelled()}
    */
   protected abstract TaskResult doInBackground();
 

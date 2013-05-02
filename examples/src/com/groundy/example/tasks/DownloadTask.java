@@ -38,9 +38,9 @@ public class DownloadTask extends GroundyTask {
       File dest = new File(getContext().getFilesDir(), new File(url).getName());
       DownloadUtils.downloadFile(getContext(), url, dest,
           DownloadUtils.getDownloadListenerForTask(this));
-      return success();
+      return succeeded();
     } catch (Exception e) {
-      return fail();
+      return failed();
     }
   }
 }

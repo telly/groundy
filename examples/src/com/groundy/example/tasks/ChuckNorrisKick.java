@@ -52,10 +52,10 @@ public class ChuckNorrisKick extends GroundyTask {
     }
 
     if (!random.nextBoolean()) {
-      TaskResult failed = fail();
+      TaskResult failed = failed();
       failed.add("lifeExpectation", random.nextInt(10) + 1);
       return failed;
     }
-    return success();
+    return succeeded();
   }
 }
