@@ -82,6 +82,12 @@ In order to use this library from you Android project using maven your pom shoul
   <groupId>com.telly</groupId>
   <artifactId>groundy</artifactId>
   <version>0.9-SNAPSHOT</version>
-  <scope>compile</scope>
+</dependency>
+
+<!-- enables groundy JSR-269 processor which makes everything up to 5 times faster -->
+<dependency>
+  <groupId>com.telly</groupId>
+  <artifactId>groundy-compiler</artifactId>
+  <version>0.9-SNAPSHOT</version>
 </dependency>
 ```
