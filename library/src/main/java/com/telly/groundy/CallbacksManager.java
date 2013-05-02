@@ -56,7 +56,7 @@ public class CallbacksManager {
   /**
    * Call from within your activity or fragment onCreate method.
    *
-   * @param bundle           the onSaveInstance bundle
+   * @param bundle the onSaveInstance bundle
    * @param callbackHandlers an array of callback handlers to mange
    * @return an instance of {@link CallbacksManager}
    */
@@ -107,7 +107,7 @@ public class CallbacksManager {
    * configuration change.
    *
    * @param bundle the same bundle you receive from within your activity or fragment
-   *               onSaveInstanceState method
+   * onSaveInstanceState method
    */
   public void onSaveInstanceState(Bundle bundle) {
     bundle.putParcelableArrayList(TASK_PROXY_LIST, proxyTasks);

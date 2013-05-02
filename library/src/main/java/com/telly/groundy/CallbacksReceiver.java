@@ -28,7 +28,7 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.util.Log;
 import com.telly.groundy.annotations.OnCancel;
-import com.telly.groundy.annotations.OnFailed;
+import com.telly.groundy.annotations.OnFailure;
 import com.telly.groundy.annotations.OnSuccess;
 import java.io.IOException;
 import java.io.Serializable;
@@ -45,7 +45,7 @@ import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class InternalReceiver extends ResultReceiver implements HandlersHolder {
+class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
 
   private static final String TAG = "groundy:receiver";
   private final Class<? extends GroundyTask> groundyTaskType;
@@ -58,7 +58,7 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
     proxies = Collections.synchronizedMap(new HashMap<TaskAndHandler, ResultProxy>());
   }
 
-  InternalReceiver(Class<? extends GroundyTask> taskType, Object... handlers) {
+  CallbacksReceiver(Class<? extends GroundyTask> taskType, Object... handlers) {
     super(new Handler());
     callbackHandlers = new SetFromMap<Object>(new WeakHashMap<Object, Boolean>());
     groundyTaskType = taskType;
@@ -67,9 +67,9 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
 
   @Override
   public void onReceiveResult(int resultCode, Bundle resultData) {
-    if (resultCode == Groundy.RESULT_CODE_CALLBACK_ANNOTATION) {//noinspection unchecked
-      Class<? extends Annotation> callbackAnnotation = (Class<? extends Annotation>) resultData.getSerializable(
-          Groundy.KEY_CALLBACK_ANNOTATION);
+    if (resultCode == GroundyTask.RESULT_CODE_CALLBACK_ANNOTATION) {//noinspection unchecked
+      Class<? extends Annotation> callbackAnnotation =
+          (Class<? extends Annotation>) resultData.getSerializable(Groundy.KEY_CALLBACK_ANNOTATION);
       handleCallback(callbackAnnotation, resultData);
     }
   }
@@ -83,7 +83,7 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
   }
 
   @Override public void removeCallbackHandlers(Class<? extends GroundyTask> groundyTaskClass,
-                                               Object... handlers) {
+      Object... handlers) {
     if (handlers != null) {
       for (Object callbackHandler : handlers) {
         callbackHandlers.remove(callbackHandler);
@@ -95,10 +95,10 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
     callbackHandlers.clear();
   }
 
-  @Override public void handleCallback(Class<? extends Annotation> callbackAnnotation,
-                                       Bundle resultData) {
+  @Override
+  public void handleCallback(Class<? extends Annotation> callbackAnnotation, Bundle resultData) {
     boolean isEndingAnnotation = callbackAnnotation == OnSuccess.class ||
-        callbackAnnotation == OnFailed.class ||
+        callbackAnnotation == OnFailure.class ||
         callbackAnnotation == OnCancel.class;
     boolean endTask = isEndingAnnotation && groundyProxy instanceof TaskHandlerImpl;
     if (endTask) {
@@ -134,8 +134,9 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
     boolean isNotPublic = !Modifier.isPublic(handlerType.getModifiers());
     if (isInner(handlerType) || isNotPublic) {
       if (isNotPublic) {
-        Log.d(TAG,
-            "Using reflection for " + handlerType + " because its not public. It's recommended to use public callbacks which enables code generation which makes things way faster.");
+        Log.d(TAG, "Using reflection for "
+            + handlerType
+            + " because its not public. It's recommended to use public callbacks which enables code generation which makes things way faster.");
       }
       resultProxy = new ReflectProxy(groundyTaskType, handlerType);
     } else {
@@ -165,7 +166,7 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
     return matcher.matches();
   }
 
-  public void setOnFinishedListener(TaskHandlerImpl<? extends GroundyTask> groundyProxy) {
+  public void setOnFinishedListener(TaskHandlerImpl groundyProxy) {
     this.groundyProxy = groundyProxy;
   }
 
@@ -185,8 +186,9 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
 
       TaskAndHandler that = (TaskAndHandler) o;
 
-      if (handlerType != null ? !handlerType.equals(that.handlerType) : that.handlerType != null)
+      if (handlerType != null ? !handlerType.equals(that.handlerType) : that.handlerType != null) {
         return false;
+      }
       if (taskType != null ? !taskType.equals(that.taskType) : that.taskType != null) return false;
 
       return true;
@@ -200,8 +202,7 @@ class InternalReceiver extends ResultReceiver implements HandlersHolder {
     }
   }
 
-  private static class SetFromMap<E> extends AbstractSet<E>
-      implements Set<E>, Serializable {
+  private static class SetFromMap<E> extends AbstractSet<E> implements Set<E>, Serializable {
     private final Map<E, Boolean> m;  // The backing map
     private transient Set<E> s;       // Its keySet
 

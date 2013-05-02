@@ -31,43 +31,76 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ResultReceiver;
 
-public class Groundy<T extends GroundyTask> implements Parcelable {
-  public static final String KEY_PARAMETERS = "com.telly.groundy.key.PARAMATERS";
-  public static final String CRASH_MESSAGE = "com.telly.groundy.key.ERROR";
-  public static final String KEY_RECEIVER = "com.telly.groundy.key.RECEIVER";
+public class Groundy implements Parcelable {
+  /**
+   * Key used by the {@link com.telly.groundy.annotations.OnProgress} callback to specify
+   * the progress of the task. Parameters annotated with this key must be int.
+   */
   public static final String KEY_PROGRESS = "com.telly.groundy.key.PROGRESS";
-  public static final String KEY_TASK = "com.telly.groundy.key.TASK";
-  public static final String KEY_GROUP_ID = "com.telly.groundy.key.GROUP_ID";
+
+  /**
+   * If the task crashed, the {@link com.telly.groundy.annotations.OnFailure} callback will
+   * be invoked and it's possible to receive the exception message by annotating a parameter with
+   * this key, e.g.:
+   *
+   * <pre>{@code
+   *
+   * @OnFailure public void onFail(@Param(Groundy.CRASH_MESSAGE) crashMessage) {
+   * // do something nice
+   * }
+   * }</pre>
+   */
+  public static final String CRASH_MESSAGE = "com.telly.groundy.key.ERROR";
+
+  /**
+   * Every callback can receive the task id by annotating a parameter with this key. The task
+   * id is a long timestamp generated when the Groundy task is created.
+   */
   public static final String TASK_ID = "com.telly.groundy.key.TASK_ID";
+
+  /**
+   * If the task was cancelled, the {@link com.telly.groundy.annotations.OnCancel} callback will
+   * be invoked and it's possible to receive the cancel reason by annotating a parameter with
+   * this key. It must be an integer.
+   */
   public static final String CANCEL_REASON = "com.telly.groundy.key.CANCEL_REASON";
-  public static final String ORIGINAL_PARAMS = "com.telly.groundy.key.ORIGINAL_PARAMS";
+
+  /**
+   * Every callback can receive the original arguments sent to the task by annotating a parameter
+   * with this key.
+   */
+  public static final String ORIGINAL_PARAMS = "com.telly.groundy.key.ORIGINAL_ARGS";
+
+  static final String KEY_ARGUMENTS = "com.telly.groundy.key.ARGS";
+  static final String KEY_RECEIVER = "com.telly.groundy.key.RECEIVER";
+  static final String KEY_TASK = "com.telly.groundy.key.TASK";
+  static final String KEY_GROUP_ID = "com.telly.groundy.key.GROUP_ID";
   static final String KEY_CALLBACK_ANNOTATION = "com.telly.groundy.key.CALLBACK_ANNOTATION";
   static final String KEY_CALLBACK_NAME = "com.telly.groundy.key.CALLBACK_NAME";
-  static final int RESULT_CODE_CALLBACK_ANNOTATION = 888;
 
   private final Class<? extends GroundyTask> mGroundyTask;
   private final long mId;
-  private InternalReceiver mResultReceiver;
-  private Bundle mParams;
+  private CallbacksReceiver mReceiver;
+  private Bundle mArgs;
   private int mGroupId;
   private boolean mAlreadyProcessed = false;
   private CallbacksManager callbacksManager;
   private Class<? extends GroundyService> mGroundyClass = GroundyService.class;
   private boolean mAllowNonUIThreadCallbacks = false;
 
-  private Groundy(Class<T> groundyTask) {
+  private Groundy(Class<? extends GroundyTask> groundyTask) {
     mGroundyTask = groundyTask;
     mId = System.nanoTime();
   }
 
-  private Groundy(Class<T> groundyTask, long id) {
+  private Groundy(Class<? extends GroundyTask> groundyTask, long id) {
     mGroundyTask = groundyTask;
     mId = id;
   }
 
   /**
    * Creates a new Groundy instance ready to be queued or executed. You can configure it by adding
-   * parameters ({@link #params(android.os.Bundle)}), setting a group id ({@link #group(int)}) or
+   * arguments ({@link #args(android.os.Bundle)}), setting a group id ({@link #group(int)}) or
    * providing a callback ({@link #callback(Object...)}).
    * <p/>
    * You must configure the value <b>before</b> queueing or executing it.
@@ -75,28 +108,28 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
    * @param groundyTask reference of the groundy value implementation
    * @return new Groundy instance (does not execute anything)
    */
-  public static <T extends GroundyTask> Groundy<? extends GroundyTask> create(
-      Class<T> groundyTask) {
+  public static Groundy create(Class<? extends GroundyTask> groundyTask) {
     if (groundyTask == null) {
       throw new IllegalStateException("GroundyTask no provided");
     }
-    return new Groundy<T>(groundyTask);
+    return new Groundy(groundyTask);
   }
 
   /**
-   * Set the parameters that the value needs in order to run
+   * Set the arguments needed to run the task
    *
-   * @param params a bundle of params
+   * @param arguments a bundle of arguments
    * @return itself
    */
-  public Groundy params(Bundle params) {
+  public Groundy args(Bundle arguments) {
     checkAlreadyProcessed();
-    mParams = params;
+    mArgs = arguments;
     return this;
   }
 
   /**
    * Allows this value to receive callback messages on non UI threads.
+   *
    * @return itself
    */
   public Groundy allowNonUiCallbacks() {
@@ -113,7 +146,7 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
     if (callbacks == null || callbacks.length == 0) {
       throw new IllegalArgumentException("You must pass at least one callback handler");
     }
-    if (mResultReceiver != null) {
+    if (mReceiver != null) {
       throw new IllegalStateException("callback method can only be called once");
     }
     checkAlreadyProcessed();
@@ -121,13 +154,15 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
       throw new IllegalStateException(
           "callbacks can only be set on the UI thread. If you are sure you can handle callbacks from a non UI thread, call Groundy#allowNonUiCallbacks() method first");
     }
-    mResultReceiver = new InternalReceiver(mGroundyTask, callbacks);
+    mReceiver = new CallbacksReceiver(mGroundyTask, callbacks);
     return this;
   }
 
   /**
-   * This allows you to set an identification groupId to the value which can be later used to cancel
-   * it. Group ids can be shared by several groundy tasks even if their implementation is different.
+   * This allows you to set an identification groupId to the value which can be later used to
+   * cancel
+   * it. Group ids can be shared by several groundy tasks even if their implementation is
+   * different.
    * If cancelling tasks using a groupId, all tasks created with this groupId will be cancelled
    * and/or removed from the queue.
    *
@@ -152,7 +187,8 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   public Groundy service(Class<? extends GroundyService> groundyClass) {
     if (groundyClass == GroundyService.class) {
       throw new IllegalStateException(
-          "This method is meant to set a different GroundyService implementation. " + "You cannot use GroundyService.class, http://i.imgur.com/IR23PAe.png");
+          "This method is meant to set a different GroundyService implementation. "
+              + "You cannot use GroundyService.class, http://i.imgur.com/IR23PAe.png");
     }
     checkAlreadyProcessed();
     mGroundyClass = groundyClass;
@@ -160,7 +196,8 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   }
 
   /**
-   * Sets a callback manager for this value. It allows you to easily attach/detach your callbacks on
+   * Sets a callback manager for this value. It allows you to easily attach/detach your callbacks
+   * on
    * configuration change. This is important if you are not handling the configuration changes by
    * your self, since it will prevent leaks or wrong results when callbacks are invoked.
    *
@@ -197,15 +234,15 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
     return internalQueueOrExecute(context, async);
   }
 
-  private TaskHandlerImpl<T> internalQueueOrExecute(Context context, boolean async) {
+  private TaskHandlerImpl internalQueueOrExecute(Context context, boolean async) {
     markAsProcessed();
-    TaskHandlerImpl<T> taskProxy = new TaskHandlerImpl<T>(this);
+    TaskHandlerImpl taskProxy = new TaskHandlerImpl(this);
     if (callbacksManager != null) {
       callbacksManager.register(taskProxy);
     }
 
-    if (mResultReceiver != null) {
-      mResultReceiver.setOnFinishedListener(taskProxy);
+    if (mReceiver != null) {
+      mReceiver.setOnFinishedListener(taskProxy);
     }
 
     startApiService(context, async);
@@ -224,8 +261,8 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
     return mGroundyTask;
   }
 
-  InternalReceiver getReceiver() {
-    return mResultReceiver;
+  CallbacksReceiver getReceiver() {
+    return mReceiver;
   }
 
   private void checkAlreadyProcessed() {
@@ -245,11 +282,11 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   private void startApiService(Context context, boolean async) {
     Intent intent = new Intent(context, mGroundyClass);
     intent.setAction(async ? GroundyService.ACTION_EXECUTE : GroundyService.ACTION_QUEUE);
-    if (mParams != null) {
-      intent.putExtra(KEY_PARAMETERS, mParams);
+    if (mArgs != null) {
+      intent.putExtra(KEY_ARGUMENTS, mArgs);
     }
-    if (mResultReceiver != null) {
-      intent.putExtra(KEY_RECEIVER, mResultReceiver);
+    if (mReceiver != null) {
+      intent.putExtra(KEY_RECEIVER, mReceiver);
     }
     intent.putExtra(KEY_TASK, mGroundyTask);
     intent.putExtra(TASK_ID, mId);
@@ -283,8 +320,8 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   public String toString() {
     return "Groundy{" +
         ", groundyTask=" + mGroundyTask +
-        ", resultReceiver=" + mResultReceiver +
-        ", extras=" + mParams +
+        ", resultReceiver=" + mReceiver +
+        ", extras=" + mArgs +
         ", groupId=" + mGroupId +
         '}';
   }
@@ -297,10 +334,11 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
 
       //noinspection unchecked
       Groundy groundy = new Groundy(groundyTask, id);
-      groundy.mResultReceiver = source.readParcelable(ResultReceiver.class.getClassLoader());
-      groundy.mParams = source.readBundle();
+      groundy.mReceiver = source.readParcelable(ResultReceiver.class.getClassLoader());
+      groundy.mArgs = source.readBundle();
       groundy.mGroupId = source.readInt();
       groundy.mAlreadyProcessed = source.readByte() == 1;
+      //noinspection unchecked
       groundy.mGroundyClass = (Class) source.readSerializable();
       groundy.mAllowNonUIThreadCallbacks = source.readByte() == 1;
       return groundy;
@@ -318,8 +356,8 @@ public class Groundy<T extends GroundyTask> implements Parcelable {
   @Override public void writeToParcel(Parcel dest, int flags) {
     dest.writeSerializable(mGroundyTask);
     dest.writeLong(mId);
-    dest.writeParcelable(mResultReceiver, flags);
-    dest.writeBundle(mParams);
+    dest.writeParcelable(mReceiver, flags);
+    dest.writeBundle(mArgs);
     dest.writeInt(mGroupId);
     dest.writeByte((byte) (mAlreadyProcessed ? 1 : 0));
     dest.writeSerializable(mGroundyClass);

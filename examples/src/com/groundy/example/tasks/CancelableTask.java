@@ -23,14 +23,12 @@
 
 package com.groundy.example.tasks;
 
-import com.telly.groundy.Cancelled;
 import com.telly.groundy.GroundyTask;
-import com.telly.groundy.Succeeded;
 import com.telly.groundy.TaskResult;
 
 public class CancelableTask extends GroundyTask {
   @Override protected TaskResult doInBackground() {
-    int time = getIntParam(RandomTimeTask.KEY_ESTIMATED);
+    int time = getIntArg(RandomTimeTask.KEY_ESTIMATED);
     if (time < 1000) {
       time = 1000;
     }
@@ -45,13 +43,13 @@ public class CancelableTask extends GroundyTask {
         // let's fake some work ^_^
         Thread.sleep(interval);
         if (isQuitting()) {
-          return new Cancelled();
+          return cancel();
         }
         currentPercentage++;
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
     }
-    return new Succeeded();
+    return success();
   }
 }

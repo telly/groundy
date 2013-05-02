@@ -26,17 +26,17 @@ package com.telly.groundy;
 import android.content.Context;
 import android.os.Parcel;
 
-class TaskHandlerImpl<T extends GroundyTask> implements TaskHandler {
+class TaskHandlerImpl implements TaskHandler {
 
-  private final Groundy<T> groundy;
+  private final Groundy groundy;
   private boolean mTaskEnded = false;
 
-  TaskHandlerImpl(Groundy<T> groundy) {
+  TaskHandlerImpl(Groundy groundy) {
     this.groundy = groundy;
   }
 
   @Override public void cancel(Context context, int reason,
-                               GroundyManager.SingleCancelListener cancelListener) {
+      GroundyManager.SingleCancelListener cancelListener) {
     if (!mTaskEnded) {
       GroundyManager.cancelTaskById(context, groundy.getId(), reason, cancelListener,
           groundy.getGroundyServiceClass());
@@ -46,9 +46,9 @@ class TaskHandlerImpl<T extends GroundyTask> implements TaskHandler {
   }
 
   @Override public void clearCallbacks() {
-    InternalReceiver internalReceiver = groundy.getReceiver();
-    if (internalReceiver != null) {
-      internalReceiver.clearHandlers();
+    CallbacksReceiver callbacksReceiver = groundy.getReceiver();
+    if (callbacksReceiver != null) {
+      callbacksReceiver.clearHandlers();
     }
   }
 
@@ -57,13 +57,13 @@ class TaskHandlerImpl<T extends GroundyTask> implements TaskHandler {
   }
 
   @Override public void appendCallbacks(Object... handlers) {
-    InternalReceiver internalReceiver = groundy.getReceiver();
-    internalReceiver.appendCallbackHandlers(handlers);
+    CallbacksReceiver callbacksReceiver = groundy.getReceiver();
+    callbacksReceiver.appendCallbackHandlers(handlers);
   }
 
   @Override public void removeCallbacks(Object... handlers) {
-    InternalReceiver internalReceiver = groundy.getReceiver();
-    internalReceiver.removeCallbackHandlers(groundy.getGroundyTaskClass(), handlers);
+    CallbacksReceiver callbacksReceiver = groundy.getReceiver();
+    callbacksReceiver.removeCallbackHandlers(groundy.getGroundyTaskClass(), handlers);
   }
 
   @Override public long getTaskId() {

@@ -35,8 +35,8 @@ public interface TaskHandler extends Parcelable {
   /**
    * Cancels this value if possible.
    *
-   * @param context        used to communicate with the groundy service
-   * @param reason         the reason to cancel this value if any.
+   * @param context used to communicate with the groundy service
+   * @param reason the reason to cancel this value if any.
    * @param cancelListener a listener to get the result of the value cancellation
    */
   void cancel(Context context, int reason, GroundyManager.SingleCancelListener cancelListener);

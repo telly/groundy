@@ -118,7 +118,7 @@ public class CancelTaskExample extends Activity implements View.OnClickListener,
     TaskHandler taskHandler = Groundy.create(CancelableTask.class)
         .callback(this)
         .group(groupId)
-        .params(params)
+        .args(params)
         .queue(CancelTaskExample.this);
 
     ProgressItem progressItem = new ProgressItem();

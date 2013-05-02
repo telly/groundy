@@ -23,9 +23,7 @@
 
 package com.groundy.example.tasks;
 
-import com.telly.groundy.Failed;
 import com.telly.groundy.GroundyTask;
-import com.telly.groundy.Succeeded;
 import com.telly.groundy.TaskResult;
 import com.telly.groundy.util.DownloadUtils;
 import java.io.File;
@@ -36,13 +34,13 @@ public class DownloadTask extends GroundyTask {
   @Override
   protected TaskResult doInBackground() {
     try {
-      String url = getParameters().getString(PARAM_URL);
+      String url = getStringArg(PARAM_URL);
       File dest = new File(getContext().getFilesDir(), new File(url).getName());
       DownloadUtils.downloadFile(getContext(), url, dest,
           DownloadUtils.getDownloadListenerForTask(this));
-      return new Succeeded();
+      return success();
     } catch (Exception e) {
-      return new Failed();
+      return fail();
     }
   }
 }

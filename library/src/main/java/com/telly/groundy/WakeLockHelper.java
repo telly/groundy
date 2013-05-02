@@ -25,9 +25,7 @@ package com.telly.groundy;
 
 import android.content.Context;
 
-/**
- * @author Evelio Tarazona <evelio@twitvid.com>
- */
+/** @author Evelio Tarazona <evelio@twitvid.com> */
 class WakeLockHelper {
   private final Context mContext;
 

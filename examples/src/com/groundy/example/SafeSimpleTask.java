@@ -72,7 +72,7 @@ public class SafeSimpleTask extends Activity {
         Groundy.create(RandomTimeTask.class)
             .callback(SafeSimpleTask.this)
             .callbackManager(mCallbacksManager)
-            .params(params)
+            .args(params)
             .queue(SafeSimpleTask.this);
       }
     });

@@ -26,7 +26,7 @@ package com.telly.groundy;
 import android.os.Bundle;
 import com.telly.groundy.annotations.OnCallback;
 import com.telly.groundy.annotations.OnCancel;
-import com.telly.groundy.annotations.OnFailed;
+import com.telly.groundy.annotations.OnFailure;
 import com.telly.groundy.annotations.OnProgress;
 import com.telly.groundy.annotations.OnStart;
 import com.telly.groundy.annotations.OnSuccess;
@@ -43,7 +43,7 @@ import java.util.Map;
 class ReflectProxy implements ResultProxy {
 
   private static final Class<?>[] GROUNDY_CALLBACKS = {
-      OnStart.class, OnSuccess.class, OnFailed.class, OnCancel.class, OnProgress.class,
+      OnStart.class, OnSuccess.class, OnFailure.class, OnCancel.class, OnProgress.class,
       OnCallback.class
   };
   private static final Map<Class<?>, Method[]> METHODS_CACHE = new HashMap<Class<?>, Method[]>();
@@ -60,7 +60,8 @@ class ReflectProxy implements ResultProxy {
     fillMethodSpecMap();
   }
 
-  @Override public void apply(Object target, Class<? extends Annotation> callbackAnnotation, Bundle resultData) {
+  @Override public void apply(Object target, Class<? extends Annotation> callbackAnnotation,
+      Bundle resultData) {
     List<MethodSpec> methodSpecs = callbacksMap.get(callbackAnnotation);
     if (methodSpecs == null || methodSpecs.isEmpty()) {
       return;
@@ -73,7 +74,7 @@ class ReflectProxy implements ResultProxy {
         // ignore method specs whose callback is not the same that is being applied right now
         continue;
       }
-      Object[] values = getReturnParams(resultData, methodSpec);
+      Object[] values = getResultParams(resultData, methodSpec);
       try {
         methodSpec.method.invoke(target, values);
       } catch (Exception pokemon) {
@@ -113,8 +114,7 @@ class ReflectProxy implements ResultProxy {
   }
 
   private void appendMethodCallback(Class<? extends GroundyTask> groundyTaskType,
-                                    Class<? extends Annotation> phaseAnnotation,
-                                    Method method) {
+      Class<? extends Annotation> phaseAnnotation, Method method) {
     Annotation methodAnnotation = method.getAnnotation(phaseAnnotation);
     if (methodAnnotation == null || !isValid(groundyTaskType, methodAnnotation)) {
       return;
@@ -169,15 +169,15 @@ class ReflectProxy implements ResultProxy {
   }
 
   private boolean isValid(Class<? extends GroundyTask> groundyTaskType,
-                          Annotation methodAnnotation) {
+      Annotation methodAnnotation) {
     if (methodAnnotation instanceof OnSuccess) {
       OnSuccess onSuccess = (OnSuccess) methodAnnotation;
       if (onSuccess.value() != groundyTaskType) {
         return false;
       }
-    } else if (methodAnnotation instanceof OnFailed) {
-      OnFailed onFailed = (OnFailed) methodAnnotation;
-      if (onFailed.value() != groundyTaskType) {
+    } else if (methodAnnotation instanceof OnFailure) {
+      OnFailure onFailure = (OnFailure) methodAnnotation;
+      if (onFailure.value() != groundyTaskType) {
         return false;
       }
     } else if (methodAnnotation instanceof OnProgress) {
@@ -204,7 +204,7 @@ class ReflectProxy implements ResultProxy {
     return true;
   }
 
-  private static Object[] getReturnParams(Bundle resultData, MethodSpec methodSpec) {
+  private static Object[] getResultParams(Bundle resultData, MethodSpec methodSpec) {
     Method method = methodSpec.method;
 
     Object[] values = new Object[methodSpec.paramNames.size()];
@@ -219,8 +219,13 @@ class ReflectProxy implements ResultProxy {
         values[i] = defaultValue(parameterType);
       } else {
         if (!isTypeValid(parameterType, values[i].getClass())) {
-          throw new RuntimeException(
-            paramName + " parameter is " + values[i].getClass().getSimpleName() + " but the method (" + method + ") expects " + parameterType.getSimpleName());
+          throw new RuntimeException(paramName
+              + " parameter is "
+              + values[i].getClass().getSimpleName()
+              + " but the method ("
+              + method
+              + ") expects "
+              + parameterType.getSimpleName());
         }
       }
     }
@@ -229,8 +234,8 @@ class ReflectProxy implements ResultProxy {
 
   private static boolean isTypeValid(Class<?> expected, Class<?> actual) {
     if (expected == Double.class || expected == double.class) {
-      return isAnyOf(actual, long.class, Long.class, int.class, Integer.class,
-        double.class, Double.class, float.class, Float.class);
+      return isAnyOf(actual, long.class, Long.class, int.class, Integer.class, double.class,
+          Double.class, float.class, Float.class);
     } else if (expected == Float.class || expected == float.class) {
       return isAnyOf(actual, int.class, Integer.class, float.class, Float.class);
     } else if (expected == Long.class || expected == long.class) {
@@ -253,13 +258,20 @@ class ReflectProxy implements ResultProxy {
   }
 
   private static Object defaultValue(Class<?> parameterType) {
-    if (parameterType == int.class || parameterType == Integer.class
-      || parameterType == float.class || parameterType == Float.class
-      || parameterType == double.class || parameterType == Double.class
-      || parameterType == long.class || parameterType == Long.class
-      || parameterType == byte.class || parameterType == Byte.class
-      || parameterType == char.class || parameterType == Character.class
-      || parameterType == short.class || parameterType == Short.class) {
+    if (parameterType == int.class
+        || parameterType == Integer.class
+        || parameterType == float.class
+        || parameterType == Float.class
+        || parameterType == double.class
+        || parameterType == Double.class
+        || parameterType == long.class
+        || parameterType == Long.class
+        || parameterType == byte.class
+        || parameterType == Byte.class
+        || parameterType == char.class
+        || parameterType == Character.class
+        || parameterType == short.class
+        || parameterType == Short.class) {
       return 0;
     } else if (parameterType == boolean.class || parameterType == Boolean.class) {
       return false;

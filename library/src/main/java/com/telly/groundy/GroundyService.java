@@ -28,14 +28,40 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.os.*;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.os.ResultReceiver;
 import com.telly.groundy.annotations.OnCancel;
-import com.telly.groundy.annotations.OnFailed;
+import com.telly.groundy.annotations.OnFailure;
 import com.telly.groundy.annotations.OnStart;
 import com.telly.groundy.annotations.OnSuccess;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * This service executes tasks dispatched to Groundy. By default, it creates a new {@link Thread}
+ * per task and executes it sequentially. It can also process tasks in parallel but you most
+ * explicitly declare your service using this meta-data tag:
+ *
+ * <pre> {@code
+ * <service android:name="com.groundy.example.AsyncGroundyService">
+ *   <meta-data android:name="groundy:mode" android:value="async" />
+ * </service>
+ * }
+ * </pre>
+ */
 public class GroundyService extends Service {
 
   static final String ACTION_QUEUE = "com.telly.groundy.action.QUEUE";
@@ -51,7 +77,8 @@ public class GroundyService extends Service {
   public static final int COULD_NOT_CANCEL = 0;
   /**
    * To be returned by cancelTaskById. It means the value was already running and {@link
-   * GroundyTask#stopTask(int)} was called on it. It depends on the value implementation to react to
+   * GroundyTask#stopTask(int)} was called on it. It depends on the value implementation to react
+   * to
    * in such cases; thus, this does not mean the value was completely stopped.
    */
   public static final int INTERRUPTED = 1;
@@ -113,7 +140,8 @@ public class GroundyService extends Service {
       if (mMode == GroundyMode.QUEUE) {
         // make sure we don't allow to asynchronously execute tasks while we are not in queue mode
         throw new UnsupportedOperationException(
-            "Current mode is 'queue'. You cannot use .execute() while" + " in this mode. You must enable 'async' mode by adding metadata to the manifest.");
+            "Current mode is 'queue'. You cannot use .execute() while"
+                + " in this mode. You must enable 'async' mode by adding metadata to the manifest.");
       }
       HandlerThread thread = new HandlerThread("AsyncGroundyService");
       thread.start();
@@ -168,7 +196,7 @@ public class GroundyService extends Service {
   }
 
   /**
-   * @param id     value to cancel
+   * @param id value to cancel
    * @param reason the reason to cancel this value. can be anything but 0
    * @return either {@link GroundyService#COULD_NOT_CANCEL}, {@link GroundyService#INTERRUPTED} and
    *         {@link GroundyService#NOT_EXECUTED}
@@ -196,7 +224,7 @@ public class GroundyService extends Service {
 
   /**
    * @param groupId group id identifying the kind of value
-   * @param reason  reason to cancel this group
+   * @param reason reason to cancel this group
    * @return number of tasks cancelled
    */
   private CancelGroupResponse cancelTasks(int groupId, int reason) {
@@ -289,13 +317,14 @@ public class GroundyService extends Service {
 
   /**
    * This method is invoked on the worker thread with a request to process. Only one Intent is
-   * processed at a time, but the processing happens on a worker thread that runs independently from
+   * processed at a time, but the processing happens on a worker thread that runs independently
+   * from
    * other application logic. So, if this code takes a long time, it will hold up other requests to
    * the same IntentService, but it will not hold up anything else.
    *
-   * @param intent     The value passed to {@link android.content.Context#startService(android.content.Intent)}.
-   * @param groupId    group id identifying the kind of value
-   * @param startId    the service start id given when the value was schedule
+   * @param intent The value passed to {@link android.content.Context#startService(android.content.Intent)}.
+   * @param groupId group id identifying the kind of value
+   * @param startId the service start id given when the value was schedule
    * @param redelivery true if this intent was redelivered by the system
    */
   private void onHandleIntent(Intent intent, int groupId, int startId, boolean redelivery) {
@@ -305,7 +334,7 @@ public class GroundyService extends Service {
   }
 
   private GroundyTask buildGroundyTask(Intent intent, int groupId, int startId,
-                                       boolean redelivery) {
+      boolean redelivery) {
     Bundle extras = intent.getExtras();
     extras = (extras == null) ? new Bundle() : extras;
 
@@ -329,7 +358,7 @@ public class GroundyService extends Service {
     groundyTask.setStartId(startId);
     groundyTask.setGroupId(groupId);
     groundyTask.setRedelivered(redelivery);
-    groundyTask.addParameters(extras.getBundle(Groundy.KEY_PARAMETERS));
+    groundyTask.addArgs(extras.getBundle(Groundy.KEY_ARGUMENTS));
     return groundyTask;
   }
 
@@ -363,20 +392,19 @@ public class GroundyService extends Service {
     }
 
     //Lets try to send back the response
-    Bundle returnParams = taskResult.getReturnParams();
-    returnParams.putBundle(Groundy.ORIGINAL_PARAMS, groundyTask.getParameters());
-
+    Bundle resultData = taskResult.getResultData();
+    resultData.putBundle(Groundy.ORIGINAL_PARAMS, groundyTask.getArgs());
 
     switch (taskResult.getType()) {
       case SUCCESS:
-        groundyTask.send(OnSuccess.class, returnParams);
+        groundyTask.send(OnSuccess.class, resultData);
         break;
       case FAIL:
-        groundyTask.send(OnFailed.class, returnParams);
+        groundyTask.send(OnFailure.class, resultData);
         break;
       case CANCEL:
-        returnParams.putInt(Groundy.CANCEL_REASON, groundyTask.getQuittingReason());
-        groundyTask.send(OnCancel.class, returnParams);
+        resultData.putInt(Groundy.CANCEL_REASON, groundyTask.getQuittingReason());
+        groundyTask.send(OnCancel.class, resultData);
         break;
     }
   }
@@ -458,7 +486,7 @@ public class GroundyService extends Service {
 
     /**
      * @param groupId group id identifying the kind of value
-     * @param reason  reason to cancel this group
+     * @param reason reason to cancel this group
      * @return number of cancelled tasks (before they were ran)
      */
     CancelGroupResponse cancelTasks(int groupId, int reason) {
@@ -466,7 +494,7 @@ public class GroundyService extends Service {
     }
 
     /**
-     * @param id     value id
+     * @param id value id
      * @param reason reason to cancel this group
      * @return either {@link GroundyService#COULD_NOT_CANCEL}, {@link GroundyService#INTERRUPTED}
      *         and {@link GroundyService#NOT_EXECUTED}

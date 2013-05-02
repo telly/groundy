@@ -31,7 +31,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 import com.groundy.example.tasks.DownloadTask;
 import com.telly.groundy.Groundy;
-import com.telly.groundy.annotations.OnFailed;
+import com.telly.groundy.annotations.OnFailure;
 import com.telly.groundy.annotations.OnProgress;
 import com.telly.groundy.annotations.OnSuccess;
 import com.telly.groundy.annotations.Param;
@@ -62,7 +62,7 @@ public class DownloadExample extends Activity {
         Bundle extras = new Bundler().add(DownloadTask.PARAM_URL, url).build();
         Groundy.create(DownloadTask.class)
             .callback(mCallback)
-            .params(extras)
+            .args(extras)
             .queue(DownloadExample.this);
       }
     });
@@ -81,7 +81,7 @@ public class DownloadExample extends Activity {
       mProgressDialog.dismiss();
     }
 
-    @OnFailed(DownloadTask.class)
+    @OnFailure(DownloadTask.class)
     public void onTragedy(@Param(Groundy.CRASH_MESSAGE) String error) {
       Toast.makeText(DownloadExample.this, error, Toast.LENGTH_LONG).show();
       mProgressDialog.dismiss();

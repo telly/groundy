@@ -49,7 +49,7 @@ public class GroundyCodeGen extends AbstractProcessor {
 
   private static final Logger logger = setupLogger();
   public static final String SUCCESS = "com.telly.groundy.annotations.OnSuccess";
-  public static final String FAILED = "com.telly.groundy.annotations.OnFailed";
+  public static final String FAILED = "com.telly.groundy.annotations.OnFailure";
   public static final String START = "com.telly.groundy.annotations.OnStart";
   public static final String CANCEL = "com.telly.groundy.annotations.OnCancel";
   public static final String PROGRESS = "com.telly.groundy.annotations.OnProgress";

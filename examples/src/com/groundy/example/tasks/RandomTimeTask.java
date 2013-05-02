@@ -24,7 +24,6 @@
 package com.groundy.example.tasks;
 
 import com.telly.groundy.GroundyTask;
-import com.telly.groundy.Succeeded;
 import com.telly.groundy.TaskResult;
 import com.telly.groundy.annotations.Traverse;
 
@@ -35,7 +34,7 @@ public class RandomTimeTask extends GroundyTask {
 
   @Override
   protected TaskResult doInBackground() {
-    int time = getIntParam(KEY_ESTIMATED);
+    int time = getIntArg(KEY_ESTIMATED);
     if (time < 1000) {
       time = 1000;
     }
@@ -54,6 +53,6 @@ public class RandomTimeTask extends GroundyTask {
         e.printStackTrace();
       }
     }
-    return new Succeeded();
+    return success();
   }
 }

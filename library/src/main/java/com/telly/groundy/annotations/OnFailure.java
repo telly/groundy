@@ -30,10 +30,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Methods with this annotation will receive the OnFailed callbacks which are sent when a value
+ * Methods with this annotation will receive the OnFailure callbacks which are sent when a value
  * returns {@link com.telly.groundy.Failed}.
  */
-@Retention(RetentionPolicy.RUNTIME) @Target({ElementType.METHOD, ElementType.TYPE})
-public @interface OnFailed {
+@Retention(RetentionPolicy.RUNTIME) @Target({ ElementType.METHOD, ElementType.TYPE })
+public @interface OnFailure {
   Class<? extends GroundyTask> value();
 }

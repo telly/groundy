@@ -24,7 +24,6 @@
 package com.telly.groundy;
 
 import android.os.Bundle;
-
 import java.lang.annotation.Annotation;
 
 /** Interface to implement by classes that hold callback handlers. */
@@ -34,7 +33,7 @@ interface HandlersHolder {
   void clearHandlers();
 
   void removeCallbackHandlers(Class<? extends GroundyTask> groundyTaskClass,
-                              Object... callbackHandlers);
+      Object... callbackHandlers);
 
   void handleCallback(Class<? extends Annotation> callbackAnnotation, Bundle resultData);
 }

@@ -67,12 +67,11 @@ class L {
    *
    * @param tag Tag to use
    * @param msg Message to send
-   * @param tr  Throwable to dump
+   * @param tr Throwable to dump
    */
   public static void e(String tag, String msg, Throwable tr) {
     if (logEnabled) {
       Log.e(tag, msg, tr);
     }
   }
-
 }

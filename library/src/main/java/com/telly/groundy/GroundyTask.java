@@ -35,10 +35,10 @@ public abstract class GroundyTask {
   protected static final int CANCEL_ALL = -1;
   protected static final int SERVICE_DESTROYED = -2;
   protected static final int CANCEL_BY_GROUP = -3;
+  static final int RESULT_CODE_CALLBACK_ANNOTATION = 888;
 
   private Context mContext;
-  //  private final Bundle mResultData = new Bundle();
-  private final Bundle mParameters = new Bundle();
+  private final Bundle mArgs = new Bundle();
   private int mStartId;
   private ResultReceiver mReceiver;
   private volatile int mQuittingReason = Integer.MIN_VALUE;
@@ -54,7 +54,7 @@ public abstract class GroundyTask {
     mContext = context;
   }
 
-  void setGroupId(int groupId) {
+  final void setGroupId(int groupId) {
     mGroupId = groupId;
   }
 
@@ -62,7 +62,7 @@ public abstract class GroundyTask {
     return mGroupId;
   }
 
-  void setStartId(int startId) {
+  final void setStartId(int startId) {
     mStartId = startId;
   }
 
@@ -70,11 +70,11 @@ public abstract class GroundyTask {
     return mStartId;
   }
 
-  void setRedelivered(boolean redelivered) {
+  final void setRedelivered(boolean redelivered) {
     mRedelivered = redelivered;
   }
 
-  void setId(long id) {
+  final void setId(long id) {
     mId = id;
   }
 
@@ -82,8 +82,27 @@ public abstract class GroundyTask {
     return mId;
   }
 
+  /**
+   * @param success true if the task was successful
+   * @return a task result instance. {@link Succeeded} if true, {@link Failed} if false.
+   */
   protected TaskResult boolToResult(boolean success) {
-    return success ? new Succeeded() : new Failed();
+    return success ? success() : fail();
+  }
+
+  /** @return a succeeded task result */
+  protected TaskResult success() {
+    return new Succeeded();
+  }
+
+  /** @return a failed task result */
+  protected TaskResult fail() {
+    return new Failed();
+  }
+
+  /** @return a cancelled task result */
+  protected TaskResult cancel() {
+    return new Cancelled();
   }
 
   /**
@@ -107,73 +126,73 @@ public abstract class GroundyTask {
     return DeviceStatus.isOnline(mContext);
   }
 
-  /** @param parameters the parameters to set */
-  void addParameters(Bundle parameters) {
-    if (parameters != null) {
-      mParameters.putAll(parameters);
+  /** @param args the args to add */
+  void addArgs(Bundle args) {
+    if (args != null) {
+      mArgs.putAll(args);
     }
   }
 
-  protected Bundle getParameters() {
-    return mParameters;
+  protected Bundle getArgs() {
+    return mArgs;
   }
 
-  protected String getStringParam(String key) {
-    return getStringParam(key, null);
+  protected String getStringArg(String key) {
+    return getStringArg(key, null);
   }
 
-  protected String getStringParam(String key, String defValue) {
-    String value = mParameters.getString(key);
+  protected String getStringArg(String key, String defValue) {
+    String value = mArgs.getString(key);
     return value != null ? value : defValue;
   }
 
-  protected CharSequence getCharSequenceParam(String key) {
-    return getCharSequenceParam(key, null);
+  protected CharSequence getCharSequenceArg(String key) {
+    return getCharSequenceArg(key, null);
   }
 
-  protected CharSequence getCharSequenceParam(String key, String defValue) {
-    CharSequence value = mParameters.getCharSequence(key);
+  protected CharSequence getCharSequenceArg(String key, String defValue) {
+    CharSequence value = mArgs.getCharSequence(key);
     return value != null ? value : defValue;
   }
 
-  protected int getIntParam(String key) {
-    return getIntParam(key, 0);
+  protected int getIntArg(String key) {
+    return getIntArg(key, 0);
   }
 
-  protected int getIntParam(String key, int defValue) {
-    return mParameters.getInt(key, defValue);
+  protected int getIntArg(String key, int defValue) {
+    return mArgs.getInt(key, defValue);
   }
 
-  protected float getFloatParam(String key) {
-    return getFloatParam(key, 0);
+  protected float getFloatArg(String key) {
+    return getFloatArg(key, 0);
   }
 
-  protected float getFloatParam(String key, float defValue) {
-    return mParameters.getFloat(key, defValue);
+  protected float getFloatArg(String key, float defValue) {
+    return mArgs.getFloat(key, defValue);
   }
 
-  protected double getDoubleParam(String key) {
-    return getDoubleParam(key, 0);
+  protected double getDoubleArg(String key) {
+    return getDoubleArg(key, 0);
   }
 
-  protected double getDoubleParam(String key, double defValue) {
-    return mParameters.getDouble(key, defValue);
+  protected double getDoubleArg(String key, double defValue) {
+    return mArgs.getDouble(key, defValue);
   }
 
-  protected boolean getBooleanParam(String key) {
-    return getBooleanParam(key, false);
+  protected boolean getBooleanArg(String key) {
+    return getBooleanArg(key, false);
   }
 
-  protected boolean getBooleanParam(String key, boolean defValue) {
-    return mParameters.getBoolean(key, defValue);
+  protected boolean getBooleanArg(String key, boolean defValue) {
+    return mArgs.getBoolean(key, defValue);
   }
 
-  protected long getLongParam(String key) {
-    return getLongParam(key, 0);
+  protected long getLongArg(String key) {
+    return getLongArg(key, 0);
   }
 
-  protected long getLongParam(String key, long defValue) {
-    return mParameters.getLong(key, defValue);
+  protected long getLongArg(String key, long defValue) {
+    return mArgs.getLong(key, defValue);
   }
 
   void setReceiver(ResultReceiver receiver) {
@@ -185,7 +204,7 @@ public abstract class GroundyTask {
       if (resultData == null) resultData = new Bundle();
       resultData.putLong(Groundy.TASK_ID, getId());
       resultData.putSerializable(Groundy.KEY_CALLBACK_ANNOTATION, callbackAnnotation);
-      mReceiver.send(Groundy.RESULT_CODE_CALLBACK_ANNOTATION, resultData);
+      mReceiver.send(RESULT_CODE_CALLBACK_ANNOTATION, resultData);
     }
   }
 
@@ -202,7 +221,7 @@ public abstract class GroundyTask {
    * Sends this data to the callback methods annotated with the specified name
    *
    * @param name the name of the callback to invoke
-   * @param resultData optional params to send
+   * @param resultData optional arguments to send
    */
   protected void callback(String name, Bundle resultData) {
     if (resultData == null) resultData = new Bundle();
@@ -295,8 +314,8 @@ public abstract class GroundyTask {
   @Override public String toString() {
     String toString = getClass().getSimpleName() + "{groupId=" + mGroupId;
     toString += ", startId=" + mStartId;
-    if (!mParameters.isEmpty()) {
-      toString += ", parameters=" + mParameters;
+    if (!mArgs.isEmpty()) {
+      toString += ", arguments=" + mArgs;
     }
     if (mReceiver != null) {
       toString += ", receiver=" + mReceiver;

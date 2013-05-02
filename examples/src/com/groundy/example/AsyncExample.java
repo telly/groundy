@@ -27,7 +27,6 @@ import android.os.Bundle;
 import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.Groundy;
 import com.telly.groundy.TaskHandler;
-import com.telly.groundy.TaskHandler;
 import com.telly.groundy.annotations.OnProgress;
 import com.telly.groundy.annotations.Param;
 
@@ -35,7 +34,7 @@ public class AsyncExample extends QueueExample {
   @Override
   protected TaskHandler processTask(Bundle params) {
     return Groundy.create(RandomTimeTask.class)
-        .params(params)
+        .args(params)
         .service(AsyncGroundyService.class)
         .callback(this)
         .execute(this);

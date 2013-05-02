@@ -24,9 +24,7 @@
 package com.groundy.example.tasks;
 
 import com.github.kevinsawicki.http.HttpRequest;
-import com.telly.groundy.Failed;
 import com.telly.groundy.GroundyTask;
-import com.telly.groundy.Succeeded;
 import com.telly.groundy.TaskResult;
 import org.json.JSONObject;
 
@@ -37,11 +35,11 @@ public class ChuckNorrisTask extends GroundyTask {
       String jsonBody = HttpRequest.get("http://api.icndb.com/jokes/random").body();
       JSONObject jsonObject = new JSONObject(jsonBody);
       String fact = jsonObject.getJSONObject("value").getString("joke");
-      Succeeded succeeded = new Succeeded();
+      TaskResult succeeded = success();
       succeeded.add("fact", fact);
       return succeeded;
     } catch (Exception e) {
-      return new Failed();
+      return fail();
     }
   }
 }

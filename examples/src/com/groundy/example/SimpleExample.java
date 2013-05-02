@@ -55,7 +55,7 @@ public class SimpleExample extends Activity {
         // queue value
         Groundy.create(RandomTimeTask.class)
             .callback(SimpleExample.this)
-            .params(params)
+            .args(params)
             .queue(SimpleExample.this);
       }
     });

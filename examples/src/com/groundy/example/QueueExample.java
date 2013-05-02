@@ -31,7 +31,6 @@ import android.widget.ListView;
 import com.groundy.example.tasks.RandomTimeTask;
 import com.telly.groundy.Groundy;
 import com.telly.groundy.TaskHandler;
-import com.telly.groundy.TaskHandler;
 import com.telly.groundy.annotations.OnProgress;
 import com.telly.groundy.annotations.Param;
 import com.telly.groundy.example.R;
@@ -74,7 +73,7 @@ public class QueueExample extends Activity {
   }
 
   protected TaskHandler processTask(Bundle params) {
-    return Groundy.create(RandomTimeTask.class).params(params).callback(this).queue(this);
+    return Groundy.create(RandomTimeTask.class).args(params).callback(this).queue(this);
   }
 
   @OnProgress(RandomTimeTask.class)

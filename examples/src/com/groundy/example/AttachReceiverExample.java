@@ -85,7 +85,7 @@ public class AttachReceiverExample extends Activity {
         mTaskHandler = Groundy.create(RandomTimeTask.class)
             .callback(AttachReceiverExample.this)
             .callbackManager(callbacksManager)
-            .params(params)
+            .args(params)
             .queue(AttachReceiverExample.this);
       }
     });

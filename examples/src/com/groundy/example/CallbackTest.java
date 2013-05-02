@@ -30,7 +30,7 @@ import android.widget.Toast;
 import com.groundy.example.tasks.ChuckNorrisKick;
 import com.telly.groundy.Groundy;
 import com.telly.groundy.annotations.OnCallback;
-import com.telly.groundy.annotations.OnFailed;
+import com.telly.groundy.annotations.OnFailure;
 import com.telly.groundy.annotations.OnSuccess;
 import com.telly.groundy.annotations.Param;
 import com.telly.groundy.example.R;
@@ -72,7 +72,7 @@ public class CallbackTest extends Activity {
     Toast.makeText(CallbackTest.this, R.string.you_were_kicked, Toast.LENGTH_LONG).show();
   }
 
-  @OnFailed(ChuckNorrisKick.class)
+  @OnFailure(ChuckNorrisKick.class)
   public void onChuckNorrisFail(@Param("lifeExpectation") int lifeExpectation) {
     mByeBtn.setEnabled(true);
     Toast.makeText(CallbackTest.this, getString(R.string.lifespan, lifeExpectation),

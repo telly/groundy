@@ -29,13 +29,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Use this annotation in callback parameter methods in order to map any result from the value. There
+ * Use this annotation in callback parameter methods in order to map any result from the value.
+ * There
  * are special params that are always sent with each callback that you can define with this
  * annotation: {@link com.telly.groundy.Groundy#TASK_ID} which holds the value id and must be long;
  * {@link com.telly.groundy.Groundy#ORIGINAL_PARAMS} which holds the params sent to the value and
  * must be {@link android.os.Bundle}.
  */
-@Retention(RetentionPolicy.RUNTIME) @Target({ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME) @Target({ ElementType.PARAMETER })
 public @interface Param {
   String value();
 }

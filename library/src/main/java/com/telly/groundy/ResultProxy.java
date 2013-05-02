@@ -24,7 +24,6 @@
 package com.telly.groundy;
 
 import android.os.Bundle;
-
 import java.lang.annotation.Annotation;
 
 public interface ResultProxy {

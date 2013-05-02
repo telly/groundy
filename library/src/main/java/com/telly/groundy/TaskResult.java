@@ -37,7 +37,7 @@ public class TaskResult extends Bundler {
     this.type = type;
   }
 
-  Bundle getReturnParams() {
+  Bundle getResultData() {
     return mBundle;
   }
 

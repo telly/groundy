@@ -27,7 +27,11 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import com.telly.groundy.GroundyTask;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -47,11 +51,11 @@ public class DownloadUtils {
    * Download a file at <code>fromUrl</code> to a file specified by <code>toFile</code>
    *
    * @param fromUrl An url pointing to a file to download
-   * @param toFile  File to save to, if existent will be overwrite
+   * @param toFile File to save to, if existent will be overwrite
    * @throws java.io.IOException If fromUrl is invalid or there is any IO issue.
    */
   public static void downloadFile(Context context, String fromUrl, File toFile,
-                                  DownloadProgressListener listener) throws IOException {
+      DownloadProgressListener listener) throws IOException {
     downloadFileHandleRedirect(context, fromUrl, toFile, 0, listener);
   }
 
@@ -78,15 +82,14 @@ public class DownloadUtils {
    * Internal version of {@link #downloadFile(Context, String, java.io.File,
    * DownloadUtils.DownloadProgressListener)}
    *
-   * @param fromUrl  the url to download from
-   * @param toFile   the file to download to
+   * @param fromUrl the url to download from
+   * @param toFile the file to download to
    * @param redirect true if it should accept redirects
    * @param listener used to report result back
    * @throws java.io.IOException
    */
   private static void downloadFileHandleRedirect(Context context, String fromUrl, File toFile,
-                                                 int redirect,
-                                                 DownloadProgressListener listener) throws IOException {
+      int redirect, DownloadProgressListener listener) throws IOException {
     if (context == null) {
       throw new RuntimeException("Context shall not be null");
     }
@@ -131,8 +134,8 @@ public class DownloadUtils {
   private static void checkForInternetPermissions(Context context) {
     try {
       PackageManager pm = context.getPackageManager();
-      PackageInfo packageInfo = pm.getPackageInfo(context.getPackageName(),
-          PackageManager.GET_PERMISSIONS);
+      PackageInfo packageInfo =
+          pm.getPackageInfo(context.getPackageName(), PackageManager.GET_PERMISSIONS);
       String[] requestedPermissions = packageInfo.requestedPermissions;
       if (requestedPermissions == null) {
         throw new RuntimeException("You must add android.permission.INTERNET to your app");

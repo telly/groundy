@@ -31,7 +31,8 @@ import java.util.Map;
 class GroundyTaskFactory {
   private static final String TAG = "GroundyTaskFactory";
 
-  private static final Map<Class<? extends GroundyTask>, GroundyTask> sCache = new HashMap<Class<? extends GroundyTask>, GroundyTask>();
+  private static final Map<Class<? extends GroundyTask>, GroundyTask> sCache =
+      new HashMap<Class<? extends GroundyTask>, GroundyTask>();
 
   private GroundyTaskFactory() {
   }
@@ -40,7 +41,7 @@ class GroundyTaskFactory {
    * Builds a GroundyTask based on call
    *
    * @param taskClass groundy value implementation class
-   * @param context   used to instantiate the value
+   * @param context used to instantiate the value
    * @return An instance of a GroundyTask if a given call is valid null otherwise
    */
   static GroundyTask get(Class<? extends GroundyTask> taskClass, Context context) {
@@ -65,5 +66,4 @@ class GroundyTaskFactory {
     }
     return groundyTask;
   }
-
 }

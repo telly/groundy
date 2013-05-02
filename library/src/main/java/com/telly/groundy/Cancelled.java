@@ -25,12 +25,12 @@ package com.telly.groundy;
 
 /**
  * Use this {@link TaskResult} if you are handling value cancellation. You must check whether the
- * value must be cancelled by checking the {@link com.telly.groundy.GroundyTask#isQuitting()} method;
- * if it returns true you must return an instance of this class and, optionally, a bundle with some
- * return parameters.
+ * value must be cancelled by checking the {@link com.telly.groundy.GroundyTask#isQuitting()}
+ * method; if it returns true you must return an instance of this class and, optionally, a bundle
+ * with some return parameters.
  */
-public final class Cancelled extends TaskResult {
-  public Cancelled() {
+final class Cancelled extends TaskResult {
+  Cancelled() {
     super(ResultType.CANCEL);
   }
 }

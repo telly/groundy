@@ -24,9 +24,7 @@
 package com.groundy.example.tasks;
 
 import android.os.Bundle;
-import com.telly.groundy.Failed;
 import com.telly.groundy.GroundyTask;
-import com.telly.groundy.Succeeded;
 import com.telly.groundy.TaskResult;
 import com.telly.groundy.example.R;
 import java.util.Random;
@@ -54,10 +52,10 @@ public class ChuckNorrisKick extends GroundyTask {
     }
 
     if (!random.nextBoolean()) {
-      Failed failed = new Failed();
+      TaskResult failed = fail();
       failed.add("lifeExpectation", random.nextInt(10) + 1);
       return failed;
     }
-    return new Succeeded();
+    return success();
   }
 }
