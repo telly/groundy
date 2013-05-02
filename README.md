@@ -27,9 +27,7 @@ public class ExampleTask extends GroundyTask {
 
     // return a TaskResult depending on the success of your task
     // and optionally pass some results back
-    TaskResult result = success();
-    result.add("the_result", "some result");
-    return result;
+    return succeeded().add("the_result", "some result");
   }
 }
 ```
