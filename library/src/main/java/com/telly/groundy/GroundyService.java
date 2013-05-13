@@ -28,26 +28,13 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.os.Binder;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
-import android.os.ResultReceiver;
+import android.os.*;
 import com.telly.groundy.annotations.OnCancel;
 import com.telly.groundy.annotations.OnFailure;
 import com.telly.groundy.annotations.OnStart;
 import com.telly.groundy.annotations.OnSuccess;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -359,6 +346,16 @@ public class GroundyService extends Service {
     groundyTask.setGroupId(groupId);
     groundyTask.setRedelivered(redelivery);
     groundyTask.addArgs(extras.getBundle(Groundy.KEY_ARGUMENTS));
+    if (Groundy.devMode) {
+        Object[] rawElements = (Object[]) extras.getSerializable(Groundy.STACK_TRACE);
+        if (rawElements != null) {
+            StackTraceElement[] stackTrace = new StackTraceElement[rawElements.length];
+            for (int i = 0; i < rawElements.length; i++) {
+                stackTrace[i] = (StackTraceElement) rawElements[i];
+            }
+            groundyTask.setStackTrace(stackTrace);
+        }
+    }
     return groundyTask;
   }
 

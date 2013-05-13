@@ -73,7 +73,14 @@ public class Groundy implements Parcelable {
    */
   public static final String ORIGINAL_PARAMS = "com.telly.groundy.key.ORIGINAL_ARGS";
 
+  /**
+   * If true, the stack trace of the call for each groundy task will be send to the service.
+   * It allows to know which piece of code invoked this task.*
+   */
+  public static boolean devMode = false;
+
   static final String KEY_ARGUMENTS = "com.telly.groundy.key.ARGS";
+  static final String STACK_TRACE = "com.telly.groundy.key.STACK_TRACE";
   static final String KEY_RECEIVER = "com.telly.groundy.key.RECEIVER";
   static final String KEY_TASK = "com.telly.groundy.key.TASK";
   static final String KEY_GROUP_ID = "com.telly.groundy.key.GROUP_ID";
@@ -284,8 +291,11 @@ public class Groundy implements Parcelable {
   private void startApiService(Context context, boolean async) {
     Intent intent = new Intent(context, mGroundyClass);
     intent.setAction(async ? GroundyService.ACTION_EXECUTE : GroundyService.ACTION_QUEUE);
-    if (mArgs != null) {
-      intent.putExtra(KEY_ARGUMENTS, mArgs);
+    intent.putExtra(KEY_ARGUMENTS, mArgs);
+
+    if (devMode) {
+      StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+      intent.putExtra(STACK_TRACE, stackTrace);
     }
     if (mReceiver != null) {
       intent.putExtra(KEY_RECEIVER, mReceiver);

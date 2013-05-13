@@ -45,6 +45,7 @@ public abstract class GroundyTask {
   private int mGroupId;
   private boolean mRedelivered;
   private long mId;
+  private StackTraceElement[] mStackTrace;
 
   /** Creates a GroundyTask composed of */
   public GroundyTask() {
@@ -365,5 +366,13 @@ public abstract class GroundyTask {
 
   /** Called once the value has been instantiated and it has a valid context */
   protected void onCreate() {
+  }
+
+  void setStackTrace(StackTraceElement[] stackTrace) {
+    mStackTrace = stackTrace;
+  }
+
+  protected StackTraceElement[] getStackTrace() {
+    return mStackTrace;
   }
 }
