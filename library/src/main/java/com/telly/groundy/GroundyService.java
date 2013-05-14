@@ -356,6 +356,7 @@ public class GroundyService extends Service {
             groundyTask.setStackTrace(stackTrace);
         }
     }
+    groundyTask.setIntent(intent);
     return groundyTask;
   }
 

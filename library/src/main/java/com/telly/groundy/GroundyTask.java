@@ -24,6 +24,7 @@
 package com.telly.groundy;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import com.telly.groundy.annotations.OnCallback;
@@ -46,6 +47,7 @@ public abstract class GroundyTask {
   private boolean mRedelivered;
   private long mId;
   private StackTraceElement[] mStackTrace;
+  private Intent mIntent;
 
   /** Creates a GroundyTask composed of */
   public GroundyTask() {
@@ -374,5 +376,22 @@ public abstract class GroundyTask {
 
   protected StackTraceElement[] getStackTrace() {
     return mStackTrace;
+  }
+
+  void setIntent(Intent intent) {
+    mIntent = intent;
+  }
+
+  /**
+   * @return intent that can be used to repeat this task. The task id will be different and no
+   *         callbacks will be assigned.
+   */
+  protected Intent asNewIntent() {
+    if (mIntent != null) {
+      Bundle extras = mIntent.getExtras();
+      extras.putLong(Groundy.TASK_ID, System.nanoTime());
+      extras.putSerializable(Groundy.KEY_RECEIVER, null);
+    }
+    return mIntent;
   }
 }
