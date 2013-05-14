@@ -50,7 +50,7 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
   private static final String TAG = "groundy:receiver";
   private final Class<? extends GroundyTask> groundyTaskType;
   private final SetFromMap<Object> callbackHandlers;
-  private TaskHandler groundyProxy;
+  private TaskHandler taskHandler;
   public static final Pattern INNER_PATTERN = Pattern.compile("^.+?\\$\\d$");
   private static final Map<TaskAndHandler, ResultProxy> proxies;
 
@@ -100,9 +100,9 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
     boolean isEndingAnnotation = callbackAnnotation == OnSuccess.class ||
         callbackAnnotation == OnFailure.class ||
         callbackAnnotation == OnCancel.class;
-    boolean endTask = isEndingAnnotation && groundyProxy instanceof TaskHandlerImpl;
+    boolean endTask = isEndingAnnotation && taskHandler instanceof TaskHandlerImpl;
     if (endTask) {
-      ((TaskHandlerImpl) groundyProxy).onTaskEnded();
+      ((TaskHandlerImpl) taskHandler).onTaskEnded();
     }
 
     for (Object callbackHandler : callbackHandlers) {
@@ -113,7 +113,7 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
     }
 
     if (endTask) {
-      groundyProxy.clearCallbacks();
+      taskHandler.clearCallbacks();
     }
   }
 
@@ -170,8 +170,8 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
     return matcher.matches();
   }
 
-  public void setOnFinishedListener(TaskHandlerImpl groundyProxy) {
-    this.groundyProxy = groundyProxy;
+  void setOnFinishedListener(TaskHandler groundyTaskHandler) {
+    this.taskHandler = groundyTaskHandler;
   }
 
   private static class TaskAndHandler {

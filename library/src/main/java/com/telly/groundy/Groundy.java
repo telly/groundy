@@ -225,7 +225,7 @@ public class Groundy implements Parcelable {
    * Groundy#execute(Context)} method.
    *
    * @param context used to start the groundy service
-   * @return a unique number assigned to this value
+   * @return a {@link TaskHandler} that can be used to clear the task callbacks list or cancel it
    */
   public TaskHandler queue(Context context) {
     boolean async = false;
@@ -236,16 +236,28 @@ public class Groundy implements Parcelable {
    * Execute a value right away
    *
    * @param context used to start the groundy service
-   * @return a unique number assigned to this value
+   * @return a {@link TaskHandler} that can be used to clear the task callbacks list or cancel it
    */
   public TaskHandler execute(Context context) {
     boolean async = true;
     return internalQueueOrExecute(context, async);
   }
 
-  private TaskHandlerImpl internalQueueOrExecute(Context context, boolean async) {
+  /**
+   * Creates an intent that can be used to execute this task by invoking context.startService()
+   *
+   * @param context used to start the groundy service
+   * @param async true if the task must be executed right away, false if it must be queued
+   * @return a unique number assigned to this value
+   */
+  public Intent asIntent(Context context, boolean async) {
     markAsProcessed();
-    TaskHandlerImpl taskProxy = new TaskHandlerImpl(this);
+    return internalGetServiceIntent(context, async);
+  }
+
+  private TaskHandler internalQueueOrExecute(Context context, boolean async) {
+    markAsProcessed();
+    TaskHandler taskProxy = new TaskHandlerImpl(this);
     if (callbacksManager != null) {
       callbacksManager.register(taskProxy);
     }
@@ -254,7 +266,7 @@ public class Groundy implements Parcelable {
       mReceiver.setOnFinishedListener(taskProxy);
     }
 
-    startApiService(context, async);
+    context.startService(internalGetServiceIntent(context, async));
     return taskProxy;
   }
 
@@ -277,7 +289,7 @@ public class Groundy implements Parcelable {
   private void checkAlreadyProcessed() {
     if (mAlreadyProcessed) {
       throw new IllegalStateException(
-          "This method can only be called before queue() or execute() methods");
+          "This method can only be called before queue(), execute() or asIntent() methods");
     }
   }
 
@@ -288,7 +300,7 @@ public class Groundy implements Parcelable {
     mAlreadyProcessed = true;
   }
 
-  private void startApiService(Context context, boolean async) {
+  private Intent internalGetServiceIntent(Context context, boolean async) {
     Intent intent = new Intent(context, mGroundyClass);
     intent.setAction(async ? GroundyService.ACTION_EXECUTE : GroundyService.ACTION_QUEUE);
     intent.putExtra(KEY_ARGUMENTS, mArgs);
@@ -303,7 +315,7 @@ public class Groundy implements Parcelable {
     intent.putExtra(KEY_TASK, mGroundyTask);
     intent.putExtra(TASK_ID, mId);
     intent.putExtra(KEY_GROUP_ID, mGroupId);
-    context.startService(intent);
+    return intent;
   }
 
   @Override
