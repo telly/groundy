@@ -31,5 +31,5 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.METHOD)
 public @interface OnProgress {
-  Class<? extends GroundyTask> value();
+  Class<? extends GroundyTask>[] value();
 }

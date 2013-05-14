@@ -170,31 +170,44 @@ class ReflectProxy implements ResultProxy {
 
   private boolean isValid(Class<? extends GroundyTask> groundyTaskType,
       Annotation methodAnnotation) {
+
+    boolean isValid = false;
+
     if (methodAnnotation instanceof OnSuccess) {
       OnSuccess onSuccess = (OnSuccess) methodAnnotation;
-      if (onSuccess.value() != groundyTaskType) {
-        return false;
+      for(Class<? extends GroundyTask> mTask: onSuccess.value()){
+        if(mTask == groundyTaskType || mTask.isAssignableFrom(groundyTaskType))
+          isValid = true;
       }
+      return isValid;
     } else if (methodAnnotation instanceof OnFailure) {
       OnFailure onFailure = (OnFailure) methodAnnotation;
-      if (onFailure.value() != groundyTaskType) {
-        return false;
+      for(Class<? extends GroundyTask> mTask: onFailure.value()){
+        if(mTask == groundyTaskType || mTask.isAssignableFrom(groundyTaskType))
+          isValid = true;
       }
+      return isValid;
     } else if (methodAnnotation instanceof OnProgress) {
       OnProgress onProgress = (OnProgress) methodAnnotation;
-      if (onProgress.value() != groundyTaskType) {
-        return false;
+      for(Class<? extends GroundyTask> mTask: onProgress.value()){
+        if(mTask == groundyTaskType || mTask.isAssignableFrom(groundyTaskType))
+          isValid = true;
       }
+      return isValid;
     } else if (methodAnnotation instanceof OnStart) {
       OnStart onStart = (OnStart) methodAnnotation;
-      if (onStart.value() != groundyTaskType) {
-        return false;
+      for(Class<? extends GroundyTask> mTask: onStart.value()){
+        if(mTask == groundyTaskType || mTask.isAssignableFrom(groundyTaskType))
+          isValid = true;
       }
+      return isValid;
     } else if (methodAnnotation instanceof OnCancel) {
       OnCancel onCancel = (OnCancel) methodAnnotation;
-      if (onCancel.value() != groundyTaskType) {
-        return false;
+      for(Class<? extends GroundyTask> mTask: onCancel.value()){
+        if(mTask == groundyTaskType || mTask.isAssignableFrom(groundyTaskType))
+          isValid = true;
       }
+      return isValid;
     } else if (methodAnnotation instanceof OnCallback) {
       OnCallback onCallback = (OnCallback) methodAnnotation;
       if (onCallback.value() != groundyTaskType) {
