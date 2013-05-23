@@ -30,8 +30,7 @@ import java.lang.annotation.Target;
 
 /**
  * To use in a {@link com.telly.groundy.GroundyTask} implementation. If present, the callback
- * method
- * search will traverse the class hierarchy.
+ * method search will traverse the class hierarchy.
  */
 @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.TYPE)
 public @interface Traverse {

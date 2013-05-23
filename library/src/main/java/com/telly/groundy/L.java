@@ -31,7 +31,7 @@ import android.util.Log;
  * @author Evelio Tarazona <evelio@telly.com>
  */
 class L {
-  /** Turns on of the enabled flag */
+  /** Turns on/off debugging messages */
   public static boolean logEnabled = true;
 
   /** Non instanceable constant class */

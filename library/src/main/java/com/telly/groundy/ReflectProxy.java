@@ -275,6 +275,13 @@ class ReflectProxy implements ResultProxy {
     return null;
   }
 
+  @Override public String toString() {
+    return "ReflectProxy{" +
+        "groundyTaskType=" + groundyTaskType +
+        ", handlerType=" + handlerType +
+        '}';
+  }
+
   static class MethodSpec {
     final Method method;
     final List<String> paramNames;

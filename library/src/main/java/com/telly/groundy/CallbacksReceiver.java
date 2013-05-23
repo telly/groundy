@@ -26,7 +26,6 @@ package com.telly.groundy;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
-import android.util.Log;
 import com.telly.groundy.annotations.OnCancel;
 import com.telly.groundy.annotations.OnFailure;
 import com.telly.groundy.annotations.OnSuccess;
@@ -76,9 +75,7 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
 
   @Override public void appendCallbackHandlers(Object... handlers) {
     if (handlers != null) {
-      for (Object callbackHandler : handlers) {
-        callbackHandlers.add(callbackHandler);
-      }
+      Collections.addAll(callbackHandlers, handlers);
     }
   }
 
@@ -134,7 +131,7 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
     boolean isNotPublic = !Modifier.isPublic(handlerType.getModifiers());
     if (isInner(handlerType) || isNotPublic) {
       if (isNotPublic) {
-        Log.d(TAG, "Using reflection for "
+        L.d(TAG, "Using reflection for "
             + handlerType
             + " because its not public. It's recommended to use public callbacks which enables code generation which makes things way faster.");
       }
@@ -144,12 +141,13 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
         String pkg = "com.telly.groundy.generated.";
         String callbackClassName = handlerType.getSimpleName();
         String taskName = groundyTaskType.getName().replaceAll("\\.", "\\$");
-        Class<?> proxyClass = Class.forName(pkg + callbackClassName + "$" + taskName + "$Proxy");
+        String fullProxyClassName = pkg + callbackClassName + "$" + taskName + "$Proxy";
+        Class<?> proxyClass = Class.forName(fullProxyClassName);
         resultProxy = (ResultProxy) proxyClass.newInstance();
         if (resultProxy == null) {
           throw new NullPointerException("Could not create proxy: " + proxyClass);
         }
-        Log.d(TAG, "Using fast proxy for: " + handlerType);
+        L.d(TAG, "Using fast proxy for: " + handlerType);
       } catch (Exception e) {
         if (e instanceof ClassNotFoundException) {
           L.e(TAG, "Could not load generated proxy. Did you add groundy-compiler dependency?");
@@ -157,7 +155,7 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
           e.printStackTrace();
         }
         resultProxy = new ReflectProxy(groundyTaskType, handlerType);
-        Log.d(TAG, "Using reflection proxy for " + handlerType);
+        L.d(TAG, "Using reflection proxy for " + handlerType);
       }
     }
 
@@ -190,12 +188,9 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
 
       TaskAndHandler that = (TaskAndHandler) o;
 
-      if (handlerType != null ? !handlerType.equals(that.handlerType) : that.handlerType != null) {
-        return false;
-      }
-      if (taskType != null ? !taskType.equals(that.taskType) : that.taskType != null) return false;
-
-      return true;
+      return !(handlerType != null ? !handlerType.equals(that.handlerType)
+          : that.handlerType != null) && !(taskType != null ? !taskType.equals(that.taskType)
+          : that.taskType != null);
     }
 
     @Override

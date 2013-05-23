@@ -74,6 +74,11 @@ public class Groundy implements Parcelable {
   public static final String ORIGINAL_PARAMS = "com.telly.groundy.key.ORIGINAL_ARGS";
 
   /**
+   * The class used to implement the executed task.
+   */
+  public static final String TASK_IMPLEMENTATION = "com.telly.groundy.key.TASK_IMPLEMENTATION";
+
+  /**
    * If true, the stack trace of the call for each groundy task will be send to the service.
    * It allows to know which piece of code invoked this task.*
    */

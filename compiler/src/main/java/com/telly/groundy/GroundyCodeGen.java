@@ -24,6 +24,7 @@
 package com.telly.groundy;
 
 import com.squareup.java.JavaWriter;
+import com.sun.tools.javac.code.Attribute;
 import com.telly.groundy.annotations.Param;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -46,6 +47,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -113,32 +115,37 @@ public class GroundyCodeGen extends AbstractProcessor {
       return;
     }
 
-    Object value = getAnnotationValue(callbackMethod, annotationElement, "value");
-    if (value == null) {
+    //noinspection unchecked
+    com.sun.tools.javac.util.List<Attribute> tasksList =
+        (com.sun.tools.javac.util.List<Attribute>) getAnnotationValue(callbackMethod,
+            annotationElement, "value");
+    if (tasksList == null) {
       logger.info("Could not found task for " + annotationElement);
       System.exit(1);
     }
 
-    Object callbackName = getAnnotationValue(callbackMethod, annotationElement, "name");
-    String groundyTaskName = value.toString().replaceAll("\\.", "\\$");
-    String genClassName = callbackElement.getSimpleName().toString();
-    String proxyClassName = genClassName + "$" + groundyTaskName + "$Proxy";
+    for (Attribute attribute : tasksList) {
+      Object callbackName = getAnnotationValue(callbackMethod, annotationElement, "name");
+      String groundyTaskName = attribute.getValue().toString().replaceAll("\\.", "\\$");
+      String genClassName = callbackElement.getSimpleName().toString();
+      String proxyClassName = genClassName + "$" + groundyTaskName + "$Proxy";
 
-    Set<ProxyImplContent> proxyImplContents;
-    if (implMap.containsKey(proxyClassName)) {
-      proxyImplContents = implMap.get(proxyClassName);
-    } else {
-      implMap.put(proxyClassName, proxyImplContents = new HashSet<ProxyImplContent>());
+      Set<ProxyImplContent> proxyImplContents;
+      if (implMap.containsKey(proxyClassName)) {
+        proxyImplContents = implMap.get(proxyClassName);
+      } else {
+        implMap.put(proxyClassName, proxyImplContents = new HashSet<ProxyImplContent>());
+      }
+
+      ProxyImplContent proxyImplContent = new ProxyImplContent();
+      proxyImplContent.annotation = annotationElement.toString();
+      proxyImplContent.paramNames = getParamNames(callbackMethod);
+      proxyImplContent.methodName = callbackMethod.getSimpleName().toString();
+      proxyImplContent.fullTargetClassName = callbackElement.toString();
+      proxyImplContent.callbackName = callbackName != null ? callbackName.toString() : null;
+
+      proxyImplContents.add(proxyImplContent);
     }
-
-    ProxyImplContent proxyImplContent = new ProxyImplContent();
-    proxyImplContent.annotation = annotationElement.toString();
-    proxyImplContent.paramNames = getParamNames(callbackMethod);
-    proxyImplContent.methodName = callbackMethod.getSimpleName().toString();
-    proxyImplContent.fullTargetClassName = callbackElement.toString();
-    proxyImplContent.callbackName = callbackName != null ? callbackName.toString() : null;
-
-    proxyImplContents.add(proxyImplContent);
   }
 
   private Object getAnnotationValue(Element callbackMethod, TypeElement annotationElement,
@@ -157,7 +164,8 @@ public class GroundyCodeGen extends AbstractProcessor {
 
     for (ExecutableElement executableElement : annotation.getElementValues().keySet()) {
       if (executableElement.getSimpleName().toString().equals(executable)) {
-        return annotation.getElementValues().get(executableElement).getValue();
+        AnnotationValue annotationValue = annotation.getElementValues().get(executableElement);
+        return annotationValue.getValue();
       }
     }
     return null;
@@ -168,8 +176,8 @@ public class GroundyCodeGen extends AbstractProcessor {
     JavaWriter javaWriter = new JavaWriter(classContent);
     try {
       if (verboseMode) {
-        ProxyImplContent[] callbacksArray = callbacks.toArray(new ProxyImplContent[0]);
-        logger.info("Generating source code for " + callbacksArray[0].fullTargetClassName + ":");
+        ProxyImplContent[] callbacksArr = callbacks.toArray(new ProxyImplContent[callbacks.size()]);
+        logger.info("Generating source code for " + callbacksArr[0].fullTargetClassName + ":");
       }
 
       javaWriter.emitEndOfLineComment("auto-generated file; don't modify");
@@ -360,15 +368,9 @@ public class GroundyCodeGen extends AbstractProcessor {
 
       ProxyImplContent that = (ProxyImplContent) o;
 
-      if (annotation != null ? !annotation.equals(that.annotation) : that.annotation != null) {
-        return false;
-      }
-      if (callbackName != null ? !callbackName.equals(that.callbackName)
-          : that.callbackName != null) {
-        return false;
-      }
-
-      return true;
+      return !(annotation != null ? !annotation.equals(that.annotation) : that.annotation != null)
+          && !(callbackName != null ? !callbackName.equals(that.callbackName)
+          : that.callbackName != null);
     }
 
     @Override

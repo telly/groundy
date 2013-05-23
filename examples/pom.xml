@@ -52,6 +52,7 @@
       <groupId>com.telly</groupId>
       <artifactId>groundy-compiler</artifactId>
       <version>${project.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>

@@ -397,6 +397,7 @@ public class GroundyService extends Service {
     //Lets try to send back the response
     Bundle resultData = taskResult.getResultData();
     resultData.putBundle(Groundy.ORIGINAL_PARAMS, groundyTask.getArgs());
+    resultData.putSerializable(Groundy.TASK_IMPLEMENTATION, groundyTask.getClass());
 
     switch (taskResult.getType()) {
       case SUCCESS:

@@ -47,6 +47,7 @@ public class MainActivity extends Activity {
     map.put(R.id.execute_example, AsyncExample.class);
     map.put(R.id.download_example, DownloadExample.class);
     map.put(R.id.callback_test, CallbackTest.class);
+    map.put(R.id.inheritance_test, InheritanceExample.class);
   }
 
   @Override

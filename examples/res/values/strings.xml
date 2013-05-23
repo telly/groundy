@@ -64,4 +64,8 @@
   <string name="you_were_kicked">You were successfully knocked out</string>
   <string name="lifespan">You can live %d more minutes</string>
   <string name="callback_test">Custom callbacks</string>
+  <string name="inheritance_explanation">Each time you click the button, two different tasks will
+    get executed, but the result will be processed in just one callback.
+  </string>
+  <string name="inheritance_test">Task inheritance example</string>
 </resources>

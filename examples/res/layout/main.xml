@@ -82,4 +82,11 @@
     android:layout_height="wrap_content"
     android:onClick="onButtonClick"
     android:text="@string/callback_test" />
+
+  <Button
+    android:id="@+id/inheritance_test"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:onClick="onButtonClick"
+    android:text="@string/inheritance_test" />
 </LinearLayout>
