@@ -170,38 +170,34 @@ class ReflectProxy implements ResultProxy {
 
   private boolean isValid(Class<? extends GroundyTask> groundyTaskType,
       Annotation methodAnnotation) {
+
     if (methodAnnotation instanceof OnSuccess) {
       OnSuccess onSuccess = (OnSuccess) methodAnnotation;
-      if (onSuccess.value() != groundyTaskType) {
-        return false;
-      }
+      return isValid(groundyTaskType, onSuccess.value());
     } else if (methodAnnotation instanceof OnFailure) {
       OnFailure onFailure = (OnFailure) methodAnnotation;
-      if (onFailure.value() != groundyTaskType) {
-        return false;
-      }
+      return isValid(groundyTaskType, onFailure.value());
     } else if (methodAnnotation instanceof OnProgress) {
       OnProgress onProgress = (OnProgress) methodAnnotation;
-      if (onProgress.value() != groundyTaskType) {
-        return false;
-      }
+      return isValid(groundyTaskType, onProgress.value());
     } else if (methodAnnotation instanceof OnStart) {
       OnStart onStart = (OnStart) methodAnnotation;
-      if (onStart.value() != groundyTaskType) {
-        return false;
-      }
+      return isValid(groundyTaskType, onStart.value());
     } else if (methodAnnotation instanceof OnCancel) {
       OnCancel onCancel = (OnCancel) methodAnnotation;
-      if (onCancel.value() != groundyTaskType) {
-        return false;
-      }
+      return isValid(groundyTaskType, onCancel.value());
     } else if (methodAnnotation instanceof OnCallback) {
       OnCallback onCallback = (OnCallback) methodAnnotation;
-      if (onCallback.value() != groundyTaskType) {
-        return false;
-      }
+      return isValid(groundyTaskType, onCallback.value());
     }
     return true;
+  }
+
+  private boolean isValid(Class<?> groundyTaskType, Class<? extends GroundyTask>[] tasks) {
+    for (Class<? extends GroundyTask> task : tasks) {
+      if (task.isAssignableFrom(groundyTaskType)) return true;
+    }
+    return false;
   }
 
   private static Object[] getResultParams(Bundle resultData, MethodSpec methodSpec) {

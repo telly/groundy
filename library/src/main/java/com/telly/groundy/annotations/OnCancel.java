@@ -37,5 +37,5 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.METHOD)
 public @interface OnCancel {
-  Class<? extends GroundyTask> value();
+  Class<? extends GroundyTask>[] value();
 }

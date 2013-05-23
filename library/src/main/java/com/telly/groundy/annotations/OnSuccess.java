@@ -35,5 +35,5 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.METHOD)
 public @interface OnSuccess {
-  Class<? extends GroundyTask> value();
+  Class<? extends GroundyTask>[] value();
 }
