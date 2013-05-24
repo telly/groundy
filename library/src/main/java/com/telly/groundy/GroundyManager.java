@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import java.util.List;
 
 /**
  * Allows you to manage your groundy services: cancel all tasks, cancel tasks by group, attach new
@@ -133,6 +134,26 @@ public class GroundyManager {
     }.start();
   }
 
+  public static void attachCallbacks(Context context, OnAttachListener onAttachListener,
+      final Class<? extends GroundyTask> task, final Object... callbacks) {
+    attachCallbacks(context, GroundyService.class, onAttachListener, task, callbacks);
+  }
+
+  public static void attachCallbacks(Context context,
+      Class<? extends GroundyService> groundyServiceClass, final OnAttachListener onAttachListener,
+      final Class<? extends GroundyTask> task, final Object... callbacks) {
+    final CallbacksReceiver receiver = new CallbacksReceiver(task, callbacks);
+    new GroundyServiceConnection(context, groundyServiceClass) {
+      @Override
+      protected void onGroundyServiceBound(GroundyService.GroundyServiceBinder binder) {
+        List<TaskHandler> taskHandlers = binder.attachCallbacks(task, receiver);
+        if (onAttachListener != null) {
+          onAttachListener.attachePerformed(task, taskHandlers);
+        }
+      }
+    }.start();
+  }
+
   public static void setLogEnabled(boolean enabled) {
     L.logEnabled = enabled;
   }
@@ -142,8 +163,7 @@ public class GroundyManager {
     private boolean mAlreadyStarted;
     private final Class<? extends GroundyService> mGroundyServiceClass;
 
-    private GroundyServiceConnection(Context context,
-        Class<? extends GroundyService> groundyServiceClass) {
+    GroundyServiceConnection(Context context, Class<? extends GroundyService> groundyServiceClass) {
       mContext = context;
       mGroundyServiceClass = groundyServiceClass;
     }
@@ -184,5 +204,14 @@ public class GroundyManager {
      * GroundyService#INTERRUPTED} and {@link GroundyService#NOT_EXECUTED}
      */
     void onCancelResult(long id, int result);
+  }
+
+  /** Listens for results of the callback attachment. */
+  public static interface OnAttachListener {
+    /**
+     * @param task the task that was targeted for the attachment
+     * @param taskHandlers task handlers for each groundy task that we attached to
+     */
+    void attachePerformed(Class<? extends GroundyTask> task, List<TaskHandler> taskHandlers);
   }
 }

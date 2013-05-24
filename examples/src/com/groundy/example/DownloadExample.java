@@ -69,7 +69,7 @@ public class DownloadExample extends Activity {
   // a callback can be any kind of object :)
   private final Object mCallback = new Object() {
     @OnProgress(DownloadTask.class)
-    public void onNiceProgress(@Param(Groundy.KEY_PROGRESS) int progress) {
+    public void onNiceProgress(@Param(Groundy.PROGRESS) int progress) {
       mProgressDialog.setProgress(progress);
     }
 

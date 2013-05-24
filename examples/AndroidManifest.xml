@@ -77,6 +77,12 @@
       android:label="@string/inheritance_test"
       android:screenOrientation="portrait" />
 
+    <activity
+      android:name="com.groundy.example.AttachExample"
+      android:configChanges="orientation"
+      android:label="@string/attached_callback_test"
+      android:screenOrientation="portrait" />
+
     <service android:name="com.telly.groundy.GroundyService" />
     <service android:name="com.groundy.example.AsyncGroundyService">
       <meta-data

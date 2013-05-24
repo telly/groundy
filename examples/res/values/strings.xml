@@ -29,6 +29,7 @@
     task if it has not already been completed/cancelled.
   </string>
   <string name="task_finished">Task finished :) enabling button</string>
+  <string name="task_finished_successfully">Task finished successfully</string>
   <string name="simple_example">Simple example</string>
   <string name="execute_some_random_task">Execute some random task</string>
   <string name="attach_toaster">Showing toast on complete</string>
@@ -68,4 +69,11 @@
     get executed, but the result will be processed in just one callback.
   </string>
   <string name="inheritance_test">Task inheritance example</string>
+  <string name="attach_callback_explanation">This example shows how to attach a callback to an already running task.</string>
+  <string name="attach_toast">Will run download task and finish the activity in 5 ses. Re-open
+    activity afterwards.
+  </string>
+  <string name="callback_attached">Callback attached</string>
+  <string name="attached_callback_test">Attach Callback example</string>
+  <string name="task_cancelled">Task cancelled</string>
 </resources>

@@ -38,7 +38,7 @@ public class Groundy implements Parcelable {
    * Key used by the {@link com.telly.groundy.annotations.OnProgress} callback to specify
    * the progress of the task. Parameters annotated with this key must be int.
    */
-  public static final String KEY_PROGRESS = "com.telly.groundy.key.PROGRESS";
+  public static final String PROGRESS = "com.telly.groundy.key.PROGRESS";
 
   /**
    * If the task crashed, the {@link com.telly.groundy.annotations.OnFailure} callback will

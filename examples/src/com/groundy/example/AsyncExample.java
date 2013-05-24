@@ -41,7 +41,7 @@ public class AsyncExample extends QueueExample {
 
   @OnProgress(RandomTimeTask.class)
   public void onProgress(@Param(Groundy.TASK_ID) long taskId,
-                         @Param(Groundy.KEY_PROGRESS) int progress) {
+                         @Param(Groundy.PROGRESS) int progress) {
     super.onProgress(taskId, progress);
   }
 }

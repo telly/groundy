@@ -209,6 +209,22 @@ public class GroundyService extends Service {
     return INTERRUPTED;
   }
 
+  private List<TaskHandler> attachCallbacks(Class<? extends GroundyTask> task,
+      CallbacksReceiver resultReceiver) {
+    List<TaskHandler> handlers = new ArrayList<TaskHandler>();
+    for (TaskInfo taskInfo : mTasksInfoSet.values()) {
+      if (taskInfo.task != null && taskInfo.task.getClass() == task) {
+        taskInfo.task.appendReceiver(resultReceiver);
+
+        AttachedTaskHandlerImpl taskHandler =
+            new AttachedTaskHandlerImpl(taskInfo.task.getId(), GroundyService.this.getClass(),
+                resultReceiver, task);
+        handlers.add(taskHandler);
+      }
+    }
+    return handlers;
+  }
+
   /**
    * @param groupId group id identifying the kind of value
    * @param reason reason to cancel this group
@@ -347,14 +363,14 @@ public class GroundyService extends Service {
     groundyTask.setRedelivered(redelivery);
     groundyTask.addArgs(extras.getBundle(Groundy.KEY_ARGUMENTS));
     if (Groundy.devMode) {
-        Object[] rawElements = (Object[]) extras.getSerializable(Groundy.STACK_TRACE);
-        if (rawElements != null) {
-            StackTraceElement[] stackTrace = new StackTraceElement[rawElements.length];
-            for (int i = 0; i < rawElements.length; i++) {
-                stackTrace[i] = (StackTraceElement) rawElements[i];
-            }
-            groundyTask.setStackTrace(stackTrace);
+      Object[] rawElements = (Object[]) extras.getSerializable(Groundy.STACK_TRACE);
+      if (rawElements != null) {
+        StackTraceElement[] stackTrace = new StackTraceElement[rawElements.length];
+        for (int i = 0; i < rawElements.length; i++) {
+          stackTrace[i] = (StackTraceElement) rawElements[i];
         }
+        groundyTask.setStackTrace(stackTrace);
+      }
     }
     groundyTask.setIntent(intent);
     return groundyTask;
@@ -505,6 +521,11 @@ public class GroundyService extends Service {
      */
     int cancelTaskById(long id, int reason) {
       return GroundyService.this.cancelTaskById(id, reason);
+    }
+
+    List<TaskHandler> attachCallbacks(Class<? extends GroundyTask> task,
+        CallbacksReceiver receiver) {
+      return GroundyService.this.attachCallbacks(task, receiver);
     }
   }
 

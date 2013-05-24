@@ -30,6 +30,7 @@ import android.os.ResultReceiver;
 import com.telly.groundy.annotations.OnCallback;
 import com.telly.groundy.annotations.OnProgress;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 
 /** Implementation of this class get executed by the {@link GroundyService} */
 public abstract class GroundyTask {
@@ -48,6 +49,7 @@ public abstract class GroundyTask {
   private long mId;
   private StackTraceElement[] mStackTrace;
   private Intent mIntent;
+  private ArrayList<ResultReceiver> mExtraReceivers;
 
   /** Creates a GroundyTask composed of */
   public GroundyTask() {
@@ -203,11 +205,21 @@ public abstract class GroundyTask {
   }
 
   void send(Class<? extends Annotation> callbackAnnotation, Bundle resultData) {
-    if (mReceiver != null) {
+    internalSend(mReceiver, resultData, callbackAnnotation);
+    if (mExtraReceivers != null) {
+      for (ResultReceiver extraReceiver : mExtraReceivers) {
+        internalSend(extraReceiver, resultData, callbackAnnotation);
+      }
+    }
+  }
+
+  private void internalSend(ResultReceiver receiver, Bundle resultData,
+      Class<? extends Annotation> callbackAnnotation) {
+    if (receiver != null) {
       if (resultData == null) resultData = new Bundle();
       resultData.putLong(Groundy.TASK_ID, getId());
       resultData.putSerializable(Groundy.KEY_CALLBACK_ANNOTATION, callbackAnnotation);
-      mReceiver.send(RESULT_CODE_CALLBACK_ANNOTATION, resultData);
+      receiver.send(RESULT_CODE_CALLBACK_ANNOTATION, resultData);
     }
   }
 
@@ -265,7 +277,7 @@ public abstract class GroundyTask {
   /**
    * Prepare and sends a progress update to the current receiver. Callback used is {@link
    * com.telly.groundy.annotations.OnProgress} and it will contain a bundle with an integer extra
-   * called {@link Groundy#KEY_PROGRESS}
+   * called {@link Groundy#PROGRESS}
    *
    * @param progress percentage to send to receiver
    */
@@ -276,7 +288,7 @@ public abstract class GroundyTask {
   /**
    * Prepare and sends a progress update to the current receiver. Callback used is {@link
    * com.telly.groundy.annotations.OnProgress} and it will contain a bundle with an integer extra
-   * called {@link Groundy#KEY_PROGRESS}
+   * called {@link Groundy#PROGRESS}
    *
    * @param extraData additional information to send to the progress callback
    * @param progress percentage to send to receiver
@@ -284,7 +296,7 @@ public abstract class GroundyTask {
   public void updateProgress(int progress, Bundle extraData) {
     if (mReceiver != null) {
       Bundle resultData = new Bundle();
-      resultData.putInt(Groundy.KEY_PROGRESS, progress);
+      resultData.putInt(Groundy.PROGRESS, progress);
       if (extraData != null) resultData.putAll(extraData);
       send(OnProgress.class, resultData);
     }
@@ -393,5 +405,12 @@ public abstract class GroundyTask {
       extras.putSerializable(Groundy.KEY_RECEIVER, null);
     }
     return mIntent;
+  }
+
+  void appendReceiver(ResultReceiver resultReceiver) {
+    if (mExtraReceivers == null) {
+      mExtraReceivers = new ArrayList<ResultReceiver>();
+    }
+    mExtraReceivers.add(resultReceiver);
   }
 }

@@ -138,7 +138,7 @@ public class CancelTaskExample extends Activity implements View.OnClickListener,
 
   @OnProgress(CancelableTask.class)
   public void onProgressUpdate(@Param(Groundy.TASK_ID) long id,
-                               @Param(Groundy.KEY_PROGRESS) int progress) {
+                               @Param(Groundy.PROGRESS) int progress) {
     findItem(id).setProgress(progress);
     mAdapter.notifyDataSetChanged();
   }
