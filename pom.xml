@@ -59,18 +59,15 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:git@github.com:twitvid/groundy.git</connection>
-    <developerConnection>scm:git:git@github.com:twitvid/groundy.git</developerConnection>
-    <url>git@github.com:twitvid/groundy.git</url>
+    <connection>scm:git:git@github.com:telly/groundy.git</connection>
+    <developerConnection>scm:git:git@github.com:telly/groundy.git</developerConnection>
+    <url>git@github.com:telly/groundy.git</url>
   </scm>
 
   <developers>
     <developer>
       <id>casidiablo</id>
       <name>Cristian</name>
-      <email>cristian@elhacker.net</email>
-      <timezone>0</timezone>
-      <url>http://casidiablo.net/</url>
     </developer>
     <developer>
       <id>eveliotc</id>
