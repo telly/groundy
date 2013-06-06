@@ -335,7 +335,7 @@ public class GroundyCodeGen extends AbstractProcessor {
       if (handler instanceof ConsoleHandler) {
         SimpleFormatter newFormatter = new SimpleFormatter() {
           @Override public synchronized String format(LogRecord r) {
-            return "[COMPILER] " + r.getMessage() + "\n";
+            return "[GROUNDY] " + r.getMessage() + "\n";
           }
         };
         handler.setFormatter(newFormatter);
