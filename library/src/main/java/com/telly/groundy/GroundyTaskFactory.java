@@ -38,7 +38,7 @@ final class GroundyTaskFactory {
   }
 
   /**
-   * Builds a GroundyTask based on call
+   * Builds a GroundyTask based on call.
    *
    * @param taskClass groundy value implementation class
    * @param context used to instantiate the value

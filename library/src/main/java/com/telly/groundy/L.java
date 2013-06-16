@@ -26,20 +26,20 @@ package com.telly.groundy;
 import android.util.Log;
 
 /**
- * Platform log gateway
+ * Platform log gateway.
  *
  * @author Evelio Tarazona <evelio@telly.com>
  */
 final class L {
-  /** Turns on/off debugging messages */
+  /** Turns on/off debugging messages. */
   public static boolean logEnabled = true;
 
-  /** Non instanceable constant class */
+  /** Non instanceable constant class. */
   private L() {
   }
 
   /**
-   * Sends a debug message to the log
+   * Sends a debug message to the log.
    *
    * @param tag Tag to use
    * @param msg Message to send
@@ -51,7 +51,7 @@ final class L {
   }
 
   /**
-   * Send an error message to the log
+   * Send an error message to the log.
    *
    * @param tag Tag to use
    * @param msg Message to send
@@ -63,7 +63,7 @@ final class L {
   }
 
   /**
-   * Send an error message to the log
+   * Send an error message to the log.
    *
    * @param tag Tag to use
    * @param msg Message to send

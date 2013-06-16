@@ -34,12 +34,12 @@ import android.os.PowerManager.WakeLock;
 final class DeviceStatus {
   private static final String TAG = "groundy";
 
-  /** Non instance constant class */
+  /** Non instance constant class. */
   private DeviceStatus() {
   }
 
   /**
-   * Checks whether there's a network connection
+   * Checks whether there's a network connection.
    *
    * @param context Context to use
    * @return true if there's an active network connection, false otherwise
@@ -55,7 +55,7 @@ final class DeviceStatus {
   }
 
   /**
-   * Check if current connection is Wi-Fi
+   * Check if current connection is Wi-Fi.
    *
    * @param context Context to use
    * @return true if current connection is Wi-Fi false otherwise
@@ -70,11 +70,11 @@ final class DeviceStatus {
     return info != null && info.getType() == ConnectivityManager.TYPE_WIFI;
   }
 
-  /** CPU wake lock unique instance */
+  /** CPU wake lock unique instance. */
   private static WakeLock cpuWakeLock;
 
   /**
-   * Register a wake lock to power management in the device
+   * Register a wake lock to power management in the device.
    *
    * @param context Context to use
    * @param awake if true the device cpu will keep awake until false is called back. if true is
@@ -102,11 +102,11 @@ final class DeviceStatus {
     }
   }
 
-  /** WiFi lock unique instance */
+  /** WiFi lock unique instance. */
   private static WifiLock wifiLock;
 
   /**
-   * Register a WiFi lock to WiFi management in the device
+   * Register a WiFi lock to WiFi management in the device.
    *
    * @param context Context to use
    * @param on if true the device WiFi radio will keep awake until false is called back. if

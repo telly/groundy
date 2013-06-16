@@ -32,7 +32,7 @@ import com.telly.groundy.annotations.OnProgress;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 
-/** Implementation of this class get executed by the {@link GroundyService} */
+/** Implementation of this class get executed by the {@link GroundyService}. */
 public abstract class GroundyTask {
   protected static final int CANCEL_ALL = -1;
   protected static final int SERVICE_DESTROYED = -2;
@@ -51,7 +51,7 @@ public abstract class GroundyTask {
   private Intent mIntent;
   private ArrayList<ResultReceiver> mExtraReceivers;
 
-  /** Creates a GroundyTask composed of */
+  /** Creates a GroundyTask composed of. */
   public GroundyTask() {
   }
 
@@ -123,7 +123,7 @@ public abstract class GroundyTask {
   }
 
   /**
-   * Determinate if there is Internet connection
+   * Determinate if there is Internet connection.
    *
    * @return true if Online false otherwise
    */
@@ -224,7 +224,7 @@ public abstract class GroundyTask {
   }
 
   /**
-   * Sends this data to the callback methods annotated with the specified name
+   * Sends this data to the callback methods annotated with the specified name.
    *
    * @param name the name of the callback to invoke
    */
@@ -233,7 +233,7 @@ public abstract class GroundyTask {
   }
 
   /**
-   * Sends this data to the callback methods annotated with the specified name
+   * Sends this data to the callback methods annotated with the specified name.
    *
    * @param name the name of the callback to invoke
    * @param resultData optional arguments to send
@@ -257,7 +257,7 @@ public abstract class GroundyTask {
 
   /**
    * This can be either {@link GroundyTask#CANCEL_ALL} or {@link GroundyTask#SERVICE_DESTROYED} or
-   * some other custom reason
+   * some other custom reason.
    *
    * @return quitting reason
    */
@@ -266,7 +266,7 @@ public abstract class GroundyTask {
   }
 
   /**
-   * Mark this value as quitting
+   * Mark this value as quitting.
    *
    * @param reason the reason to stop this value
    */
@@ -378,7 +378,7 @@ public abstract class GroundyTask {
     return toString;
   }
 
-  /** Called once the value has been instantiated and it has a valid context */
+  /** Called once the value has been instantiated and it has a valid context. */
   protected void onCreate() {
   }
 

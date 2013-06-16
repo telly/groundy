@@ -26,7 +26,7 @@ package com.telly.groundy;
 import android.content.Context;
 import android.os.Parcelable;
 
-/** Allows to get information about, cancel it, */
+/** Allows to get information about, cancel it. */
 public interface TaskHandler extends Parcelable {
 
   /** @return the associated value id */
@@ -45,19 +45,19 @@ public interface TaskHandler extends Parcelable {
   void clearCallbacks();
 
   /**
-   * Add more callback handlers to this value
+   * Add more callback handlers to this value.
    *
    * @param handlers an array of callback handlers to add
    */
   void appendCallbacks(Object... handlers);
 
   /**
-   * Remove the specified callback handlers from this value
+   * Remove the specified callback handlers from this value.
    *
    * @param handlers the callback handlers to remove
    */
   void removeCallbacks(Object... handlers);
 
-  /** @return true if the value was already ended */
+  /** @return true if the value was already ended. */
   boolean taskAlreadyEnded();
 }

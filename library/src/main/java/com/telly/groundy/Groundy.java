@@ -43,7 +43,7 @@ public final class Groundy implements Parcelable {
   /**
    * If the task crashed, the {@link com.telly.groundy.annotations.OnFailure} callback will
    * be invoked and it's possible to receive the exception message by annotating a parameter with
-   * this key, e.g.:
+   * this key, e.g.
    *
    * <pre>{@code
    *
@@ -130,7 +130,7 @@ public final class Groundy implements Parcelable {
   }
 
   /**
-   * Set the arguments needed to run the task
+   * Set the arguments needed to run the task.
    *
    * @param arguments a bundle of arguments
    * @return itself
@@ -175,8 +175,7 @@ public final class Groundy implements Parcelable {
 
   /**
    * This allows you to set an identification groupId to the value which can be later used to
-   * cancel
-   * it. Group ids can be shared by several groundy tasks even if their implementation is
+   * cancel it. Group ids can be shared by several groundy tasks even if their implementation is
    * different.
    * If cancelling tasks using a groupId, all tasks created with this groupId will be cancelled
    * and/or removed from the queue.
@@ -239,7 +238,7 @@ public final class Groundy implements Parcelable {
   }
 
   /**
-   * Execute a value right away
+   * Execute a value right away.
    *
    * @param context used to start the Groundy service
    * @return a {@link TaskHandler} that can be used to clear the task callbacks list or cancel it
@@ -250,7 +249,7 @@ public final class Groundy implements Parcelable {
   }
 
   /**
-   * Creates an intent that can be used to execute this task by invoking context.startService()
+   * Creates an intent that can be used to execute this task by invoking context.startService().
    *
    * @param context used to start the groundy service
    * @param async true if the task must be executed right away, false if it must be queued

@@ -39,19 +39,19 @@ public final class DownloadUtils {
   private static boolean alreadyCheckedInternetPermission = false;
   /**
    * Amount of maximum allowed redirects number by:
-   * http://www.google.com/support/forum/p/Webmasters/thread?tid=3760b68fb305088a&hl=en
+   * http://www.google.com/support/forum/p/Webmasters/thread?tid=3760b68fb305088a&hl=en.
    */
   private static final int MAX_REDIRECTS = 5;
 
-  /** Non instance constants class */
+  /** Non instance constants class. */
   private DownloadUtils() {
   }
 
-  /** Read it's name */
+  /** Read it's name. */
   private static final int DEFAULT_BUFFER_SIZE = 4096; // 4 KiB
 
   /**
-   * Download a file at <code>fromUrl</code> to a file specified by <code>toFile</code>
+   * Download a file at <code>fromUrl</code> to a file specified by <code>toFile</code>.
    *
    * @param fromUrl An url pointing to a file to download
    * @param toFile File to save to, if existent will be overwrite
@@ -67,7 +67,7 @@ public final class DownloadUtils {
   }
 
   /**
-   * Returns a progress listener that will post progress to the specified groundyTask
+   * Returns a progress listener that will post progress to the specified groundyTask.
    *
    * @param groundyTask the groundyTask to post progress to. Cannot be null.
    * @return a progress listener
@@ -83,7 +83,7 @@ public final class DownloadUtils {
 
   /**
    * Internal version of {@link #downloadFile(Context, String, java.io.File,
-   * DownloadUtils.DownloadProgressListener)}
+   * DownloadUtils.DownloadProgressListener)}.
    *
    * @param fromUrl the url to download from
    * @param toFile the file to download to

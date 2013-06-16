@@ -56,9 +56,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * explicitly declare your service using this meta-data tag:
  *
  * <pre> {@code
- * <service android:name="com.groundy.example.AsyncGroundyService">
- *   <meta-data android:name="groundy:mode" android:value="async" />
- * </service>
+ * &lt;service android:name="com.groundy.example.AsyncGroundyService"&gt;
+ *   &lt;meta-data android:name="groundy:mode" android:value="async" /&gt;
+ * &lt;/service&gt;
  * }
  * </pre>
  */
