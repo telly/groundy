@@ -34,7 +34,11 @@ import java.util.List;
  * Allows you to manage your groundy services: cancel all tasks, cancel tasks by group, attach new
  * result receivers, etc.
  */
-public class GroundyManager {
+public final class GroundyManager {
+
+  private GroundyManager() {
+  }
+
   /**
    * Cancel all tasks: the ones running and parallel and future tasks.
    *
@@ -193,11 +197,11 @@ public class GroundyManager {
     protected abstract void onGroundyServiceBound(GroundyService.GroundyServiceBinder binder);
   }
 
-  public static interface CancelListener {
+  public interface CancelListener {
     void onCancelResult(int groupId, GroundyService.CancelGroupResponse tasksCancelled);
   }
 
-  public static interface SingleCancelListener {
+  public interface SingleCancelListener {
     /**
      * @param id the id of the cancelled value
      * @param result either {@link GroundyService#COULD_NOT_CANCEL}, {@link
@@ -207,7 +211,7 @@ public class GroundyManager {
   }
 
   /** Listens for results of the callback attachment. */
-  public static interface OnAttachListener {
+  public interface OnAttachListener {
     /**
      * @param task the task that was targeted for the attachment
      * @param taskHandlers task handlers for each groundy task that we attached to

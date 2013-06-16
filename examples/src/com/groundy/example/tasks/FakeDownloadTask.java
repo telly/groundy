@@ -20,6 +20,7 @@ public class FakeDownloadTask extends GroundyTask {
         Thread.sleep(interval);
         currentPercentage++;
       } catch (InterruptedException e) {
+        e.printStackTrace();
       }
     }
     return succeeded();

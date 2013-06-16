@@ -30,7 +30,7 @@ import android.util.Log;
  *
  * @author Evelio Tarazona <evelio@telly.com>
  */
-class L {
+final class L {
   /** Turns on/off debugging messages */
   public static boolean logEnabled = true;
 

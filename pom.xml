@@ -44,7 +44,7 @@
     <android.version>4.1.1.4</android.version>
     <android.platform>16</android.platform>
     <android.support.version>r7</android.support.version>
-    <android-maven.version>3.3.0</android-maven.version>
+    <android-maven.version>3.6.0</android-maven.version>
     <java.writer.version>1.0.4</java.writer.version>
   </properties>
 
@@ -124,6 +124,23 @@
           </configuration>
           <extensions>true</extensions>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <configuration>
+            <failsOnError>true</failsOnError>
+            <configLocation>checkstyle.xml</configLocation>
+            <consoleOutput>true</consoleOutput>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>verify</phase>
+              <goals>
+                <goal>checkstyle</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -143,6 +160,10 @@
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
         <version>2.1.2</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.9.1</version>
       </plugin>
     </plugins>
   </build>

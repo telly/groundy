@@ -28,25 +28,25 @@ import android.os.Parcel;
 
 class TaskHandlerImpl implements TaskHandler {
 
-  private final Groundy groundy;
+  private final Groundy mGroundy;
   private boolean mTaskEnded = false;
 
   TaskHandlerImpl(Groundy groundy) {
-    this.groundy = groundy;
+    mGroundy = groundy;
   }
 
   @Override public void cancel(Context context, int reason,
       GroundyManager.SingleCancelListener cancelListener) {
     if (!mTaskEnded) {
-      GroundyManager.cancelTaskById(context, groundy.getId(), reason, cancelListener,
-          groundy.getGroundyServiceClass());
+      GroundyManager.cancelTaskById(context, mGroundy.getId(), reason, cancelListener,
+          mGroundy.getGroundyServiceClass());
     } else {
-      cancelListener.onCancelResult(groundy.getId(), GroundyService.COULD_NOT_CANCEL);
+      cancelListener.onCancelResult(mGroundy.getId(), GroundyService.COULD_NOT_CANCEL);
     }
   }
 
   @Override public void clearCallbacks() {
-    CallbacksReceiver callbacksReceiver = groundy.getReceiver();
+    CallbacksReceiver callbacksReceiver = mGroundy.getReceiver();
     if (callbacksReceiver != null) {
       callbacksReceiver.clearHandlers();
     }
@@ -57,21 +57,21 @@ class TaskHandlerImpl implements TaskHandler {
   }
 
   @Override public void appendCallbacks(Object... handlers) {
-    CallbacksReceiver callbacksReceiver = groundy.getReceiver();
+    CallbacksReceiver callbacksReceiver = mGroundy.getReceiver();
     if (callbacksReceiver != null) {
       callbacksReceiver.appendCallbackHandlers(handlers);
     }
   }
 
   @Override public void removeCallbacks(Object... handlers) {
-    CallbacksReceiver callbacksReceiver = groundy.getReceiver();
+    CallbacksReceiver callbacksReceiver = mGroundy.getReceiver();
     if (callbacksReceiver != null) {
-      callbacksReceiver.removeCallbackHandlers(groundy.getGroundyTaskClass(), handlers);
+      callbacksReceiver.removeCallbackHandlers(mGroundy.getGroundyTaskClass(), handlers);
     }
   }
 
   @Override public long getTaskId() {
-    return groundy.getId();
+    return mGroundy.getId();
   }
 
   void onTaskEnded() {
@@ -81,9 +81,9 @@ class TaskHandlerImpl implements TaskHandler {
   @SuppressWarnings("UnusedDeclaration")
   public static final Creator<TaskHandlerImpl> CREATOR = new Creator<TaskHandlerImpl>() {
     @Override public TaskHandlerImpl createFromParcel(Parcel source) {
-      Groundy groundy = source.readParcelable(Groundy.class.getClassLoader());
+      Groundy g = source.readParcelable(Groundy.class.getClassLoader());
       //noinspection unchecked
-      return new TaskHandlerImpl(groundy);
+      return new TaskHandlerImpl(g);
     }
 
     @Override public TaskHandlerImpl[] newArray(int size) {
@@ -96,6 +96,6 @@ class TaskHandlerImpl implements TaskHandler {
   }
 
   @Override public void writeToParcel(Parcel dest, int flags) {
-    dest.writeParcelable(groundy, flags);
+    dest.writeParcelable(mGroundy, flags);
   }
 }

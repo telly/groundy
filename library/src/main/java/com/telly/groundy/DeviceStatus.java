@@ -31,7 +31,7 @@ import android.net.wifi.WifiManager.WifiLock;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 
-class DeviceStatus {
+final class DeviceStatus {
   private static final String TAG = "groundy";
 
   /** Non instance constant class */

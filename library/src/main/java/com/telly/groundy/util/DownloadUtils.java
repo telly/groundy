@@ -35,9 +35,12 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class DownloadUtils {
+public final class DownloadUtils {
   private static boolean alreadyCheckedInternetPermission = false;
-  /** Amount of maximum allowed redirects number by: http://www.google.com/support/forum/p/Webmasters/thread?tid=3760b68fb305088a&hl=en */
+  /**
+   * Amount of maximum allowed redirects number by:
+   * http://www.google.com/support/forum/p/Webmasters/thread?tid=3760b68fb305088a&hl=en
+   */
   private static final int MAX_REDIRECTS = 5;
 
   /** Non instance constants class */
@@ -151,7 +154,8 @@ public class DownloadUtils {
       } else {
         alreadyCheckedInternetPermission = true;
       }
-    } catch (PackageManager.NameNotFoundException ignored) {
+    } catch (PackageManager.NameNotFoundException e) {
+      e.printStackTrace();
     }
   }
 }

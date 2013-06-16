@@ -33,7 +33,7 @@ import android.os.ResultReceiver;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Groundy implements Parcelable {
+public final class Groundy implements Parcelable {
   /**
    * Key used by the {@link com.telly.groundy.annotations.OnProgress} callback to specify
    * the progress of the task. Parameters annotated with this key must be int.
@@ -98,7 +98,7 @@ public class Groundy implements Parcelable {
   private final Bundle mArgs = new Bundle();
   private int mGroupId;
   private boolean mAlreadyProcessed = false;
-  private CallbacksManager callbacksManager;
+  private CallbacksManager mCallbacksManager;
   private Class<? extends GroundyService> mGroundyClass = GroundyService.class;
   private boolean mAllowNonUIThreadCallbacks = false;
 
@@ -166,7 +166,8 @@ public class Groundy implements Parcelable {
     checkAlreadyProcessed();
     if (!mAllowNonUIThreadCallbacks && Looper.myLooper() != Looper.getMainLooper()) {
       throw new IllegalStateException(
-          "callbacks can only be set on the UI thread. If you are sure you can handle callbacks from a non UI thread, call Groundy#allowNonUiCallbacks() method first");
+          "callbacks can only be set on the UI thread. If you are sure you can handle callbacks "
+              + "from a non UI thread, call Groundy#allowNonUiCallbacks() method first");
     }
     mReceiver = new CallbacksReceiver(mGroundyTask, callbacks);
     return this;
@@ -220,7 +221,7 @@ public class Groundy implements Parcelable {
    */
   public Groundy callbackManager(CallbacksManager callbacksManager) {
     checkAlreadyProcessed();
-    this.callbacksManager = callbacksManager;
+    mCallbacksManager = callbacksManager;
     return this;
   }
 
@@ -263,8 +264,8 @@ public class Groundy implements Parcelable {
   private TaskHandler internalQueueOrExecute(Context context, boolean async) {
     markAsProcessed();
     TaskHandler taskProxy = new TaskHandlerImpl(this);
-    if (callbacksManager != null) {
-      callbacksManager.register(taskProxy);
+    if (mCallbacksManager != null) {
+      mCallbacksManager.register(taskProxy);
     }
 
     if (mReceiver != null) {
@@ -293,8 +294,8 @@ public class Groundy implements Parcelable {
 
   private void checkAlreadyProcessed() {
     if (mAlreadyProcessed) {
-      throw new IllegalStateException(
-          "This method can only be called before queueUsing(), executeUsing() or asIntent() methods");
+      throw new IllegalStateException("This method can only be called before queueUsing(), "
+          + "executeUsing() or asIntent() methods");
     }
   }
 

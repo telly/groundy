@@ -34,21 +34,21 @@ import java.util.TreeMap;
 
 public class MainActivity extends Activity {
 
-  private static final SortedMap<Integer, Class<? extends Activity>> map;
+  private static final SortedMap<Integer, Class<? extends Activity>> MAP;
 
   static {
-    map = new TreeMap<Integer, Class<? extends Activity>>();
-    map.put(R.id.simple_example, SimpleExample.class);
-    map.put(R.id.cancel_example, CancelTaskExample.class);
-    map.put(R.id.safe_simple_example, SafeSimpleTask.class);
-    map.put(R.id.attach_receiver_example, AttachReceiverExample.class);
-    map.put(R.id.chuck_norris_example, ChuckNorrisActivity.class);
-    map.put(R.id.queue_example, QueueExample.class);
-    map.put(R.id.execute_example, AsyncExample.class);
-    map.put(R.id.download_example, DownloadExample.class);
-    map.put(R.id.callback_test, CallbackTest.class);
-    map.put(R.id.inheritance_test, InheritanceExample.class);
-    map.put(R.id.attach_callback_test, AttachExample.class);
+    MAP = new TreeMap<Integer, Class<? extends Activity>>();
+    MAP.put(R.id.simple_example, SimpleExample.class);
+    MAP.put(R.id.cancel_example, CancelTaskExample.class);
+    MAP.put(R.id.safe_simple_example, SafeSimpleTask.class);
+    MAP.put(R.id.attach_receiver_example, AttachReceiverExample.class);
+    MAP.put(R.id.chuck_norris_example, ChuckNorrisActivity.class);
+    MAP.put(R.id.queue_example, QueueExample.class);
+    MAP.put(R.id.execute_example, AsyncExample.class);
+    MAP.put(R.id.download_example, DownloadExample.class);
+    MAP.put(R.id.callback_test, CallbackTest.class);
+    MAP.put(R.id.inheritance_test, InheritanceExample.class);
+    MAP.put(R.id.attach_callback_test, AttachExample.class);
   }
 
   @Override
@@ -59,6 +59,6 @@ public class MainActivity extends Activity {
   }
 
   public void onButtonClick(View view) {
-    startActivity(new Intent(this, map.get(view.getId())));
+    startActivity(new Intent(this, MAP.get(view.getId())));
   }
 }

@@ -24,7 +24,6 @@
 package com.groundy.example;
 
 import com.telly.groundy.TaskHandler;
-import com.telly.groundy.TaskHandler;
 
 public class ProgressItem {
   public static final int DEFAULT = 0;

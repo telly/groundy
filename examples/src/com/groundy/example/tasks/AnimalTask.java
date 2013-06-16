@@ -15,7 +15,8 @@ public abstract class AnimalTask extends GroundyTask {
     try {
       // let's fake some work ^_^
       Thread.sleep(time);
-    } catch (InterruptedException ignore) {
+    } catch (InterruptedException e) {
+      e.printStackTrace();
     }
     return succeeded().add("sound", getSound());
   }

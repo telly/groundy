@@ -43,7 +43,7 @@ import java.util.ArrayList;
  * method and pass the instance of this class. This is important; otherwise the callback manager
  * won't know which tasks it should manage.
  */
-public class CallbacksManager {
+public final class CallbacksManager {
 
   public static final String GROUNDY_PROXY_KEY_PREFIX = "com.telly.groundy.key.GROUNDY_PROXY_KEY:";
   private static final String TASK_PROXY_LIST = "com.telly.groundy.key.TASK_PROXY_LIST";

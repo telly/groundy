@@ -28,13 +28,26 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.os.*;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.os.ResultReceiver;
 import com.telly.groundy.annotations.OnCancel;
 import com.telly.groundy.annotations.OnFailure;
 import com.telly.groundy.annotations.OnStart;
 import com.telly.groundy.annotations.OnSuccess;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -239,8 +252,8 @@ public class GroundyService extends Service {
     }
 
     if (mStartBehavior == START_REDELIVER_INTENT) {
-      L.d(TAG,
-          "Cancelling groups of tasks is not secure when using force_queue_completion. If your service gets killed unpredictable behavior can happen.");
+      L.d(TAG, "Cancelling groups of tasks is not secure when using force_queue_completion."
+          + "If your service gets killed unpredictable behavior can happen.");
     }
 
     // prevent current scheduled tasks with this group id from executing
@@ -275,20 +288,20 @@ public class GroundyService extends Service {
   }
 
   public static class CancelGroupResponse {
-    private final Set<Long> interruptedTasks;
-    private final Set<Long> notExecutedTasks;
+    private final Set<Long> mInterruptedTasks;
+    private final Set<Long> mNotExecutedTasks;
 
     public CancelGroupResponse(Set<Long> interruptedTasks, Set<Long> notExecutedTasks) {
-      this.interruptedTasks = interruptedTasks;
-      this.notExecutedTasks = notExecutedTasks;
+      mInterruptedTasks = interruptedTasks;
+      mNotExecutedTasks = notExecutedTasks;
     }
 
     public Set<Long> getInterruptedTasks() {
-      return interruptedTasks;
+      return mInterruptedTasks;
     }
 
     public Set<Long> getNotExecutedTasks() {
-      return notExecutedTasks;
+      return mNotExecutedTasks;
     }
   }
 
@@ -534,9 +547,9 @@ public class GroundyService extends Service {
     final int groupId;
     GroundyTask task;
 
-    public TaskInfo(int startId, int groupId) {
+    public TaskInfo(int startId, int group) {
       serviceId = startId;
-      this.groupId = groupId;
+      groupId = group;
     }
   }
 }

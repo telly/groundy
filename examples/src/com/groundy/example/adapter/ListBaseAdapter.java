@@ -118,7 +118,8 @@ public abstract class ListBaseAdapter<Item, ViewHolder> extends BaseAdapter {
       try {
         holder = mViewHolderClass.newInstance();
       } catch (Exception e) {
-        throw new IllegalStateException("Could not instantiate view holder: " + mViewHolderClass + ". Make sure it has an empty constructor.", e);
+        throw new IllegalStateException("Could not instantiate view holder: " + mViewHolderClass +
+            ". Make sure it has an empty constructor.", e);
       }
 
       // inflate the base view
@@ -130,7 +131,8 @@ public abstract class ListBaseAdapter<Item, ViewHolder> extends BaseAdapter {
         try {
           field.set(holder, viewById);
         } catch (Exception e) {
-          throw new RuntimeException("Could not set view (" + resourceId + ") to field " + field + ". Holder: " + holder + ", found view: " + viewById, e);
+          throw new RuntimeException("Could not set view (" + resourceId + ") to field " + field +
+              ". Holder: " + holder + ", found view: " + viewById, e);
         }
       }
       view.setTag(holder);

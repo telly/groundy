@@ -28,10 +28,10 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
-class GroundyTaskFactory {
+final class GroundyTaskFactory {
   private static final String TAG = "GroundyTaskFactory";
 
-  private static final Map<Class<? extends GroundyTask>, GroundyTask> sCache =
+  private static final Map<Class<? extends GroundyTask>, GroundyTask> CACHE =
       new HashMap<Class<? extends GroundyTask>, GroundyTask>();
 
   private GroundyTaskFactory() {
@@ -45,8 +45,8 @@ class GroundyTaskFactory {
    * @return An instance of a GroundyTask if a given call is valid null otherwise
    */
   static GroundyTask get(Class<? extends GroundyTask> taskClass, Context context) {
-    if (sCache.containsKey(taskClass)) {
-      return sCache.get(taskClass);
+    if (CACHE.containsKey(taskClass)) {
+      return CACHE.get(taskClass);
     }
     GroundyTask groundyTask = null;
     try {
@@ -54,9 +54,9 @@ class GroundyTaskFactory {
       Constructor ctc = taskClass.getConstructor();
       groundyTask = (GroundyTask) ctc.newInstance();
       if (groundyTask.canBeCached()) {
-        sCache.put(taskClass, groundyTask);
-      } else if (sCache.containsKey(taskClass)) {
-        sCache.remove(taskClass);
+        CACHE.put(taskClass, groundyTask);
+      } else if (CACHE.containsKey(taskClass)) {
+        CACHE.remove(taskClass);
       }
       groundyTask.setContext(context);
       groundyTask.onCreate();

@@ -51,10 +51,10 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
   private final SetFromMap<Object> callbackHandlers;
   private TaskHandler taskHandler;
   public static final Pattern INNER_PATTERN = Pattern.compile("^.+?\\$\\d$");
-  private static final Map<TaskAndHandler, ResultProxy> proxies;
+  private static final Map<TaskAndHandler, ResultProxy> PROXIES;
 
   static {
-    proxies = Collections.synchronizedMap(new HashMap<TaskAndHandler, ResultProxy>());
+    PROXIES = Collections.synchronizedMap(new HashMap<TaskAndHandler, ResultProxy>());
   }
 
   CallbacksReceiver(Class<? extends GroundyTask> taskType, Object... handlers) {
@@ -66,7 +66,8 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
 
   @Override
   public void onReceiveResult(int resultCode, Bundle resultData) {
-    if (resultCode == GroundyTask.RESULT_CODE_CALLBACK_ANNOTATION) {//noinspection unchecked
+    if (resultCode == GroundyTask.RESULT_CODE_CALLBACK_ANNOTATION) {
+      //noinspection unchecked
       Class<? extends Annotation> callbackAnnotation =
           (Class<? extends Annotation>) resultData.getSerializable(Groundy.KEY_CALLBACK_ANNOTATION);
       handleCallback(callbackAnnotation, resultData);
@@ -121,9 +122,9 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
 
     Class<?> handlerType = handler.getClass();
     TaskAndHandler taskAndHandler = new TaskAndHandler(groundyTaskType, handlerType);
-    synchronized (proxies) {
-      if (proxies.containsKey(taskAndHandler)) {
-        return proxies.get(taskAndHandler);
+    synchronized (PROXIES) {
+      if (PROXIES.containsKey(taskAndHandler)) {
+        return PROXIES.get(taskAndHandler);
       }
     }
 
@@ -133,7 +134,8 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
       if (isNotPublic) {
         L.d(TAG, "Using reflection for "
             + handlerType
-            + " because its not public. It's recommended to use public callbacks which enables code generation which makes things way faster.");
+            + " because its not public. It's recommended to use public callbacks which enables code"
+            + "generation which makes things way faster.");
       }
       resultProxy = new ReflectProxy(groundyTaskType, handlerType);
     } else {
@@ -159,7 +161,7 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
       }
     }
 
-    proxies.put(taskAndHandler, resultProxy);
+    PROXIES.put(taskAndHandler, resultProxy);
     return resultProxy;
   }
 
@@ -172,13 +174,13 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
     this.taskHandler = groundyTaskHandler;
   }
 
-  private static class TaskAndHandler {
+  private static final class TaskAndHandler {
     final Class<? extends GroundyTask> taskType;
     final Class<?> handlerType;
 
-    private TaskAndHandler(Class<? extends GroundyTask> taskType, Class<?> handlerType) {
-      this.taskType = taskType;
-      this.handlerType = handlerType;
+    private TaskAndHandler(Class<? extends GroundyTask> taskClass, Class<?> handlerClass) {
+      taskType = taskClass;
+      handlerType = handlerClass;
     }
 
     @Override

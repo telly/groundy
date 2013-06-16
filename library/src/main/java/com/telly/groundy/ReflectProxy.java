@@ -49,12 +49,12 @@ class ReflectProxy implements ResultProxy {
   private static final Map<Class<?>, Method[]> METHODS_CACHE = new HashMap<Class<?>, Method[]>();
 
   private final Map<Class<? extends Annotation>, List<MethodSpec>> callbacksMap;
-  private final Class<? extends GroundyTask> groundyTaskType;
-  private final Class<?> handlerType;
+  private final Class<? extends GroundyTask> mTaskType;
+  private final Class<?> mHandlerType;
 
   ReflectProxy(Class<? extends GroundyTask> groundyTaskType, Class<?> handlerType) {
-    this.groundyTaskType = groundyTaskType;
-    this.handlerType = handlerType;
+    mTaskType = groundyTaskType;
+    mHandlerType = handlerType;
     callbacksMap = new HashMap<Class<? extends Annotation>, List<MethodSpec>>();
 
     fillMethodSpecMap();
@@ -84,10 +84,10 @@ class ReflectProxy implements ResultProxy {
   }
 
   private void fillMethodSpecMap() {
-    Class<?> type = handlerType;
+    Class<?> type = mHandlerType;
     while (type != Object.class) {
       fillMethodSpecMapWith(type);
-      if (!groundyTaskType.isAnnotationPresent(Traverse.class)) {
+      if (!mTaskType.isAnnotationPresent(Traverse.class)) {
         // traverse class hierarchy when @Traverse annotation is present only
         break;
       }
@@ -101,7 +101,7 @@ class ReflectProxy implements ResultProxy {
       for (Class<?> groundyCallback : GROUNDY_CALLBACKS) {
         //noinspection unchecked
         Class<? extends Annotation> annotation = (Class<? extends Annotation>) groundyCallback;
-        appendMethodCallback(groundyTaskType, annotation, method);
+        appendMethodCallback(mTaskType, annotation, method);
       }
     }
   }
@@ -113,10 +113,10 @@ class ReflectProxy implements ResultProxy {
     return METHODS_CACHE.get(type);
   }
 
-  private void appendMethodCallback(Class<? extends GroundyTask> groundyTaskType,
+  private void appendMethodCallback(Class<? extends GroundyTask> taskType,
       Class<? extends Annotation> phaseAnnotation, Method method) {
     Annotation methodAnnotation = method.getAnnotation(phaseAnnotation);
-    if (methodAnnotation == null || !isValid(groundyTaskType, methodAnnotation)) {
+    if (methodAnnotation == null || !isValid(taskType, methodAnnotation)) {
       return;
     }
 
@@ -277,8 +277,8 @@ class ReflectProxy implements ResultProxy {
 
   @Override public String toString() {
     return "ReflectProxy{" +
-        "groundyTaskType=" + groundyTaskType +
-        ", handlerType=" + handlerType +
+        "groundyTaskType=" + mTaskType +
+        ", handlerType=" + mHandlerType +
         '}';
   }
 
@@ -287,10 +287,10 @@ class ReflectProxy implements ResultProxy {
     final List<String> paramNames;
     final String name;
 
-    MethodSpec(Method method, List<String> paramNames, String name) {
-      this.method = method;
-      this.paramNames = paramNames;
-      this.name = name;
+    MethodSpec(Method m, List<String> methodParams, String customName) {
+      method = m;
+      paramNames = methodParams;
+      name = customName;
     }
   }
 }

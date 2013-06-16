@@ -62,7 +62,7 @@ import javax.tools.JavaFileObject;
 })
 public class GroundyCodeGen extends AbstractProcessor {
 
-  private static final Logger logger = setupLogger();
+  private static final Logger LOGGER = setupLogger();
   public static final String SUCCESS = "com.telly.groundy.annotations.OnSuccess";
   public static final String FAILED = "com.telly.groundy.annotations.OnFailure";
   public static final String START = "com.telly.groundy.annotations.OnStart";
@@ -110,7 +110,7 @@ public class GroundyCodeGen extends AbstractProcessor {
     // ignore inner classes and non public classes
     Element callbackElement = callbackMethod.getEnclosingElement();
     if (!callbackElement.getModifiers().contains(Modifier.PUBLIC)) {
-      logger.info(
+      LOGGER.info(
           callbackElement + " is not public. Reflection will be used and it can slow things down.");
       return;
     }
@@ -120,7 +120,7 @@ public class GroundyCodeGen extends AbstractProcessor {
         (com.sun.tools.javac.util.List<Attribute>) getAnnotationValue(callbackMethod,
             annotationElement, "value");
     if (tasksList == null) {
-      logger.info("Could not found task for " + annotationElement);
+      LOGGER.info("Could not found task for " + annotationElement);
       System.exit(1);
     }
 
@@ -134,7 +134,8 @@ public class GroundyCodeGen extends AbstractProcessor {
       if (implMap.containsKey(proxyClassName)) {
         proxyImplContents = implMap.get(proxyClassName);
       } else {
-        implMap.put(proxyClassName, proxyImplContents = new HashSet<ProxyImplContent>());
+        proxyImplContents = new HashSet<ProxyImplContent>();
+        implMap.put(proxyClassName, proxyImplContents);
       }
 
       ProxyImplContent proxyImplContent = new ProxyImplContent();
@@ -177,7 +178,7 @@ public class GroundyCodeGen extends AbstractProcessor {
     try {
       if (verboseMode) {
         ProxyImplContent[] callbacksArr = callbacks.toArray(new ProxyImplContent[callbacks.size()]);
-        logger.info("Generating source code for " + callbacksArr[0].fullTargetClassName + ":");
+        LOGGER.info("Generating source code for " + callbacksArr[0].fullTargetClassName + ":");
       }
 
       javaWriter.emitEndOfLineComment("auto-generated file; don't modify");
@@ -204,7 +205,7 @@ public class GroundyCodeGen extends AbstractProcessor {
 
       for (ProxyImplContent proxyImpl : callbacks) {
         if (verboseMode) {
-          logger.info("Adding annotation proxy: " + proxyImpl.annotation);
+          LOGGER.info("Adding annotation proxy: " + proxyImpl.annotation);
         }
         String shouldHandleAnnotation = "callbackAnnotation == " + proxyImpl.annotation + ".class";
         if (proxyImpl.callbackName != null) {
@@ -252,7 +253,7 @@ public class GroundyCodeGen extends AbstractProcessor {
       String fileContent = classContent.toString();
 
       if (verboseMode) {
-        logger.info("Generated file: " + proxyClassName + ".java");
+        LOGGER.info("Generated file: " + proxyClassName + ".java");
         System.out.println(fileContent);
       }
 
@@ -270,29 +271,29 @@ public class GroundyCodeGen extends AbstractProcessor {
 
   private static String defaultValue(String parameterType) {
     if (parameterType.equals(int.class.getName())
-        || parameterType.equals("Integer")
+        || "Integer".equals(parameterType)
         || parameterType.equals(float.class.getName())
-        || parameterType.equals("Float")
+        || "Float".equals(parameterType)
         || parameterType.equals(double.class.getName())
-        || parameterType.equals("Double")
+        || "Double".equals(parameterType)
         || parameterType.equals(long.class.getName())
-        || parameterType.equals("Long")
+        || "Long".equals(parameterType)
         || parameterType.equals(byte.class.getName())
-        || parameterType.equals("Byte")
+        || "Byte".equals(parameterType)
         || parameterType.equals(char.class.getName())
-        || parameterType.equals("Character")
+        || "Character".equals(parameterType)
         || parameterType.equals(short.class.getName())
-        || parameterType.equals("Short")) {
+        || "Short".equals(parameterType)) {
       return "0";
-    } else if (parameterType.equals(boolean.class.getName()) || parameterType.equals("Boolean")) {
+    } else if (parameterType.equals(boolean.class.getName()) || "Boolean".equals(parameterType)) {
       return "false";
     }
     return "null";
   }
 
   private String cleanCasting(String type) {
-    if (primitives.containsKey(type)) {
-      return primitives.get(type);
+    if (PRIMITIVES.containsKey(type)) {
+      return PRIMITIVES.get(type);
     }
     return type;
   }
@@ -305,12 +306,12 @@ public class GroundyCodeGen extends AbstractProcessor {
     ExecutableElement method = (ExecutableElement) callbackMethod;
 
     if (!method.getModifiers().contains(Modifier.PUBLIC)) {
-      logger.info(methodFullInfo + " must be public.");
+      LOGGER.info(methodFullInfo + " must be public.");
       System.exit(-1);
     }
 
     if (method.getReturnType().getKind() != TypeKind.VOID) {
-      logger.info(methodFullInfo + " must return void.");
+      LOGGER.info(methodFullInfo + " must return void.");
       System.exit(-1);
     }
 
@@ -318,7 +319,7 @@ public class GroundyCodeGen extends AbstractProcessor {
     for (VariableElement param : method.getParameters()) {
       Param paramAnnotation = param.getAnnotation(Param.class);
       if (paramAnnotation == null) {
-        logger.info(methodFullInfo
+        LOGGER.info(methodFullInfo
             + ": all parameters must be annotated with the @"
             + Param.class.getName());
         System.exit(-1);
@@ -344,13 +345,13 @@ public class GroundyCodeGen extends AbstractProcessor {
     return logger;
   }
 
-  private static class NameAndType {
+  private static final class NameAndType {
     final String name;
     final String type;
 
-    private NameAndType(String name, String type) {
-      this.name = name;
-      this.type = type;
+    private NameAndType(String n, String t) {
+      this.name = n;
+      this.type = t;
     }
   }
 
@@ -381,16 +382,16 @@ public class GroundyCodeGen extends AbstractProcessor {
     }
   }
 
-  private static final Map<String, String> primitives = new HashMap<String, String>();
+  private static final Map<String, String> PRIMITIVES = new HashMap<String, String>();
 
   static {
-    primitives.put("int", "Integer");
-    primitives.put("long", "Long");
-    primitives.put("float", "Float");
-    primitives.put("double", "Double");
-    primitives.put("char", "Character");
-    primitives.put("boolean", "Boolean");
-    primitives.put("byte", "Byte");
-    primitives.put("short", "Short");
+    PRIMITIVES.put("int", "Integer");
+    PRIMITIVES.put("long", "Long");
+    PRIMITIVES.put("float", "Float");
+    PRIMITIVES.put("double", "Double");
+    PRIMITIVES.put("char", "Character");
+    PRIMITIVES.put("boolean", "Boolean");
+    PRIMITIVES.put("byte", "Byte");
+    PRIMITIVES.put("short", "Short");
   }
 }

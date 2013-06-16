@@ -35,10 +35,10 @@ import java.util.ArrayList;
  */
 public class TaskResult {
   private final Bundle mBundle = new Bundle();
-  private final ResultType type;
+  private final ResultType mType;
 
   TaskResult(ResultType type) {
-    this.type = type;
+    mType = type;
   }
 
   Bundle getResultData() {
@@ -46,7 +46,7 @@ public class TaskResult {
   }
 
   ResultType getType() {
-    return type;
+    return mType;
   }
 
   /**
