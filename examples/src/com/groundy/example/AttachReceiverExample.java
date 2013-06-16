@@ -88,7 +88,7 @@ public class AttachReceiverExample extends Activity {
             .callback(AttachReceiverExample.this)
             .callbackManager(callbacksManager)
             .arg(RandomTimeTask.KEY_ESTIMATED, time)
-            .queue(AttachReceiverExample.this);
+            .queueUsing(AttachReceiverExample.this);
       }
     });
   }

@@ -26,11 +26,11 @@ public class InheritanceExample extends Activity {
 
         Groundy.create(CatTask.class)
             .callback(InheritanceExample.this)
-            .queue(InheritanceExample.this);
+            .queueUsing(InheritanceExample.this);
 
         Groundy.create(DogTask.class)
             .callback(InheritanceExample.this)
-            .queue(InheritanceExample.this);
+            .queueUsing(InheritanceExample.this);
       }
     });
   }

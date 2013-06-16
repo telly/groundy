@@ -71,7 +71,7 @@ public class SafeSimpleTask extends Activity {
             .callback(SafeSimpleTask.this)
             .callbackManager(mCallbacksManager)
             .arg(RandomTimeTask.KEY_ESTIMATED, time)
-            .queue(SafeSimpleTask.this);
+            .queueUsing(SafeSimpleTask.this);
       }
     });
   }

@@ -127,7 +127,7 @@ public class GroundyService extends Service {
       if (mMode == GroundyMode.QUEUE) {
         // make sure we don't allow to asynchronously execute tasks while we are not in queue mode
         throw new UnsupportedOperationException(
-            "Current mode is 'queue'. You cannot use .execute() while"
+            "Current mode is 'queue'. You cannot use .executeUsing() while"
                 + " in this mode. You must enable 'async' mode by adding metadata to the manifest.");
       }
       HandlerThread thread = new HandlerThread("AsyncGroundyService");

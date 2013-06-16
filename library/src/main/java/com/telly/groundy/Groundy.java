@@ -227,12 +227,12 @@ public class Groundy implements Parcelable {
   /**
    * Queues a value to the Groundy Service. This value won't be executed until the previous queued
    * tasks are done. If you need your value to execute right away use the {@link
-   * Groundy#execute(Context)} method.
+   * Groundy#executeUsing(Context)} method.
    *
-   * @param context used to start the groundy service
+   * @param context used to start the Groundy service
    * @return a {@link TaskHandler} that can be used to clear the task callbacks list or cancel it
    */
-  public TaskHandler queue(Context context) {
+  public TaskHandler queueUsing(Context context) {
     boolean async = false;
     return internalQueueOrExecute(context, async);
   }
@@ -240,10 +240,10 @@ public class Groundy implements Parcelable {
   /**
    * Execute a value right away
    *
-   * @param context used to start the groundy service
+   * @param context used to start the Groundy service
    * @return a {@link TaskHandler} that can be used to clear the task callbacks list or cancel it
    */
-  public TaskHandler execute(Context context) {
+  public TaskHandler executeUsing(Context context) {
     boolean async = true;
     return internalQueueOrExecute(context, async);
   }
@@ -294,7 +294,7 @@ public class Groundy implements Parcelable {
   private void checkAlreadyProcessed() {
     if (mAlreadyProcessed) {
       throw new IllegalStateException(
-          "This method can only be called before queue(), execute() or asIntent() methods");
+          "This method can only be called before queueUsing(), executeUsing() or asIntent() methods");
     }
   }
 

@@ -117,7 +117,7 @@ public class CancelTaskExample extends Activity implements View.OnClickListener,
         .callback(this)
         .group(groupId)
         .arg(RandomTimeTask.KEY_ESTIMATED, time)
-        .queue(CancelTaskExample.this);
+        .queueUsing(CancelTaskExample.this);
 
     ProgressItem progressItem = new ProgressItem();
     progressItem.setTaskProxy(taskHandler);

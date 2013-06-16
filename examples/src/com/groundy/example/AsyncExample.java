@@ -36,7 +36,7 @@ public class AsyncExample extends QueueExample {
         .arg(RandomTimeTask.KEY_ESTIMATED, time)
         .service(AsyncGroundyService.class)
         .callback(this)
-        .execute(this);
+        .executeUsing(this);
   }
 
   @OnProgress(RandomTimeTask.class)

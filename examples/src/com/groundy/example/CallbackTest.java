@@ -49,7 +49,8 @@ public class CallbackTest extends Activity {
       @Override
       public void onClick(View v) {
         mByeBtn.setEnabled(false);
-        Groundy.create(ChuckNorrisKick.class).callback(CallbackTest.this).queue(CallbackTest.this);
+        Groundy.create(ChuckNorrisKick.class).callback(CallbackTest.this).queueUsing(
+            CallbackTest.this);
       }
     });
   }

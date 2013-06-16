@@ -88,7 +88,7 @@ public class AttachExample extends Activity {
   private void queueTask() {
     Toast.makeText(this, R.string.attach_toast, Toast.LENGTH_LONG).show();
     // queue task
-    mTaskHandler = Groundy.create(FakeDownloadTask.class).callback(this).queue(this);
+    mTaskHandler = Groundy.create(FakeDownloadTask.class).callback(this).queueUsing(this);
 
     new Handler().postDelayed(new Runnable() {
       @Override public void run() {

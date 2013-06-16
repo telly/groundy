@@ -49,7 +49,7 @@ public class ChuckNorrisActivity extends Activity {
       public void onClick(View v) {
         Groundy.create(ChuckNorrisTask.class)
             .callback(ChuckNorrisActivity.this)
-            .queue(ChuckNorrisActivity.this);
+            .queueUsing(ChuckNorrisActivity.this);
       }
     });
   }

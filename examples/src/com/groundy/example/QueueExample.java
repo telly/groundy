@@ -74,7 +74,7 @@ public class QueueExample extends Activity {
     return Groundy.create(RandomTimeTask.class)
         .arg(RandomTimeTask.KEY_ESTIMATED, time)
         .callback(this)
-        .queue(this);
+        .queueUsing(this);
   }
 
   @OnProgress(RandomTimeTask.class)

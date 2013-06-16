@@ -61,7 +61,7 @@ public class DownloadExample extends Activity {
         Groundy.create(DownloadTask.class)
             .callback(mCallback)
             .arg(DownloadTask.PARAM_URL, url)
-            .queue(DownloadExample.this);
+            .queueUsing(DownloadExample.this);
       }
     });
   }
