@@ -4,7 +4,7 @@ Groundy library for Android
 ![Groundy](http://i.imgur.com/fgC2aaw.png)
 
 Groundy is a fun, sexy way to do background work on your Android app; it's specially useful for
-running tasks that must be executed even if your activities are rotated or even quited. It allows
+running tasks that must be executed even if your activities/fragments are destroyed. It allows
 you to receive notifications from the background task directly to your activity or any object.
 
 It is useful for several scenarios like executing calls to external services (e.g. RESTful web
@@ -54,7 +54,16 @@ public void onSuccess(@Param("the_result") String result) {
 Do not forget to add `GroundyService` to the `AndroidManifest.xml` file:
 
 ```xml
-<service android:name="com.telly.groundy.GroundyService"/>
+<service android:name="com.telly.groundy.GroundyService" android:exported="false"/>
+```
+
+Or if you want to use parallel tasks
+```xml
+<service android:name="com.telly.groundy.GroundyService" android:exported="false">
+  <meta-data
+    android:name="groundy:mode"
+    android:value="async"/>
+</service>
 ```
 
 Extending callback system
@@ -81,13 +90,15 @@ In order to use this library from you Android project using maven your pom shoul
 <dependency>
   <groupId>com.telly</groupId>
   <artifactId>groundy</artifactId>
-  <version>0.9-SNAPSHOT</version>
+  <version>(insert latest version)</version>
 </dependency>
 
 <!-- enables groundy JSR-269 processor which makes everything up to 5 times faster -->
 <dependency>
   <groupId>com.telly</groupId>
   <artifactId>groundy-compiler</artifactId>
-  <version>0.9-SNAPSHOT</version>
+  <version>(insert latest version)</version>
 </dependency>
 ```
+
+At this point latest version is `0.9`, and `1.0-SNAPSHOT` under development.
