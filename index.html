@@ -28,7 +28,8 @@
         </ul>
       </header>
       <section>
-        <h1>Groundy library for Android</h1>
+        <h1>
+<a name="groundy-library-for-android" class="anchor" href="#groundy-library-for-android"><span class="octicon octicon-link"></span></a>Groundy library for Android</h1>
 
 <p>Groundy is a fun, sexy way to do background work on your Android app; it's specially useful for
 running tasks that must be executed even if your activities are rotated or even quited. It allows
@@ -38,7 +39,8 @@ you to receive notifications from the background task directly to your activity 
 services), download and/or process files, encoding audio/video and any kind of task that could
 block the main thread.</p>
 
-<h1>Basic usage</h1>
+<h1>
+<a name="basic-usage" class="anchor" href="#basic-usage"><span class="octicon octicon-link"></span></a>Basic usage</h1>
 
 <p>Create a subclass of <code>GroundyTask</code>:</p>
 
@@ -63,7 +65,7 @@ block the main thread.</p>
 <span class="n">Groundy</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">ExampleTask</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
     <span class="o">.</span><span class="na">callback</span><span class="o">(</span><span class="n">callbackObj</span><span class="o">)</span>        <span class="c1">// required if you want to get notified of your task lifecycle</span>
     <span class="o">.</span><span class="na">arg</span><span class="o">(</span><span class="s">"arg_name"</span><span class="o">,</span> <span class="s">"foo"</span><span class="o">)</span>       <span class="c1">// optional</span>
-    <span class="o">.</span><span class="na">queue</span><span class="o">(</span><span class="n">YourActivity</span><span class="o">.</span><span class="na">this</span><span class="o">);</span>
+    <span class="o">.</span><span class="na">queueUsing</span><span class="o">(</span><span class="n">YourActivity</span><span class="o">.</span><span class="na">this</span><span class="o">);</span>
 </pre></div>
 
 <p>You will get results in your callback object(s) (in the main thread):</p>
@@ -79,7 +81,8 @@ block the main thread.</p>
 <div class="highlight"><pre><span class="nt">&lt;service</span> <span class="na">android:name=</span><span class="s">"com.telly.groundy.GroundyService"</span><span class="nt">/&gt;</span>
 </pre></div>
 
-<h1>Extending callback system</h1>
+<h1>
+<a name="extending-callback-system" class="anchor" href="#extending-callback-system"><span class="octicon octicon-link"></span></a>Extending callback system</h1>
 
 <p>There are some already defined onCallback annotations: <code>@OnSuccess</code>, <code>@OnFailed</code>, <code>@OnCancel</code>,
 <code>@OnProgress</code> and <code>@OnStart</code>, but you can also create your own callback types like:</p>
@@ -92,7 +95,8 @@ block the main thread.</p>
 
 <p>Take a look at the custom callbacks example for details on this.</p>
 
-<h1>Maven integration</h1>
+<h1>
+<a name="maven-integration" class="anchor" href="#maven-integration"><span class="octicon octicon-link"></span></a>Maven integration</h1>
 
 <p>In order to use this library from you Android project using maven your pom should look like this:</p>
 
