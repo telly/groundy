@@ -96,7 +96,7 @@ class ReflectProxy implements ResultProxy {
   }
 
   private void fillMethodSpecMapWith(Class<?> type) {
-    for (Method method : getDeclaredMethods(type)) {
+    for (Method method : getMethods(type)) {
       // register groundy callbacks
       for (Class<?> groundyCallback : GROUNDY_CALLBACKS) {
         //noinspection unchecked
@@ -106,9 +106,9 @@ class ReflectProxy implements ResultProxy {
     }
   }
 
-  private static Method[] getDeclaredMethods(Class<?> type) {
+  private static Method[] getMethods(Class<?> type) {
     if (!METHODS_CACHE.containsKey(type)) {
-      METHODS_CACHE.put(type, type.getDeclaredMethods());
+      METHODS_CACHE.put(type, type.getMethods());
     }
     return METHODS_CACHE.get(type);
   }
