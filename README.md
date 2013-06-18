@@ -39,7 +39,7 @@ Whenever you want to execute the task, just do this:
 Groundy.create(ExampleTask.class)
     .callback(callbackObj)        // required if you want to get notified of your task lifecycle
     .arg("arg_name", "foo")       // optional
-    .queue(YourActivity.this);
+    .queueUsing(YourActivity.this);
 ```
 
 You will get results in your callback object(s) (in the main thread):
