@@ -46,7 +46,7 @@ class AttachedTaskHandlerImpl implements TaskHandler {
       GroundyManager.SingleCancelListener cancelListener) {
     if (!mTaskEnded) {
       GroundyManager.cancelTaskById(context, mId, reason, cancelListener, mGroundyServiceClass);
-    } else {
+    } else if (cancelListener != null) {
       cancelListener.onCancelResult(mId, GroundyService.COULD_NOT_CANCEL);
     }
   }

@@ -40,7 +40,7 @@ class TaskHandlerImpl implements TaskHandler {
     if (!mTaskEnded) {
       GroundyManager.cancelTaskById(context, mGroundy.getId(), reason, cancelListener,
           mGroundy.getGroundyServiceClass());
-    } else {
+    } else if (cancelListener != null) {
       cancelListener.onCancelResult(mGroundy.getId(), GroundyService.COULD_NOT_CANCEL);
     }
   }
