@@ -24,13 +24,13 @@
 package com.telly.groundy;
 
 import com.squareup.java.JavaWriter;
-import com.sun.tools.javac.code.Attribute;
 import com.telly.groundy.annotations.Param;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -45,6 +45,7 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -60,6 +61,7 @@ import javax.tools.JavaFileObject;
     GroundyCodeGen.SUCCESS, GroundyCodeGen.FAILED, GroundyCodeGen.START, GroundyCodeGen.CANCEL,
     GroundyCodeGen.PROGRESS, GroundyCodeGen.CALLBACK
 })
+@SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class GroundyCodeGen extends AbstractProcessor {
 
   private static final Logger LOGGER = setupLogger();
@@ -74,10 +76,6 @@ public class GroundyCodeGen extends AbstractProcessor {
   private final Map<String, Set<ProxyImplContent>> implMap =
       new HashMap<String, Set<ProxyImplContent>>();
   private boolean verboseMode;
-
-  @Override public SourceVersion getSupportedSourceVersion() {
-    return SourceVersion.latestSupported();
-  }
 
   @Override public boolean process(Set<? extends TypeElement> typeElements, RoundEnvironment env) {
     if (typeElements.isEmpty()) {
@@ -106,7 +104,7 @@ public class GroundyCodeGen extends AbstractProcessor {
     return true;
   }
 
-  private void processCallback(TypeElement annotationElement, ExecutableElement callbackMethod) {
+  private void processCallback(Element annotationElement, ExecutableElement callbackMethod) {
     // ignore inner classes and non public classes
     Element callbackElement = callbackMethod.getEnclosingElement();
     if (!callbackElement.getModifiers().contains(Modifier.PUBLIC)) {
@@ -116,15 +114,14 @@ public class GroundyCodeGen extends AbstractProcessor {
     }
 
     //noinspection unchecked
-    com.sun.tools.javac.util.List<Attribute> tasksList =
-        (com.sun.tools.javac.util.List<Attribute>) getAnnotationValue(callbackMethod,
-            annotationElement, "value");
+    Collection<AnnotationValue> tasksList = (Collection<AnnotationValue>)
+        getAnnotationValue(callbackMethod, annotationElement, "value");
     if (tasksList == null) {
       LOGGER.info("Could not found task for " + annotationElement);
       System.exit(1);
     }
 
-    for (Attribute attribute : tasksList) {
+    for (AnnotationValue attribute : tasksList) {
       Object callbackName = getAnnotationValue(callbackMethod, annotationElement, "name");
       String groundyTaskName = attribute.getValue().toString().replaceAll("\\.", "\\$");
       String genClassName = callbackElement.getSimpleName().toString();
@@ -144,12 +141,13 @@ public class GroundyCodeGen extends AbstractProcessor {
       proxyImplContent.methodName = callbackMethod.getSimpleName().toString();
       proxyImplContent.fullTargetClassName = callbackElement.toString();
       proxyImplContent.callbackName = callbackName != null ? callbackName.toString() : null;
+      proxyImplContent.originatingElement = annotationElement;
 
       proxyImplContents.add(proxyImplContent);
     }
   }
 
-  private Object getAnnotationValue(Element callbackMethod, TypeElement annotationElement,
+  private Object getAnnotationValue(Element callbackMethod, Element annotationElement,
       String executable) {
     AnnotationMirror annotation = null;
     for (AnnotationMirror annotationMirror : callbackMethod.getAnnotationMirrors()) {
@@ -200,15 +198,22 @@ public class GroundyCodeGen extends AbstractProcessor {
       javaWriter.emitStatement("return");
       javaWriter.endControlFlow();
 
-      javaWriter.emitStatement(
-          "String callbackName = resultData.getString(\"" + Groundy.KEY_CALLBACK_NAME + "\")");
+      boolean alreadySetCallbackName = false;
 
+
+      List<Element> originatingElements = new ArrayList<Element>();
       for (ProxyImplContent proxyImpl : callbacks) {
+        originatingElements.add(proxyImpl.originatingElement);
         if (verboseMode) {
           LOGGER.info("Adding annotation proxy: " + proxyImpl.annotation);
         }
         String shouldHandleAnnotation = "callbackAnnotation == " + proxyImpl.annotation + ".class";
         if (proxyImpl.callbackName != null) {
+          if (!alreadySetCallbackName) {
+            javaWriter.emitStatement("String callbackName = "
+                    + "resultData.getString(\"" + Groundy.KEY_CALLBACK_NAME + "\")");
+            alreadySetCallbackName = true;
+          }
           String callbackNameCheck = '\"' + proxyImpl.callbackName + "\".equals(callbackName)";
           shouldHandleAnnotation += " && " + callbackNameCheck;
         }
@@ -258,7 +263,9 @@ public class GroundyCodeGen extends AbstractProcessor {
       }
 
       Filer filer = processingEnv.getFiler();
-      JavaFileObject sourceFile = filer.createSourceFile(proxyClassName, (Element) null);
+      Element[] elements = originatingElements.toArray(new Element[originatingElements.size()]);
+      String fullClassName = "com.telly.groundy.generated." + proxyClassName;
+      JavaFileObject sourceFile = filer.createSourceFile(fullClassName, elements);
       Writer writer = sourceFile.openWriter();
       writer.write(fileContent);
       writer.flush();
@@ -361,6 +368,7 @@ public class GroundyCodeGen extends AbstractProcessor {
     String methodName;
     String fullTargetClassName;
     String callbackName;
+    Element originatingElement;
 
     @Override
     public boolean equals(Object o) {
@@ -379,6 +387,17 @@ public class GroundyCodeGen extends AbstractProcessor {
       int result = annotation != null ? annotation.hashCode() : 0;
       result = 31 * result + (callbackName != null ? callbackName.hashCode() : 0);
       return result;
+    }
+
+    @Override public String toString() {
+      return "ProxyImplContent{" +
+          "annotation='" + annotation + '\'' +
+          ", paramNames=" + paramNames +
+          ", methodName='" + methodName + '\'' +
+          ", fullTargetClassName='" + fullTargetClassName + '\'' +
+          ", callbackName='" + callbackName + '\'' +
+          ", originatingElement=" + originatingElement +
+          '}';
     }
   }
 
