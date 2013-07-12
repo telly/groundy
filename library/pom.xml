@@ -19,7 +19,7 @@
   <parent>
     <groupId>com.telly</groupId>
     <artifactId>groundy-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
   </parent>
 
   <artifactId>groundy</artifactId>
