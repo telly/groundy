@@ -1,17 +1,24 @@
-/*
- * Copyright 2013 Telly Inc.
+/**
+ * Copyright Telly, Inc. and other Groundy contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the
+ * following conditions:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+ * NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+ * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.groundy.example;
@@ -20,66 +27,38 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import com.telly.groundy.GroundyManager;
 import com.telly.groundy.example.R;
-import com.telly.groundy.GroundyManger;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
 public class MainActivity extends Activity {
+
+  private static final SortedMap<Integer, Class<? extends Activity>> MAP;
+
+  static {
+    MAP = new TreeMap<Integer, Class<? extends Activity>>();
+    MAP.put(R.id.simple_example, SimpleExample.class);
+    MAP.put(R.id.cancel_example, CancelTaskExample.class);
+    MAP.put(R.id.safe_simple_example, SafeSimpleTask.class);
+    MAP.put(R.id.attach_receiver_example, AttachReceiverExample.class);
+    MAP.put(R.id.chuck_norris_example, ChuckNorrisActivity.class);
+    MAP.put(R.id.queue_example, QueueExample.class);
+    MAP.put(R.id.execute_example, AsyncExample.class);
+    MAP.put(R.id.download_example, DownloadExample.class);
+    MAP.put(R.id.callback_test, CallbackTest.class);
+    MAP.put(R.id.inheritance_test, InheritanceExample.class);
+    MAP.put(R.id.attach_callback_test, AttachExample.class);
+  }
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-    GroundyManger.setLogEnabled(false);
+    GroundyManager.setLogEnabled(false);
+  }
 
-    findViewById(R.id.simple_example).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, SimpleTaskTest.class));
-      }
-    });
-
-    findViewById(R.id.safe_simple_example).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, SafeSimpleTaskTest.class));
-      }
-    });
-
-    findViewById(R.id.attach_receiver_example).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, AttachReceiverExample.class));
-      }
-    });
-
-    findViewById(R.id.chuck_norris_example).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, ChuckNorrisActivity.class));
-      }
-    });
-
-    findViewById(R.id.queue_example).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, QueueTest.class));
-      }
-    });
-
-    findViewById(R.id.execute_example).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, ExecuteTest.class));
-      }
-    });
-
-    findViewById(R.id.download_example).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        startActivity(new Intent(MainActivity.this, DownloadExample.class));
-      }
-    });
+  public void onButtonClick(View view) {
+    startActivity(new Intent(this, MAP.get(view.getId())));
   }
 }

@@ -1,54 +1,52 @@
-/*
- * Copyright 2013 Telly Inc.
+/**
+ * Copyright Telly, Inc. and other Groundy contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the
+ * following conditions:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+ * NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+ * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.telly.groundy;
 
 import android.content.Context;
-
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * {@link GroundyTask} factory
- *
- * @author Evelio Tarazona <evelio@twitvid.com>
- * @version 1.0
- */
-class GroundyTaskFactory {
+final class GroundyTaskFactory {
   private static final String TAG = "GroundyTaskFactory";
 
-  private static final Map<Class<? extends GroundyTask>, GroundyTask> sCache = new HashMap<Class<? extends GroundyTask>, GroundyTask>();
+  private static final Map<Class<? extends GroundyTask>, GroundyTask> CACHE =
+      new HashMap<Class<? extends GroundyTask>, GroundyTask>();
 
-  /**
-   * Non instances
-   */
   private GroundyTaskFactory() {
   }
 
   /**
-   * Builds a GroundyTask based on call
+   * Builds a GroundyTask based on call.
    *
-   * @param taskClass groundy task implementation class
-   * @param context   used to instantiate the task
+   * @param taskClass groundy value implementation class
+   * @param context used to instantiate the value
    * @return An instance of a GroundyTask if a given call is valid null otherwise
    */
   static GroundyTask get(Class<? extends GroundyTask> taskClass, Context context) {
-    if (sCache.containsKey(taskClass)) {
-      return sCache.get(taskClass);
+    if (CACHE.containsKey(taskClass)) {
+      return CACHE.get(taskClass);
     }
     GroundyTask groundyTask = null;
     try {
@@ -56,16 +54,16 @@ class GroundyTaskFactory {
       Constructor ctc = taskClass.getConstructor();
       groundyTask = (GroundyTask) ctc.newInstance();
       if (groundyTask.canBeCached()) {
-        sCache.put(taskClass, groundyTask);
-      } else if (sCache.containsKey(taskClass)) {
-        sCache.remove(taskClass);
+        CACHE.put(taskClass, groundyTask);
+      } else if (CACHE.containsKey(taskClass)) {
+        CACHE.remove(taskClass);
       }
       groundyTask.setContext(context);
+      groundyTask.onCreate();
       return groundyTask;
     } catch (Exception e) {
-      L.e(TAG, "Unable to create task for call " + taskClass, e);
+      L.e(TAG, "Unable to create value for call " + taskClass, e);
     }
     return groundyTask;
   }
-
 }

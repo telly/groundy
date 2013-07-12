@@ -15,58 +15,71 @@
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.telly</groupId>
-        <artifactId>groundy-parent</artifactId>
-        <version>0.8</version>
-    </parent>
-
+  <parent>
     <groupId>com.telly</groupId>
-    <artifactId>groundy-examples</artifactId>
-    <version>0.8</version>
-    <packaging>apk</packaging>
+    <artifactId>groundy-parent</artifactId>
+    <version>1.1-SNAPSHOT</version>
+  </parent>
 
-    <name>Groundy Example</name>
-    <description>Groundy library examples</description>
+  <artifactId>groundy-examples</artifactId>
+  <packaging>apk</packaging>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.google.android</groupId>
-            <artifactId>android</artifactId>
-            <scope>provided</scope>
-        </dependency>
+  <name>Groundy Example</name>
+  <description>Groundy library examples</description>
 
-        <dependency>
-            <groupId>com.google.android</groupId>
-            <artifactId>support-v4</artifactId>
-        </dependency>
+  <dependencies>
+    <dependency>
+      <groupId>com.google.android</groupId>
+      <artifactId>android</artifactId>
+      <scope>provided</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>com.telly</groupId>
-            <artifactId>groundy</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+    <dependency>
+      <groupId>com.google.android</groupId>
+      <artifactId>support-v4</artifactId>
+    </dependency>
 
-        <dependency>
-            <groupId>com.github.kevinsawicki</groupId>
-            <artifactId>http-request</artifactId>
-            <version>4.0</version>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
+    <dependency>
+      <groupId>com.telly</groupId>
+      <artifactId>groundy</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
-    <build>
-        <sourceDirectory>src</sourceDirectory>
-        <finalName>${project.artifactId}-unaligned</finalName>
+    <dependency>
+      <groupId>com.telly</groupId>
+      <artifactId>groundy-compiler</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
 
-        <plugins>
-            <plugin>
-                <groupId>com.jayway.maven.plugins.android.generation2</groupId>
-                <artifactId>android-maven-plugin</artifactId>
-                <extensions>true</extensions>
-            </plugin>
-        </plugins>
-    </build>
+    <dependency>
+      <groupId>com.github.kevinsawicki</groupId>
+      <artifactId>http-request</artifactId>
+      <version>4.0</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <finalName>${project.artifactId}-unaligned</finalName>
+
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <compilerArgument>-Xlint:all</compilerArgument>
+          <showWarnings>true</showWarnings>
+          <showDeprecation>true</showDeprecation>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+        <artifactId>android-maven-plugin</artifactId>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

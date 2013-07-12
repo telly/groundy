@@ -1,34 +1,38 @@
-/*
- * Copyright 2013 Telly Inc.
+/**
+ * Copyright Telly, Inc. and other Groundy contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the
+ * following conditions:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+ * NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+ * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.groundy.example;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.ResultReceiver;
 import android.view.View;
 import android.widget.EditText;
-import com.telly.groundy.example.R;
 import com.groundy.example.tasks.ChuckNorrisTask;
 import com.telly.groundy.Groundy;
+import com.telly.groundy.annotations.OnSuccess;
+import com.telly.groundy.annotations.Param;
+import com.telly.groundy.example.R;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
 public class ChuckNorrisActivity extends Activity {
 
   private EditText mNorrisFacts;
@@ -43,23 +47,15 @@ public class ChuckNorrisActivity extends Activity {
     findViewById(R.id.get_norris_fact).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        Groundy.create(ChuckNorrisActivity.this, ChuckNorrisTask.class)
-            .receiver(mReceiver)
-            .queue();
+        Groundy.create(ChuckNorrisTask.class)
+            .callback(ChuckNorrisActivity.this)
+            .queueUsing(ChuckNorrisActivity.this);
       }
     });
   }
 
-  private final ResultReceiver mReceiver = new ResultReceiver(new Handler()) {
-    @Override
-    protected void onReceiveResult(int resultCode, Bundle resultData) {
-      super.onReceiveResult(resultCode, resultData);
-      if (resultCode == Groundy.STATUS_FINISHED) {
-        String fact = resultData.getString("fact");
-        if (fact != null) {
-          mNorrisFacts.append(fact + "\n\n");
-        }
-      }
-    }
-  };
+  @OnSuccess(ChuckNorrisTask.class)
+  public void onReceiveResult(@Param("fact") String fact) {
+    mNorrisFacts.append(fact + "\n\n");
+  }
 }

@@ -1,39 +1,56 @@
-/*
- * Copyright 2013 Telly Inc.
+/**
+ * Copyright Telly, Inc. and other Groundy contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the
+ * following conditions:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+ * NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+ * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.groundy.example;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
+import com.telly.groundy.TaskHandler;
+
 public class ProgressItem {
-  private long mCount;
+  public static final int DEFAULT = 0;
+  public static final int INTERRUPTED = 1;
+  public static final int CANCELLED = 2;
+  public static final int DONE = 3;
+
+  private TaskHandler mTaskHandler;
   private int mProgress;
   private int mEstimated;
+  private int mState = DEFAULT;
+  private int mColor;
 
-  public long getCount() {
-    return mCount;
+  public long getId() {
+    return mTaskHandler.getTaskId();
+  }
+
+  public TaskHandler getTaskProxy() {
+    return mTaskHandler;
   }
 
   public int getEstimated() {
     return mEstimated;
   }
 
-  public void setCount(long count) {
-    mCount = count;
+  public void setTaskProxy(TaskHandler taskHandler) {
+    mTaskHandler = taskHandler;
   }
 
   public int getProgress() {
@@ -48,6 +65,14 @@ public class ProgressItem {
     mProgress = progress;
   }
 
+  public void setState(int cancelled) {
+    mState = cancelled;
+  }
+
+  public int getState() {
+    return mState;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -55,24 +80,30 @@ public class ProgressItem {
 
     ProgressItem that = (ProgressItem) o;
 
-    if (mCount != that.mCount) return false;
-    if (mProgress != that.mProgress) return false;
+    if (mTaskHandler != null ? !mTaskHandler.equals(that.mTaskHandler) : that.mTaskHandler != null)
+      return false;
 
     return true;
   }
 
   @Override
   public int hashCode() {
-    int result = (int) (mCount ^ (mCount >>> 32));
-    result = 31 * result + mProgress;
-    return result;
+    return mTaskHandler != null ? mTaskHandler.hashCode() : 0;
   }
 
   @Override
   public String toString() {
     return "ProgressItem{" +
-        "mCount=" + mCount +
+        "mTaskHandler=" + mTaskHandler +
         ", mProgress=" + mProgress +
         '}';
+  }
+
+  public void setColor(int color) {
+    mColor = color;
+  }
+
+  public int getColor() {
+    return mColor;
   }
 }

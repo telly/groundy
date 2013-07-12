@@ -13,3 +13,4 @@ gen-external-apklibs
 .project
 atlassian-ide-plugin.xml
 .settings
+.idea

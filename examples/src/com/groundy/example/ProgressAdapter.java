@@ -1,17 +1,24 @@
-/*
- * Copyright 2013 Telly Inc.
+/**
+ * Copyright Telly, Inc. and other Groundy contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the
+ * following conditions:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+ * NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+ * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.groundy.example;
@@ -21,14 +28,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import com.groundy.example.adapter.Layout;
+import com.groundy.example.adapter.ListBaseAdapter;
+import com.groundy.example.adapter.ResourceId;
 import com.telly.groundy.example.R;
-import com.telly.groundy.adapter.Layout;
-import com.telly.groundy.adapter.ListBaseAdapter;
-import com.telly.groundy.adapter.ResourceId;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
 public class ProgressAdapter extends ListBaseAdapter<ProgressItem, ProgressAdapter.ViewHolder> {
 
   public ProgressAdapter(Context context) {
@@ -36,19 +40,27 @@ public class ProgressAdapter extends ListBaseAdapter<ProgressItem, ProgressAdapt
   }
 
   @Override
-  public void populateHolder(int position, View view, ViewGroup parent, ProgressItem item, ViewHolder holder) {
-    holder.label.setText(String.valueOf(item.getCount()));
+  public void populateHolder(int position, View view, ViewGroup parent, ProgressItem item,
+                             ViewHolder holder) {
     holder.progressBar.setProgress(item.getProgress());
-    holder.estimated.setText(getContext().getString(R.string.will_work_for, item.getEstimated()));
+    switch (item.getState()) {
+      case ProgressItem.CANCELLED:
+        holder.estimated.setText(getString(R.string.task_didnt_run));
+        break;
+      case ProgressItem.INTERRUPTED:
+        holder.estimated.setText(R.string.task_interrupted);
+        break;
+      case ProgressItem.DONE:
+        holder.estimated.setText(R.string.task_completed);
+        break;
+      default:
+        holder.estimated.setText(getString(R.string.will_work_for, item.getEstimated()));
+    }
   }
 
   @Layout(R.layout.progress_row)
   public static class ViewHolder {
-    @ResourceId(R.id.lbl_id)
-    TextView label;
-    @ResourceId(R.id.lbl_estimated)
-    TextView estimated;
-    @ResourceId(R.id.progress)
-    ProgressBar progressBar;
+    @ResourceId(R.id.lbl_estimated) TextView estimated;
+    @ResourceId(R.id.progress) ProgressBar progressBar;
   }
 }

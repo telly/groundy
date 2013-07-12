@@ -1,145 +1,176 @@
-<?xinitinitml version="1.0" encoding="UTF-8"?><!--
-  ~ Copyright 2013 Telly Inc.
+<?xml version="1.0" encoding="UTF-8"?><!--~
+  ~ Copyright Telly, Inc. and other Groundy contributors.
   ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
+  ~ Permission is hereby granted, free of charge, to any person obtaining a
+  ~ copy of this software and associated documentation files (the
+  ~ "Software"), to deal in the Software without restriction, including
+  ~ without limitation the rights to use, copy, modify, merge, publish,
+  ~ distribute, sublicense, and/or sell copies of the Software, and to permit
+  ~ persons to whom the Software is furnished to do so, subject to the
+  ~ following conditions:
   ~
-  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~ The above copyright notice and this permission notice shall be included
+  ~ in all copies or substantial portions of the Software.
   ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+  ~ OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  ~ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+  ~ NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+  ~ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+  ~ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+  ~ THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.telly</groupId>
-    <artifactId>groundy-parent</artifactId>
-    <version>0.8</version>
-    <packaging>pom</packaging>
-    <name>Groundy project</name>
-    <description>Fancy way to execute async/background tasks on Android</description>
-    <url>https://github.com/telly/groundy</url>
+  <groupId>com.telly</groupId>
+  <artifactId>groundy-parent</artifactId>
+  <version>1.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>Groundy project</name>
+  <description>Fancy way to execute async/background tasks on Android</description>
+  <url>https://github.com/telly/groundy</url>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <java.version>1.6</java.version>
-        <android.version>4.1.1.4</android.version>
-        <android.platform>16</android.platform>
-        <android.support.version>r7</android.support.version>
+    <java.version>1.6</java.version>
+    <android.version>4.1.1.4</android.version>
+    <android.platform>16</android.platform>
+    <android.support.version>r7</android.support.version>
+    <android-maven.version>3.6.0</android-maven.version>
+    <java.writer.version>1.0.4</java.writer.version>
+  </properties>
 
-        <android-maven.version>3.3.0</android-maven.version>
-    </properties>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
 
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
+  <scm>
+    <connection>scm:git:git@github.com:telly/groundy.git</connection>
+    <developerConnection>scm:git:git@github.com:telly/groundy.git</developerConnection>
+    <url>git@github.com:telly/groundy.git</url>
+  </scm>
 
-    <scm>
-        <connection>scm:git:git@github.com:twitvid/groundy.git</connection>
-        <developerConnection>scm:git:git@github.com:twitvid/groundy.git</developerConnection>
-        <url>git@github.com:twitvid/groundy.git</url>
-    </scm>
+  <developers>
+    <developer>
+      <id>casidiablo</id>
+      <name>Cristian</name>
+    </developer>
+    <developer>
+      <id>eveliotc</id>
+      <name>Evelio Tarazona</name>
+      <email>evelio@telly.com</email>
+      <timezone>0</timezone>
+      <url>http://evel.io/</url>
+    </developer>
+  </developers>
 
-    <developers>
-        <developer>
-            <id>casidiablo</id>
-            <name>Cristian Castiblanco</name>
-            <email>cristian@elhacker.net</email>
-            <timezone>0</timezone>
-            <url>http://casidiablo.net/</url>
-        </developer>
-    </developers>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.android</groupId>
+        <artifactId>android</artifactId>
+        <version>${android.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.android</groupId>
+        <artifactId>support-v4</artifactId>
+        <version>${android.support.version}</version>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.squareup</groupId>
+        <artifactId>javawriter</artifactId>
+        <version>${java.writer.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.google.android</groupId>
-                <artifactId>android</artifactId>
-                <version>${android.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.google.android</groupId>
-                <artifactId>support-v4</artifactId>
-                <version>${android.support.version}</version>
-                <scope>compile</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <source>${java.version}</source>
+            <target>${java.version}</target>
+            <showDeprecation>true</showDeprecation>
+            <showWarnings>true</showWarnings>
+          </configuration>
+        </plugin>
 
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>2.3.2</version>
-                    <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                    </configuration>
-                </plugin>
+        <plugin>
+          <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+          <artifactId>android-maven-plugin</artifactId>
+          <version>${android-maven.version}</version>
+          <configuration>
+            <sdk>
+              <platform>${android.platform}</platform>
+            </sdk>
+            <undeployBeforeDeploy>true</undeployBeforeDeploy>
+          </configuration>
+          <extensions>true</extensions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <configuration>
+            <failsOnError>true</failsOnError>
+            <configLocation>checkstyle.xml</configLocation>
+            <consoleOutput>true</consoleOutput>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>verify</phase>
+              <goals>
+                <goal>checkstyle</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
 
-                <plugin>
-                    <groupId>com.jayway.maven.plugins.android.generation2</groupId>
-                    <artifactId>android-maven-plugin</artifactId>
-                    <version>${android-maven.version}</version>
-                    <configuration>
-                        <sdk>
-                            <platform>${android.platform}</platform>
-                        </sdk>
-                        <undeployBeforeDeploy>true</undeployBeforeDeploy>
-                    </configuration>
-                    <extensions>true</extensions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.5</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.8</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>2.5</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.1.2</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.9.1</version>
+      </plugin>
+    </plugins>
+  </build>
 
-        <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-            </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.8</version>
-            </plugin>
-            <plugin>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.5</version>
-            </plugin>
-            <plugin>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.1.2</version>
-            </plugin>
-        </plugins>
-    </build>
-
-    <distributionManagement>
-        <repository>
-            <id>sonatype-nexus-staging</id>
-            <name>Nexus Staging Repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
-
-    <modules>
-        <module>library</module>
-        <module>examples</module>
-    </modules>
+  <modules>
+    <module>library</module>
+    <module>compiler</module>
+    <module>examples</module>
+  </modules>
 </project>

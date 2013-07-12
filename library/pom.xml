@@ -15,29 +15,22 @@
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>com.telly</groupId>
-        <artifactId>groundy-parent</artifactId>
-        <version>0.8</version>
-    </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
     <groupId>com.telly</groupId>
-    <artifactId>groundy</artifactId>
-    <version>0.8</version>
+    <artifactId>groundy-parent</artifactId>
+    <version>1.1-SNAPSHOT</version>
+  </parent>
 
-    <name>Groundy library</name>
-    <description>Fancy way to execute async/background tasks on Android</description>
+  <artifactId>groundy</artifactId>
+  <name>Groundy library</name>
+  <description>Fancy way to execute async/background tasks on Android</description>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.google.android</groupId>
-            <artifactId>android</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.android</groupId>
-            <artifactId>support-v4</artifactId>
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>com.google.android</groupId>
+      <artifactId>android</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 </project>

@@ -1,17 +1,24 @@
-/*
- * Copyright 2013 Telly Inc.
+/**
+ * Copyright Telly, Inc. and other Groundy contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to the
+ * following conditions:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+ * NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+ * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.groundy.example;
@@ -19,19 +26,17 @@ package com.groundy.example;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.ResultReceiver;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
-import com.telly.groundy.example.R;
 import com.groundy.example.tasks.DownloadTask;
 import com.telly.groundy.Groundy;
-import com.telly.groundy.util.Bundler;
+import com.telly.groundy.annotations.OnFailure;
+import com.telly.groundy.annotations.OnProgress;
+import com.telly.groundy.annotations.OnSuccess;
+import com.telly.groundy.annotations.Param;
+import com.telly.groundy.example.R;
 
-/**
- * @author Cristian Castiblanco <cristian@elhacker.net>
- */
 public class DownloadExample extends Activity {
 
   private EditText mEditUrl;
@@ -53,32 +58,31 @@ public class DownloadExample extends Activity {
         mProgressDialog.show();
 
         String url = mEditUrl.getText().toString().trim();
-        Bundle extras = new Bundler().add(DownloadTask.PARAM_URL, url).build();
-        Groundy.create(DownloadExample.this, DownloadTask.class)
-            .receiver(mReceiver)
-            .params(extras)
-            .queue();
+        Groundy.create(DownloadTask.class)
+            .callback(mCallback)
+            .arg(DownloadTask.PARAM_URL, url)
+            .queueUsing(DownloadExample.this);
       }
     });
   }
 
-  private ResultReceiver mReceiver = new ResultReceiver(new Handler()) {
-    @Override
-    protected void onReceiveResult(int resultCode, Bundle resultData) {
-      super.onReceiveResult(resultCode, resultData);
-      switch (resultCode) {
-        case Groundy.STATUS_PROGRESS:
-          mProgressDialog.setProgress(resultData.getInt(Groundy.KEY_PROGRESS));
-          break;
-        case Groundy.STATUS_FINISHED:
-          Toast.makeText(DownloadExample.this, R.string.file_downloaded, Toast.LENGTH_LONG);
-          mProgressDialog.dismiss();
-          break;
-        case Groundy.STATUS_ERROR:
-          Toast.makeText(DownloadExample.this, resultData.getString(Groundy.KEY_ERROR), Toast.LENGTH_LONG).show();
-          mProgressDialog.dismiss();
-          break;
-      }
+  // a callback can be any kind of object :)
+  private final Object mCallback = new Object() {
+    @OnProgress(DownloadTask.class)
+    public void onNiceProgress(@Param(Groundy.PROGRESS) int progress) {
+      mProgressDialog.setProgress(progress);
+    }
+
+    @OnSuccess(DownloadTask.class)
+    public void onBeautifulSuccess() {
+      Toast.makeText(DownloadExample.this, R.string.file_downloaded, Toast.LENGTH_LONG);
+      mProgressDialog.dismiss();
+    }
+
+    @OnFailure(DownloadTask.class)
+    public void onTragedy(@Param(Groundy.CRASH_MESSAGE) String error) {
+      Toast.makeText(DownloadExample.this, error, Toast.LENGTH_LONG).show();
+      mProgressDialog.dismiss();
     }
   };
 }
