@@ -30,7 +30,7 @@
 
   <groupId>com.telly</groupId>
   <artifactId>groundy-parent</artifactId>
-  <version>1.0</version>
+  <version>1.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Groundy project</name>
   <description>Fancy way to execute async/background tasks on Android</description>
