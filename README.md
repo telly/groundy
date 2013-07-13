@@ -101,4 +101,4 @@ In order to use this library from you Android project using maven your pom shoul
 </dependency>
 ```
 
-At this point latest version is `0.9`, and `1.0-SNAPSHOT` under development.
+At this point latest version is `1.0`, and `1.1-SNAPSHOT` under development.
