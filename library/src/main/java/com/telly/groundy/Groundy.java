@@ -29,7 +29,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.ResultReceiver;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -360,10 +360,13 @@ public final class Groundy implements Parcelable {
     @Override public Groundy createFromParcel(Parcel source) {
       Class groundyTask = (Class) source.readSerializable();
       long id = source.readLong();
+      boolean hadReceiver = source.readByte() == 1;
 
       //noinspection unchecked
       Groundy groundy = new Groundy(groundyTask, id);
-      groundy.mReceiver = source.readParcelable(ResultReceiver.class.getClassLoader());
+      if (hadReceiver) {
+        groundy.mReceiver = source.readParcelable(CallbacksReceiver.class.getClassLoader());
+      }
       groundy.mArgs.putAll(source.readBundle());
       groundy.mGroupId = source.readInt();
       groundy.mAlreadyProcessed = source.readByte() == 1;
@@ -385,7 +388,10 @@ public final class Groundy implements Parcelable {
   @Override public void writeToParcel(Parcel dest, int flags) {
     dest.writeSerializable(mGroundyTask);
     dest.writeLong(mId);
-    dest.writeParcelable(mReceiver, flags);
+    dest.writeByte((byte) (mReceiver == null ? 0 : 1));
+    if (mReceiver != null) {
+      dest.writeParcelable(mReceiver, flags);
+    }
     dest.writeBundle(mArgs);
     dest.writeInt(mGroupId);
     dest.writeByte((byte) (mAlreadyProcessed ? 1 : 0));
