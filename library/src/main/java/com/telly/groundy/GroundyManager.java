@@ -168,7 +168,7 @@ public final class GroundyManager {
     private final Class<? extends GroundyService> mGroundyServiceClass;
 
     GroundyServiceConnection(Context context, Class<? extends GroundyService> groundyServiceClass) {
-      mContext = context;
+      mContext = context.getApplicationContext();
       mGroundyServiceClass = groundyServiceClass;
     }
 

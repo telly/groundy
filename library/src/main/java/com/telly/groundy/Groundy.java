@@ -30,6 +30,7 @@ import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import android.os.ResultReceiver;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -73,9 +74,7 @@ public final class Groundy implements Parcelable {
    */
   public static final String ORIGINAL_PARAMS = "com.telly.groundy.key.ORIGINAL_ARGS";
 
-  /**
-   * The class used to implement the executed task.
-   */
+  /** The class used to implement the executed task. */
   public static final String TASK_IMPLEMENTATION = "com.telly.groundy.key.TASK_IMPLEMENTATION";
 
   /**
@@ -267,10 +266,6 @@ public final class Groundy implements Parcelable {
       mCallbacksManager.register(taskProxy);
     }
 
-    if (mReceiver != null) {
-      mReceiver.setOnFinishedListener(taskProxy);
-    }
-
     context.startService(internalGetServiceIntent(context, async));
     return taskProxy;
   }
@@ -365,7 +360,16 @@ public final class Groundy implements Parcelable {
       //noinspection unchecked
       Groundy groundy = new Groundy(groundyTask, id);
       if (hadReceiver) {
-        groundy.mReceiver = source.readParcelable(CallbacksReceiver.class.getClassLoader());
+        ResultReceiver r = source.readParcelable(CallbacksReceiver.class.getClassLoader());
+        if (r instanceof CallbacksReceiver) {
+          groundy.mReceiver = (CallbacksReceiver) r;
+        } else if (r != null) {
+          //noinspection unchecked
+          groundy.mReceiver = new CallbacksReceiver(groundyTask);
+          Bundle bundle = new Bundle();
+          bundle.putParcelable(CallbacksReceiver.RECEIVER_PARCEL, groundy.mReceiver);
+          r.send(CallbacksReceiver.ATTACH_RECEIVER_PARCEL, bundle);
+        }
       }
       groundy.mArgs.putAll(source.readBundle());
       groundy.mGroupId = source.readInt();

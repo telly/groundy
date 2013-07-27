@@ -25,6 +25,7 @@ package com.telly.groundy;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.os.ResultReceiver;
 import com.telly.groundy.annotations.OnCancel;
 import com.telly.groundy.annotations.OnFailure;
@@ -47,11 +48,14 @@ import java.util.regex.Pattern;
 class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
 
   private static final String TAG = "groundy:receiver";
-  private final Class<? extends GroundyTask> groundyTaskType;
-  private final SetFromMap<Object> callbackHandlers;
-  private TaskHandler taskHandler;
   public static final Pattern INNER_PATTERN = Pattern.compile("^.+?\\$\\d$");
   private static final Map<TaskAndHandler, ResultProxy> PROXIES;
+  public static final int ATTACH_RECEIVER_PARCEL = 9999;
+  public static final String RECEIVER_PARCEL = "com.telly.groundy.RECEIVER_PARCEL";
+
+  private final Class<? extends GroundyTask> groundyTaskType;
+  private final SetFromMap<Object> callbackHandlers;
+  private ResultReceiver mAttachedReceiver;
 
   static {
     PROXIES = Collections.synchronizedMap(new HashMap<TaskAndHandler, ResultProxy>());
@@ -66,11 +70,20 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
 
   @Override
   public void onReceiveResult(int resultCode, Bundle resultData) {
-    if (resultCode == GroundyTask.RESULT_CODE_CALLBACK_ANNOTATION) {
+    if (resultCode == ATTACH_RECEIVER_PARCEL && resultData != null) {
+      Parcelable parcelable = resultData.getParcelable(RECEIVER_PARCEL);
+      if (parcelable instanceof ResultReceiver) {
+        L.d(TAG, "Attaching a parcel receiver");
+        mAttachedReceiver = (ResultReceiver) parcelable;
+      }
+    } else if (resultCode == GroundyTask.RESULT_CODE_CALLBACK_ANNOTATION) {
       //noinspection unchecked
       Class<? extends Annotation> callbackAnnotation =
           (Class<? extends Annotation>) resultData.getSerializable(Groundy.KEY_CALLBACK_ANNOTATION);
       handleCallback(callbackAnnotation, resultData);
+      if (mAttachedReceiver != null) {
+        mAttachedReceiver.send(resultCode, resultData);
+      }
     }
   }
 
@@ -98,10 +111,6 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
     boolean isEndingAnnotation = callbackAnnotation == OnSuccess.class ||
         callbackAnnotation == OnFailure.class ||
         callbackAnnotation == OnCancel.class;
-    boolean endTask = isEndingAnnotation && taskHandler instanceof TaskHandlerImpl;
-    if (endTask) {
-      ((TaskHandlerImpl) taskHandler).onTaskEnded();
-    }
 
     for (Object callbackHandler : callbackHandlers) {
       ResultProxy methodProxy = getMethodProxy(callbackHandler);
@@ -110,8 +119,8 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
       }
     }
 
-    if (endTask) {
-      taskHandler.clearCallbacks();
+    if (isEndingAnnotation) {
+      clearHandlers();
     }
   }
 
@@ -168,10 +177,6 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
   private static boolean isInner(Class<?> type) {
     Matcher matcher = INNER_PATTERN.matcher(type.getName());
     return matcher.matches();
-  }
-
-  void setOnFinishedListener(TaskHandler groundyTaskHandler) {
-    this.taskHandler = groundyTaskHandler;
   }
 
   private static final class TaskAndHandler {
