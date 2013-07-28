@@ -107,14 +107,9 @@ public final class DownloadUtils {
     URL url = new URL(fromUrl);
     URLConnection urlConnection = url.openConnection();
     urlConnection.connect();
-    int contentLength = urlConnection.getContentLength();
-    if (contentLength == -1) {
-      fromUrl = urlConnection.getHeaderField("Location");
-      if (fromUrl == null) {
-        throw new IOException(
-            "No content or redirect found for URL " + url + " with " + redirect + " redirects.");
-      }
-      downloadFileHandleRedirect(context, fromUrl, toFile, redirect + 1, listener);
+    String redirectTarget = urlConnection.getHeaderField("Location");
+    if (redirectTarget != null) {
+      downloadFileHandleRedirect(context, redirectTarget, toFile, redirect + 1, listener);
       return;
     }
     InputStream input = urlConnection.getInputStream();
