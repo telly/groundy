@@ -29,7 +29,6 @@ import android.os.Parcel;
 class TaskHandlerImpl implements TaskHandler {
 
   private final Groundy mGroundy;
-  private boolean mTaskEnded = false;
 
   TaskHandlerImpl(Groundy groundy) {
     mGroundy = groundy;
@@ -37,12 +36,8 @@ class TaskHandlerImpl implements TaskHandler {
 
   @Override public void cancel(Context context, int reason,
       GroundyManager.SingleCancelListener cancelListener) {
-    if (!mTaskEnded) {
-      GroundyManager.cancelTaskById(context, mGroundy.getId(), reason, cancelListener,
-          mGroundy.getGroundyServiceClass());
-    } else if (cancelListener != null) {
-      cancelListener.onCancelResult(mGroundy.getId(), GroundyService.COULD_NOT_CANCEL);
-    }
+    GroundyManager.cancelTaskById(context, mGroundy.getId(), reason, cancelListener,
+        mGroundy.getGroundyServiceClass());
   }
 
   @Override public void clearCallbacks() {
@@ -50,10 +45,6 @@ class TaskHandlerImpl implements TaskHandler {
     if (callbacksReceiver != null) {
       callbacksReceiver.clearHandlers();
     }
-  }
-
-  @Override public boolean taskAlreadyEnded() {
-    return mTaskEnded;
   }
 
   @Override public void appendCallbacks(Object... handlers) {
@@ -72,10 +63,6 @@ class TaskHandlerImpl implements TaskHandler {
 
   @Override public long getTaskId() {
     return mGroundy.getId();
-  }
-
-  void onTaskEnded() {
-    mTaskEnded = true;
   }
 
   @SuppressWarnings("UnusedDeclaration")

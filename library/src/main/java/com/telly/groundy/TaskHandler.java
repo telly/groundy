@@ -57,7 +57,4 @@ public interface TaskHandler extends Parcelable {
    * @param handlers the callback handlers to remove
    */
   void removeCallbacks(Object... handlers);
-
-  /** @return true if the value was already ended. */
-  boolean taskAlreadyEnded();
 }
