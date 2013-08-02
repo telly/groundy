@@ -8,6 +8,11 @@ allprojects {
 subprojects {
   apply plugin: 'java'
   apply plugin: 'signing'
+  apply plugin: 'checkstyle'
+
+  checkstyle {
+    configFile = new File(rootDir, "checkstyle.xml")
+  }
 
   repositories {
     mavenLocal()
@@ -66,7 +71,7 @@ subprojects {
           }
 
           repository(url: sonatypeRepositoryUrl) {
-            authentication(userName: sonatypeUsername, password: sonatypePassword)
+            authentication(userName: sonatypeTellyUsername, password: sonatypeTellyPassword)
           }
 
           pom.project {
