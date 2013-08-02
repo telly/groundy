@@ -1,0 +1,41 @@
+buildscript {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:0.5.+'
+  }
+}
+
+apply plugin: 'android'
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+dependencies {
+  compile 'com.telly:groundy:1.2-SNAPSHOT'
+  compile 'com.telly:groundy-compiler:1.2-SNAPSHOT'
+  compile 'com.github.kevinsawicki:http-request:4.0'
+  compile 'com.squareup:javawriter:1.0.4'
+}
+
+android {
+  compileSdkVersion 18
+  buildToolsVersion "18.0.1"
+
+  defaultConfig {
+    minSdkVersion 8
+    targetSdkVersion 16
+  }
+
+  sourceSets {
+    main {
+      java { srcDir 'src'}
+      manifest.srcFile 'AndroidManifest.xml'
+      res.srcDirs = ['res']
+    }
+  }
+}
