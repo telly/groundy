@@ -109,6 +109,7 @@ public final class DownloadUtils {
 
     URL url = new URL(fromUrl);
     URLConnection urlConnection = url.openConnection();
+    urlConnection.setRequestProperty("Accept-Encoding", "gzip");
     urlConnection.connect();
     String redirectTarget = urlConnection.getHeaderField("Location");
     if (redirectTarget != null) {
