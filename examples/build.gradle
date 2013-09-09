@@ -16,8 +16,8 @@ repositories {
 }
 
 dependencies {
-  compile 'com.telly:groundy:1.2-SNAPSHOT'
-  compile 'com.telly:groundy-compiler:1.2-SNAPSHOT'
+  compile 'com.telly:groundy:1.1'
+  compile 'com.telly:groundy-compiler:1.1'
   compile 'com.github.kevinsawicki:http-request:4.0'
   compile 'com.squareup:javawriter:1.0.4'
 }
