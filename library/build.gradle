@@ -1,5 +1,5 @@
 description = 'Groundy Library'
 
 dependencies {
-  compile 'com.google.android:android:2.2.1'
+  provided 'com.google.android:android:2.2.1'
 }

@@ -2,13 +2,21 @@ allprojects {
   apply plugin: 'maven'
 
   group = 'com.telly'
-  version = '1.2.1'
+  version = '1.2.2'
 }
 
 subprojects {
   apply plugin: 'java'
   apply plugin: 'signing'
   apply plugin: 'checkstyle'
+
+  configurations {
+    provided
+  }
+
+  sourceSets {
+    main { compileClasspath += configurations.provided }
+  }
 
   checkstyle {
     configFile = new File(rootDir, "checkstyle.xml")
