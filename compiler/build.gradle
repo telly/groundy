@@ -2,5 +2,5 @@ description = 'Groundy Compiler'
 
 dependencies {
   compile 'com.telly:groundy:'+ rootProject.version
-  compile 'com.squareup:javawriter:1.0.4'
+  compile 'com.squareup:javawriter:2.2.1'
 }

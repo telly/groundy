@@ -23,19 +23,13 @@
 
 package com.telly.groundy;
 
-import com.squareup.java.JavaWriter;
+import com.squareup.javawriter.JavaWriter;
 import com.telly.groundy.annotations.Param;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
@@ -179,15 +173,15 @@ public class GroundyCodeGen extends AbstractProcessor {
         LOGGER.info("Generating source code for " + callbacksArr[0].fullTargetClassName + ":");
       }
 
-      javaWriter.emitEndOfLineComment("auto-generated file; don't modify");
+      javaWriter.emitSingleLineComment("auto-generated file; don't modify");
       javaWriter.emitPackage("com.telly.groundy.generated");
       javaWriter.emitImports("android.os.Bundle", Annotation.class.getName(),
           "com.telly.groundy.*");
 
-      javaWriter.beginType(proxyClassName, "class", java.lang.reflect.Modifier.PUBLIC, null,
+      javaWriter.beginType(proxyClassName, "class", EnumSet.of(Modifier.PUBLIC), null,
           "ResultProxy");
 
-      javaWriter.beginMethod("void", "apply", java.lang.reflect.Modifier.PUBLIC, "Object", "target",
+      javaWriter.beginMethod("void", "apply", EnumSet.of(Modifier.PUBLIC), "Object", "target",
           "Class<? extends Annotation>", "callbackAnnotation", "Bundle", "resultData");
 
       // make sure the target and result is OK
