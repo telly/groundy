@@ -2,7 +2,7 @@ allprojects {
   apply plugin: 'maven'
 
   group = 'com.telly'
-  version = '1.2.2'
+  version = '1.3'
 }
 
 subprojects {
@@ -11,7 +11,9 @@ subprojects {
   apply plugin: 'checkstyle'
 
   configurations {
-    provided
+    provided {
+      description = 'Dependencies provided by the runtime'
+    }
   }
 
   sourceSets {
@@ -24,7 +26,11 @@ subprojects {
 
   repositories {
     mavenLocal()
-    mavenRepo url: "http://repo.maven.apache.org/maven2"
+    if (gradle.gradleVersion < '1.8') {
+      mavenRepo url: "http://repo.maven.apache.org/maven2"
+    } else {
+      maven { url "http://repo.maven.apache.org/maven2" }
+    }
   }
 
   task javadocJar(type: Jar, dependsOn: javadoc) {
