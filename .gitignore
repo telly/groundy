@@ -14,3 +14,5 @@ gen-external-apklibs
 atlassian-ide-plugin.xml
 .settings
 .idea
+.gradle
+build

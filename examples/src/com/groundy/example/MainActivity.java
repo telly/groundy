@@ -55,7 +55,7 @@ public class MainActivity extends Activity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-    GroundyManager.setLogEnabled(false);
+    GroundyManager.setLogEnabled(true);
   }
 
   public void onButtonClick(View view) {

@@ -26,7 +26,9 @@ package com.telly.groundy.util;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+
 import com.telly.groundy.GroundyTask;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -34,6 +36,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.zip.GZIPInputStream;
 
 public final class DownloadUtils {
   private static boolean alreadyCheckedInternetPermission = false;
@@ -106,18 +109,18 @@ public final class DownloadUtils {
 
     URL url = new URL(fromUrl);
     URLConnection urlConnection = url.openConnection();
+    urlConnection.setRequestProperty("Accept-Encoding", "gzip");
     urlConnection.connect();
-    int contentLength = urlConnection.getContentLength();
-    if (contentLength == -1) {
-      fromUrl = urlConnection.getHeaderField("Location");
-      if (fromUrl == null) {
-        throw new IOException(
-            "No content or redirect found for URL " + url + " with " + redirect + " redirects.");
-      }
-      downloadFileHandleRedirect(context, fromUrl, toFile, redirect + 1, listener);
+    String redirectTarget = urlConnection.getHeaderField("Location");
+    if (redirectTarget != null) {
+      downloadFileHandleRedirect(context, redirectTarget, toFile, redirect + 1, listener);
       return;
     }
     InputStream input = urlConnection.getInputStream();
+    if ("gzip".equals(urlConnection.getContentEncoding())) {
+      input = new GZIPInputStream(input);
+    }
+
     OutputStream output = new FileOutputStream(toFile);
     byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
     long total = 0;

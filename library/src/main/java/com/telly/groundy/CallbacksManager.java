@@ -73,12 +73,8 @@ public final class CallbacksManager {
 
     if (callbackHandlers != null) {
       for (TaskHandler proxyTask : new ArrayList<TaskHandler>(callbacksManager.proxyTasks)) {
-        if (proxyTask.taskAlreadyEnded()) {
-          callbacksManager.proxyTasks.remove(proxyTask);
-        } else {
-          proxyTask.clearCallbacks();
-          proxyTask.appendCallbacks(callbackHandlers);
-        }
+        proxyTask.clearCallbacks();
+        proxyTask.appendCallbacks(callbackHandlers);
       }
     }
     return callbacksManager;
@@ -92,12 +88,8 @@ public final class CallbacksManager {
   public void linkCallbacks(Object... callbackHandlers) {
     if (callbackHandlers != null) {
       for (TaskHandler proxyTask : new ArrayList<TaskHandler>(proxyTasks)) {
-        if (proxyTask.taskAlreadyEnded()) {
-          proxyTasks.remove(proxyTask);
-        } else {
-          proxyTask.clearCallbacks();
-          proxyTask.appendCallbacks(callbackHandlers);
-        }
+        proxyTask.clearCallbacks();
+        proxyTask.appendCallbacks(callbackHandlers);
       }
     }
   }

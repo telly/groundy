@@ -1,7 +1,7 @@
 Groundy library for Android
 ===========================
 
-![Groundy](http://i.imgur.com/fgC2aaw.png)
+![Groundy](http://i.imgur.com/2xg2weE.png)
 
 Groundy is a fun, sexy way to do background work on your Android app; it's specially useful for
 running tasks that must be executed even if your activities/fragments are destroyed. It allows
@@ -54,16 +54,7 @@ public void onSuccess(@Param("the_result") String result) {
 Do not forget to add `GroundyService` to the `AndroidManifest.xml` file:
 
 ```xml
-<service android:name="com.telly.groundy.GroundyService" android:exported="false"/>
-```
-
-Or if you want to use parallel tasks
-```xml
-<service android:name="com.telly.groundy.GroundyService" android:exported="false">
-  <meta-data
-    android:name="groundy:mode"
-    android:value="async"/>
-</service>
+<service android:name="com.telly.groundy.GroundyService"/>
 ```
 
 Extending callback system
@@ -81,10 +72,10 @@ public void onChuckNorrisAttack(@Param("target") String target) {
 
 Take a look at the custom callbacks example for details on this.
 
-Maven integration
-=================
+Integration
+===========
 
-In order to use this library from you Android project using maven your pom should look like this:
+In order to use this library from you Android project using **Maven** your pom should look like this:
 
 ```xml
 <dependency>
@@ -101,4 +92,11 @@ In order to use this library from you Android project using maven your pom shoul
 </dependency>
 ```
 
-At this point latest version is `0.9`, and `1.0-SNAPSHOT` under development.
+For **Gradle** projects use:
+
+```groovy
+compile 'com.telly:groundy:(insert latest version)'
+compile 'com.telly:groundy-compiler:(insert latest version)'
+```
+
+At this point latest version is `1.3`.

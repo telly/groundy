@@ -1,0 +1,5 @@
+description = 'Groundy Library'
+
+dependencies {
+  provided 'com.google.android:android:2.2.1'
+}

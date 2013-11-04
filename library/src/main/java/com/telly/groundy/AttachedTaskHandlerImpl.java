@@ -25,10 +25,10 @@ package com.telly.groundy;
 
 import android.content.Context;
 import android.os.Parcel;
+import android.os.ResultReceiver;
 
 class AttachedTaskHandlerImpl implements TaskHandler {
 
-  private boolean mTaskEnded = false;
   private final long mId;
   private final Class<? extends GroundyService> mGroundyServiceClass;
   private final CallbacksReceiver mCallbacksReceiver;
@@ -44,21 +44,13 @@ class AttachedTaskHandlerImpl implements TaskHandler {
 
   @Override public void cancel(Context context, int reason,
       GroundyManager.SingleCancelListener cancelListener) {
-    if (!mTaskEnded) {
-      GroundyManager.cancelTaskById(context, mId, reason, cancelListener, mGroundyServiceClass);
-    } else if (cancelListener != null) {
-      cancelListener.onCancelResult(mId, GroundyService.COULD_NOT_CANCEL);
-    }
+    GroundyManager.cancelTaskById(context, mId, reason, cancelListener, mGroundyServiceClass);
   }
 
   @Override public void clearCallbacks() {
     if (mCallbacksReceiver != null) {
       mCallbacksReceiver.clearHandlers();
     }
-  }
-
-  @Override public boolean taskAlreadyEnded() {
-    return mTaskEnded;
   }
 
   @Override public void appendCallbacks(Object... handlers) {
@@ -77,18 +69,29 @@ class AttachedTaskHandlerImpl implements TaskHandler {
     return mId;
   }
 
-  void onTaskEnded() {
-    mTaskEnded = true;
-  }
-
   @SuppressWarnings("UnusedDeclaration")
   public static final Creator<AttachedTaskHandlerImpl> CREATOR =
       new Creator<AttachedTaskHandlerImpl>() {
         @Override public AttachedTaskHandlerImpl createFromParcel(Parcel source) {
-          //Groundy groundy = source.readParcelable(Groundy.class.getClassLoader());
-          ////noinspection unchecked
-          //return new AttachedTaskHandlerImpl(groundy);
-          return null;
+          //noinspection unchecked
+          Class groundyTaskClass = (Class) source.readSerializable();
+          long id = source.readLong();
+
+          boolean hadReceiver = source.readByte() == 1;
+
+          //noinspection unchecked
+          CallbacksReceiver receiver = null;
+          if (hadReceiver) {
+            ResultReceiver r = source.readParcelable(CallbacksReceiver.class.getClassLoader());
+            if (r instanceof CallbacksReceiver) {
+              receiver = (CallbacksReceiver) r;
+            }
+          }
+          Class groundyServiceClass = (Class) source.readSerializable();
+
+          //noinspection unchecked
+          return new AttachedTaskHandlerImpl(id, groundyServiceClass,
+              receiver, groundyTaskClass);
         }
 
         @Override public AttachedTaskHandlerImpl[] newArray(int size) {
@@ -101,6 +104,12 @@ class AttachedTaskHandlerImpl implements TaskHandler {
   }
 
   @Override public void writeToParcel(Parcel dest, int flags) {
-    //dest.writeParcelable(groundy, flags);
+    dest.writeSerializable(mGroundyTaskClass);
+    dest.writeLong(mId);
+    dest.writeByte((byte) (mCallbacksReceiver == null ? 0 : 1));
+    if (mCallbacksReceiver != null) {
+      dest.writeParcelable(mCallbacksReceiver, flags);
+    }
+    dest.writeSerializable(mGroundyServiceClass);
   }
 }

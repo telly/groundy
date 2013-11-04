@@ -1,0 +1,9 @@
+rootProject.name = 'groundy-parent'
+include ':library'
+include ':compiler'
+
+project(':library').name = 'groundy'
+project(':groundy').projectDir = "$rootDir/library" as File
+
+project(':compiler').name = 'groundy-compiler'
+project(':groundy-compiler').projectDir = "$rootDir/compiler" as File
