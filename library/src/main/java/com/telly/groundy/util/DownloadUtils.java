@@ -26,9 +26,7 @@ package com.telly.groundy.util;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-
 import com.telly.groundy.GroundyTask;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -58,11 +56,30 @@ public final class DownloadUtils {
    *
    * @param fromUrl An url pointing to a file to download
    * @param toFile File to save to, if existent will be overwrite
+   * @param listener Callback that notifies the download progress
    * @throws java.io.IOException If fromUrl is invalid or there is any IO issue.
    */
   public static void downloadFile(Context context, String fromUrl, File toFile,
       DownloadProgressListener listener) throws IOException {
-    downloadFileHandleRedirect(context, fromUrl, toFile, 0, listener);
+    downloadFile(context, fromUrl, toFile, listener, null);
+  }
+
+  /**
+   * Download a file at <code>fromUrl</code> to a file specified by <code>toFile</code>.
+   *
+   * @param fromUrl An url pointing to a file to download
+   * @param toFile File to save to, if existent will be overwrite
+   * @param listener Callback that notifies the download progress
+   * @param cancelListener Used to interrupt the download if necessary
+   * @throws java.io.IOException If fromUrl is invalid or there is any IO issue.
+   */
+  public static void downloadFile(Context context, String fromUrl, File toFile,
+      DownloadProgressListener listener, DownloadCancelListener cancelListener) throws IOException {
+    downloadFileHandleRedirect(context, fromUrl, toFile, 0, listener, cancelListener);
+  }
+
+  public interface DownloadCancelListener {
+    boolean shouldCancelDownload();
   }
 
   public interface DownloadProgressListener {
@@ -88,14 +105,16 @@ public final class DownloadUtils {
    * Internal version of {@link #downloadFile(Context, String, java.io.File,
    * DownloadUtils.DownloadProgressListener)}.
    *
+   *
    * @param fromUrl the url to download from
    * @param toFile the file to download to
    * @param redirect true if it should accept redirects
    * @param listener used to report result back
+   * @param cancelListener used to interrupt the download if necessary
    * @throws java.io.IOException
    */
   private static void downloadFileHandleRedirect(Context context, String fromUrl, File toFile,
-      int redirect, DownloadProgressListener listener) throws IOException {
+      int redirect, DownloadProgressListener listener, DownloadCancelListener cancelListener) throws IOException {
     if (context == null) {
       throw new RuntimeException("Context shall not be null");
     }
@@ -107,18 +126,33 @@ public final class DownloadUtils {
       throw new IOException("Too many redirects for " + fromUrl);
     }
 
+    if (cancelListener != null && cancelListener.shouldCancelDownload()) {
+      return;
+    }
+
     URL url = new URL(fromUrl);
     URLConnection urlConnection = url.openConnection();
     urlConnection.setRequestProperty("Accept-Encoding", "gzip");
     urlConnection.connect();
     String redirectTarget = urlConnection.getHeaderField("Location");
     if (redirectTarget != null) {
-      downloadFileHandleRedirect(context, redirectTarget, toFile, redirect + 1, listener);
+      downloadFileHandleRedirect(context, redirectTarget, toFile, redirect + 1, listener,
+          cancelListener);
       return;
     }
+
+    if (cancelListener != null && cancelListener.shouldCancelDownload()) {
+      return;
+    }
+
     InputStream input = urlConnection.getInputStream();
     if ("gzip".equals(urlConnection.getContentEncoding())) {
       input = new GZIPInputStream(input);
+    }
+
+    if (cancelListener != null && cancelListener.shouldCancelDownload()) {
+      input.close();
+      return;
     }
 
     OutputStream output = new FileOutputStream(toFile);
@@ -127,6 +161,11 @@ public final class DownloadUtils {
     int count;
     int fileLength = urlConnection.getContentLength();
     while ((count = input.read(buffer)) > 0) {// > 0 due zero sized streams
+      if (cancelListener != null && cancelListener.shouldCancelDownload()) {
+        output.close();
+        input.close();
+        return;
+      }
       total += count;
       output.write(buffer, 0, count);
       if (listener != null && fileLength > 0) {
