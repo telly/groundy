@@ -29,18 +29,23 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.content.DialogInterface;
 import com.groundy.example.tasks.DownloadTask;
 import com.telly.groundy.Groundy;
+import com.telly.groundy.TaskHandler;
+import com.telly.groundy.GroundyManager;
 import com.telly.groundy.annotations.OnFailure;
 import com.telly.groundy.annotations.OnProgress;
 import com.telly.groundy.annotations.OnSuccess;
 import com.telly.groundy.annotations.Param;
 import com.telly.groundy.example.R;
+import java.lang.Override;
 
 public class DownloadExample extends Activity {
 
   private EditText mEditUrl;
   private ProgressDialog mProgressDialog;
+  private TaskHandler mTaskHandler;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +59,24 @@ public class DownloadExample extends Activity {
       public void onClick(View v) {
         mProgressDialog = new ProgressDialog(DownloadExample.this);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        mProgressDialog.setCancelable(false);
+        mProgressDialog.setCancelable(true);
+        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+          @Override
+          public void onCancel(android.content.DialogInterface dialogInterface){
+            if (mTaskHandler != null) {
+              mTaskHandler.cancel(DownloadExample.this, 0, new GroundyManager.SingleCancelListener() {
+                @Override
+                public void onCancelResult(long id, int result){
+                  Toast.makeText(DownloadExample.this, R.string.download_cancelled, Toast.LENGTH_LONG).show();
+                }
+              });
+            }
+          }
+        });
         mProgressDialog.show();
 
         String url = mEditUrl.getText().toString().trim();
-        Groundy.create(DownloadTask.class)
+        mTaskHandler = Groundy.create(DownloadTask.class)
             .callback(mCallback)
             .arg(DownloadTask.PARAM_URL, url)
             .queueUsing(DownloadExample.this);

@@ -37,7 +37,16 @@ public class DownloadTask extends GroundyTask {
       String url = getStringArg(PARAM_URL);
       File dest = new File(getContext().getFilesDir(), new File(url).getName());
       DownloadUtils.downloadFile(getContext(), url, dest,
-          DownloadUtils.getDownloadListenerForTask(this));
+          DownloadUtils.getDownloadListenerForTask(this), new DownloadUtils.DownloadCancelListener(){
+        @Override
+        public boolean shouldCancelDownload() {
+          return isQuitting();
+        }
+      });
+
+      if (isQuitting()) {
+        return cancelled();
+      }
       return succeeded();
     } catch (Exception e) {
       return failed();
