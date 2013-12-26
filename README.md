@@ -99,4 +99,4 @@ compile 'com.telly:groundy:(insert latest version)'
 compile 'com.telly:groundy-compiler:(insert latest version)'
 ```
 
-At this point latest version is `1.3.2`.
+At this point latest version is `1.3.3`.

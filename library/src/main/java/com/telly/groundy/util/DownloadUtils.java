@@ -26,6 +26,8 @@ package com.telly.groundy.util;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+
+import com.telly.groundy.Groundy;
 import com.telly.groundy.GroundyTask;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -83,6 +85,11 @@ public final class DownloadUtils {
   }
 
   public interface DownloadProgressListener {
+    /**
+     * @param url      the url being downloaded
+     * @param progress percentage of the download or {@link Groundy#NO_SIZE_AVAILABLE}
+     *                 if file size is not available.
+     */
     void onProgress(String url, int progress);
   }
 
@@ -160,6 +167,11 @@ public final class DownloadUtils {
     long total = 0;
     int count;
     int fileLength = urlConnection.getContentLength();
+
+    if (fileLength == -1 && listener != null) {
+      listener.onProgress(fromUrl, Groundy.NO_SIZE_AVAILABLE);
+    }
+
     while ((count = input.read(buffer)) > 0) {// > 0 due zero sized streams
       if (cancelListener != null && cancelListener.shouldCancelDownload()) {
         output.close();
