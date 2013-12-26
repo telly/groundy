@@ -369,7 +369,9 @@ public class GroundyService extends Service {
     if (receiver != null) {
       groundyTask.setReceiver(receiver);
     }
-    groundyTask.send(OnStart.class, new Bundle());
+    final Bundle resultData = new Bundle();
+    resultData.putSerializable(Groundy.TASK_IMPLEMENTATION, getClass());
+    groundyTask.send(OnStart.class, resultData);
 
     groundyTask.setStartId(startId);
     groundyTask.setGroupId(groupId);

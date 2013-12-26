@@ -241,6 +241,7 @@ public abstract class GroundyTask {
   protected void callback(String name, Bundle resultData) {
     if (resultData == null) resultData = new Bundle();
     resultData.putString(Groundy.KEY_CALLBACK_NAME, name);
+    resultData.putSerializable(Groundy.TASK_IMPLEMENTATION, getClass());
     send(OnCallback.class, resultData);
   }
 
@@ -297,6 +298,7 @@ public abstract class GroundyTask {
     if (mReceiver != null) {
       Bundle resultData = new Bundle();
       resultData.putInt(Groundy.PROGRESS, progress);
+      resultData.putSerializable(Groundy.TASK_IMPLEMENTATION, getClass());
       if (extraData != null) resultData.putAll(extraData);
       send(OnProgress.class, resultData);
     }
