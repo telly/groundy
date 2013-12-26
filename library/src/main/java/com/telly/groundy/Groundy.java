@@ -77,6 +77,9 @@ public final class Groundy implements Parcelable {
   /** The class used to implement the executed task. */
   public static final String TASK_IMPLEMENTATION = "com.telly.groundy.key.TASK_IMPLEMENTATION";
 
+  /** Progress value returned when it's not possible to determine the size of a file **/
+  public static final int NO_SIZE_AVAILABLE = Integer.MIN_VALUE;
+
   /**
    * If true, the stack trace of the call for each groundy task will be send to the service.
    * It allows to know which piece of code invoked this task.*

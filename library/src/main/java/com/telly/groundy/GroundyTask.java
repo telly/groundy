@@ -280,7 +280,8 @@ public abstract class GroundyTask {
    * com.telly.groundy.annotations.OnProgress} and it will contain a bundle with an integer extra
    * called {@link Groundy#PROGRESS}
    *
-   * @param progress percentage to send to receiver
+   * @param progress percentage to send to receiver or {@link Groundy#NO_SIZE_AVAILABLE}
+   *                 if file size is not available.
    */
   public void updateProgress(int progress) {
     updateProgress(progress, null);

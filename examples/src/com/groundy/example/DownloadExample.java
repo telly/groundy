@@ -25,6 +25,7 @@ package com.groundy.example;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -42,6 +43,8 @@ import com.telly.groundy.example.R;
 import java.lang.Override;
 
 public class DownloadExample extends Activity {
+
+  private static final int SDK_HONEYCOMB_API_LEVEL = 11;
 
   private EditText mEditUrl;
   private ProgressDialog mProgressDialog;
@@ -88,6 +91,14 @@ public class DownloadExample extends Activity {
   private final Object mCallback = new Object() {
     @OnProgress(DownloadTask.class)
     public void onNiceProgress(@Param(Groundy.PROGRESS) int progress) {
+      if (progress == Groundy.NO_SIZE_AVAILABLE) {
+        mProgressDialog.setIndeterminate(true);
+        if (Build.VERSION.SDK_INT >= SDK_HONEYCOMB_API_LEVEL) {
+          mProgressDialog.setProgressNumberFormat(null);
+          mProgressDialog.setProgressPercentFormat(null);
+        }
+        return;
+      }
       mProgressDialog.setProgress(progress);
     }
 
