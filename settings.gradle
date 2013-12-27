@@ -1,6 +1,5 @@
 rootProject.name = 'groundy-parent'
-include ':library'
-include ':compiler'
+include 'library', 'compiler', 'examples'
 
 project(':library').name = 'groundy'
 project(':groundy').projectDir = "$rootDir/library" as File

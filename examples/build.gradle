@@ -17,8 +17,8 @@ repositories {
 }
 
 dependencies {
-  compile 'com.telly:groundy:1.3.3'
-  compile 'com.telly:groundy-compiler:1.3.3'
+  compile project(':groundy')
+  compile project(':groundy-compiler')
   compile 'com.github.kevinsawicki:http-request:4.0'
 }
 
