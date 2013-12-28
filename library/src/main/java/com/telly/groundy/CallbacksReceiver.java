@@ -27,9 +27,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.os.ResultReceiver;
+
 import com.telly.groundy.annotations.OnCancel;
 import com.telly.groundy.annotations.OnFailure;
 import com.telly.groundy.annotations.OnSuccess;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -41,7 +43,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,7 +55,7 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
   public static final String RECEIVER_PARCEL = "com.telly.groundy.RECEIVER_PARCEL";
 
   private final Class<? extends GroundyTask> groundyTaskType;
-  private final SetFromMap<Object> callbackHandlers;
+  private final Set<Object> callbackHandlers;
   private ResultReceiver mAttachedReceiver;
 
   static {
@@ -63,7 +64,7 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
 
   CallbacksReceiver(Class<? extends GroundyTask> taskType, Object... handlers) {
     super(new Handler());
-    callbackHandlers = new SetFromMap<Object>(new WeakHashMap<Object, Boolean>());
+    callbackHandlers = new SetFromMap<Object>(new HashMap<Object, Boolean>());
     groundyTaskType = taskType;
     appendCallbackHandlers(handlers);
   }
