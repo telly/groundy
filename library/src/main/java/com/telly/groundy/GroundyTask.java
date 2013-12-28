@@ -50,6 +50,7 @@ public abstract class GroundyTask {
   private StackTraceElement[] mStackTrace;
   private Intent mIntent;
   private ArrayList<ResultReceiver> mExtraReceivers;
+  private boolean mExecuted;
 
   /** Creates a GroundyTask composed of. */
   public GroundyTask() {
@@ -415,5 +416,13 @@ public abstract class GroundyTask {
       mExtraReceivers = new ArrayList<ResultReceiver>();
     }
     mExtraReceivers.add(resultReceiver);
+  }
+
+  boolean alreadyExecuted() {
+    return mExecuted;
+  }
+
+  void flagAsExecuted() {
+    mExecuted = true;
   }
 }
