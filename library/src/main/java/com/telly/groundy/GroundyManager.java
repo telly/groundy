@@ -148,11 +148,10 @@ public final class GroundyManager {
                                      final OnAttachListener onAttachListener,
                                      final Class<? extends GroundyTask> task,
                                      final Object... callbacks) {
-    final CallbacksReceiver receiver = new CallbacksReceiver(task, callbacks);
     new GroundyServiceConnection(context, groundyServiceClass) {
       @Override
       protected void onGroundyServiceBound(GroundyService.GroundyServiceBinder binder) {
-        List<TaskHandler> taskHandlers = binder.attachCallbacks(task, receiver);
+        List<TaskHandler> taskHandlers = binder.attachCallbacks(task, callbacks);
         if (onAttachListener != null) {
           onAttachListener.attachePerformed(task, taskHandlers);
         }

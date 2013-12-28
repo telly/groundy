@@ -221,16 +221,19 @@ public class GroundyService extends Service {
   }
 
   private List<TaskHandler> attachCallbacks(Class<? extends GroundyTask> task,
-                                            CallbacksReceiver resultReceiver) {
+                                            Object... callbacks) {
     List<TaskHandler> handlers = new ArrayList<TaskHandler>();
-    for (GroundyTask groundyTask : mTasksSet.values()) {
-      if (groundyTask.getClass() == task) {
-        groundyTask.appendReceiver(resultReceiver);
+    synchronized (mTasksSet) {
+      for (GroundyTask groundyTask : mTasksSet.values()) {
+        if (groundyTask.getClass() == task) {
+          final CallbacksReceiver receiver = new CallbacksReceiver(task, callbacks);
+          groundyTask.appendReceiver(receiver);
 
-        AttachedTaskHandlerImpl taskHandler =
-            new AttachedTaskHandlerImpl(groundyTask.getId(), GroundyService.this.getClass(),
-                resultReceiver, task);
-        handlers.add(taskHandler);
+          AttachedTaskHandlerImpl taskHandler =
+              new AttachedTaskHandlerImpl(groundyTask.getId(), GroundyService.this.getClass(),
+                  receiver, task);
+          handlers.add(taskHandler);
+        }
       }
     }
     return handlers;
@@ -519,8 +522,8 @@ public class GroundyService extends Service {
     }
 
     List<TaskHandler> attachCallbacks(Class<? extends GroundyTask> task,
-                                      CallbacksReceiver receiver) {
-      return GroundyService.this.attachCallbacks(task, receiver);
+                                      Object... callbacks) {
+      return GroundyService.this.attachCallbacks(task, callbacks);
     }
   }
 }
