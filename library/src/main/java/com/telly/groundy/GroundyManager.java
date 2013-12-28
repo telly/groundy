@@ -144,8 +144,10 @@ public final class GroundyManager {
   }
 
   public static void attachCallbacks(Context context,
-      Class<? extends GroundyService> groundyServiceClass, final OnAttachListener onAttachListener,
-      final Class<? extends GroundyTask> task, final Object... callbacks) {
+                                     Class<? extends GroundyService> groundyServiceClass,
+                                     final OnAttachListener onAttachListener,
+                                     final Class<? extends GroundyTask> task,
+                                     final Object... callbacks) {
     final CallbacksReceiver receiver = new CallbacksReceiver(task, callbacks);
     new GroundyServiceConnection(context, groundyServiceClass) {
       @Override

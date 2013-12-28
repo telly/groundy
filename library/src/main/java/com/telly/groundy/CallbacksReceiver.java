@@ -54,7 +54,7 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
   public static final String RECEIVER_PARCEL = "com.telly.groundy.RECEIVER_PARCEL";
 
   private final Class<? extends GroundyTask> groundyTaskType;
-  private final SetFromMap<Object> callbackHandlers;
+  private final Set<Object> callbackHandlers;
   private ResultReceiver mAttachedReceiver;
 
   static {
