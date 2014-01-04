@@ -151,7 +151,7 @@ public class GroundyService extends Service {
     } else if (ACTION_QUEUE.equals(action)) {
       scheduleTask(intent, startId, mGroundyHandler, flags);
     } else {
-      throw new UnsupportedOperationException("Wrong intent received: " + intent);
+      L.e(TAG, "Wrong intent received: " + intent);
     }
 
     return mStartBehavior;
