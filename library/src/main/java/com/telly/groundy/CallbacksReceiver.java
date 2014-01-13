@@ -152,6 +152,9 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
       try {
         String pkg = "com.telly.groundy.generated.";
         String callbackClassName = handlerType.getSimpleName();
+        if(handlerType.getSuperclass() != Object.class){
+          callbackClassName = handlerType.getSuperclass().getSimpleName();
+        }
         String taskName = groundyTaskType.getName().replaceAll("\\.", "\\$");
         String fullProxyClassName = pkg + callbackClassName + "$" + taskName + "$Proxy";
         Class<?> proxyClass = Class.forName(fullProxyClassName);
