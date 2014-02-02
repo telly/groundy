@@ -9,22 +9,18 @@ buildscript {
   }
 }
 
-task wrapper(type: Wrapper) {
-  gradleVersion = '1.10'
-}
-
 apply plugin: 'android'
 apply plugin: 'android-apt'
 
 repositories {
   mavenLocal()
   mavenCentral()
-  maven { url "https://os.sonatype.org/content/repositories/snapshots/" }
+  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 dependencies {
-  compile "com.telly:groundy:1.4"
-  apt "com.telly:groundy-compiler:1.4"
+  compile project(':groundy')
+  compile project(':groundy-compiler')
   compile 'com.github.kevinsawicki:http-request:4.0'
 }
 

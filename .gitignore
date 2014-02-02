@@ -18,3 +18,4 @@ atlassian-ide-plugin.xml
 build
 local.properties
 examples/gradle
+gradle/*

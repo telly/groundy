@@ -24,24 +24,27 @@
 package com.telly.groundy;
 
 import com.squareup.javawriter.JavaWriter;
+import com.sun.tools.javac.code.Symbol;
 import com.telly.groundy.annotations.Param;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
@@ -55,7 +58,11 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementKindVisitor6;
+import javax.lang.model.util.Types;
 import javax.tools.JavaFileObject;
 
 @SupportedAnnotationTypes({
@@ -74,11 +81,12 @@ public class GroundyCodeGen extends AbstractProcessor {
   public static final String CALLBACK = "com.telly.groundy.annotations.OnCallback";
   public static final String GROUNDY_VERBOSE = "GROUNDY_VERBOSE";
 
-  private final Map<String, Set<ProxyImplContent>> implMap =
-      new HashMap<String, Set<ProxyImplContent>>();
+  private final Map<HandlerAndTask, Set<ProxyImplContent>> implMap =
+      new HashMap<HandlerAndTask, Set<ProxyImplContent>>();
   private boolean verboseMode;
 
-  @Override public boolean process(Set<? extends TypeElement> typeElements, RoundEnvironment env) {
+  @Override
+  public boolean process(Set<? extends TypeElement> typeElements, RoundEnvironment env) {
     if (typeElements.isEmpty()) {
       return true;
     }
@@ -86,18 +94,30 @@ public class GroundyCodeGen extends AbstractProcessor {
     String groundyVerbose = System.getenv(GROUNDY_VERBOSE);
     verboseMode = String.valueOf(Boolean.TRUE).equals(groundyVerbose);
 
+    final Map<Element, Set<Element>> elementsHierarchy = new HashMap<Element, Set<Element>>();
+
     for (TypeElement annotationElement : typeElements) {
+
       Set<? extends Element> annotatedElements = env.getElementsAnnotatedWith(annotationElement);
       for (Element annotatedElement : annotatedElements) {
         if (annotatedElement instanceof ExecutableElement) {
+          // get class hierarchy
+          Element callbackElement = annotatedElement.getEnclosingElement();
+          if (!elementsHierarchy.containsKey(callbackElement)) {
+            elementsHierarchy.put(callbackElement, getSuperClasses(callbackElement));
+          }
+
+          // populate the proxy impl map
           ExecutableElement callbackMethod = (ExecutableElement) annotatedElement;
           processCallback(annotationElement, callbackMethod);
         }
       }
     }
 
-    for (Map.Entry<String, Set<ProxyImplContent>> elementSetEntry : implMap.entrySet()) {
-      String proxyClassName = elementSetEntry.getKey();
+    mergeProxiesWithClassHierarchy();
+
+    for (Map.Entry<HandlerAndTask, Set<ProxyImplContent>> elementSetEntry : implMap.entrySet()) {
+      HandlerAndTask proxyClassName = elementSetEntry.getKey();
       Set<ProxyImplContent> callbacks = elementSetEntry.getValue();
       generateProxy(proxyClassName, callbacks);
     }
@@ -105,12 +125,92 @@ public class GroundyCodeGen extends AbstractProcessor {
     return true;
   }
 
+  /**
+   * Merges callbacks implementations taking into account the supper types of the handlers and
+   * the tasks.
+   * 1. It will look for callbacks of the super classes of the tasks, in the same handler.
+   * 2. It will look for callbacks of the super classes of the handler, that use the same task.
+   * 3. It will look for callbacks of the super classes of the handler, that use super classes of the task.
+   */
+  private void mergeProxiesWithClassHierarchy() {
+    for (Map.Entry<HandlerAndTask, Set<ProxyImplContent>> elementSetEntry : implMap.entrySet()) {
+      final HandlerAndTask handlerAndTask = elementSetEntry.getKey();
+
+      // 1. merge super tasks, for same handler
+      final Set<Element> superTasks = getSuperClasses(handlerAndTask.task);
+      for (Element superTask : superTasks) {
+        final HandlerAndTask handlerAndSuperTask = new HandlerAndTask(handlerAndTask.handler, superTask);
+        if (implMap.containsKey(handlerAndSuperTask)) {
+          appendNonExistentCallbacks(handlerAndSuperTask, handlerAndTask);
+        }
+      }
+
+      // 2. merge super handlers, for same task
+      final Set<Element> superHandlers = getSuperClasses(handlerAndTask.handler);
+      for (Element superHandler : superHandlers) {
+        final HandlerAndTask superHandlerAndTask = new HandlerAndTask(superHandler, handlerAndTask.task);
+        if (implMap.containsKey(superHandlerAndTask)) {
+          appendNonExistentCallbacks(superHandlerAndTask, handlerAndTask);
+        }
+
+        // 3. merge super handlers, for super tasks
+        for (Element superTask : superTasks) {
+          final HandlerAndTask superHandlerAndSuperTask = new HandlerAndTask(superHandler, superTask);
+          if (implMap.containsKey(superHandlerAndSuperTask)) {
+            appendNonExistentCallbacks(superHandlerAndSuperTask, handlerAndTask);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Copy all callbacks implementations from -> to the specified set. It makes sure
+   * to copy the callbacks that don't exist already on the destination set.
+   *
+   * @param from key for the set of callbacks to copy from
+   * @param to   key for the set of callbacks to copy to
+   */
+  private void appendNonExistentCallbacks(HandlerAndTask from, HandlerAndTask to) {
+    final Set<ProxyImplContent> proxyImplContentsTo = implMap.get(to);
+    if (proxyImplContentsTo == null) {
+      return;
+    }
+
+    final Set<ProxyImplContent> proxyImplContentsFrom = implMap.get(from);
+    if (proxyImplContentsFrom == null) {
+      return;
+    }
+
+    for (ProxyImplContent proxyImplContentFrom : proxyImplContentsFrom) {
+      boolean exists = false;
+      for (ProxyImplContent proxyImplContentTo : proxyImplContentsTo) {
+        if (proxyImplContentTo.annotation.equals(proxyImplContentFrom.annotation)) {
+          exists = true;
+          break;
+        }
+      }
+
+      if (!exists) {
+        proxyImplContentsTo.add(proxyImplContentFrom);
+      }
+    }
+  }
+
+  private Set<Element> getSuperClasses(Element callbackElement) {
+    final Set<Element> superHierarchy = new HashSet<Element>();
+    callbackElement.accept(new SuperClassVisitor(), superHierarchy);
+    return superHierarchy;
+  }
+
   private void processCallback(Element annotationElement, ExecutableElement callbackMethod) {
     // ignore inner classes and non public classes
-    Element callbackElement = callbackMethod.getEnclosingElement();
-    if (!callbackElement.getModifiers().contains(Modifier.PUBLIC)) {
+    Element handlerElement = callbackMethod.getEnclosingElement();
+    LOGGER.info("Processing callback element: " + handlerElement);
+
+    if (!handlerElement.getModifiers().contains(Modifier.PUBLIC)) {
       LOGGER.info(
-          callbackElement + " is not public. Reflection will be used and it can slow things down.");
+          handlerElement + " is not public. Reflection will be used and it can slow things down.");
       return;
     }
 
@@ -124,32 +224,67 @@ public class GroundyCodeGen extends AbstractProcessor {
 
     for (AnnotationValue attribute : tasksList) {
       Object callbackName = getAnnotationValue(callbackMethod, annotationElement, "name");
-      String groundyTaskName = attribute.getValue().toString().replaceAll("\\.", "\\$");
-      String genClassName = callbackElement.getSimpleName().toString();
-      String proxyClassName = genClassName + "$" + groundyTaskName + "$Proxy";
+      Element taskElement;
+      if (!(attribute.getValue() instanceof DeclaredType)) {
+        continue;
+      }
+
+      taskElement = ((DeclaredType) attribute.getValue()).asElement();
+
+      // generate proxy class name
+      final HandlerAndTask handlerAndTask = new HandlerAndTask(handlerElement, taskElement);
 
       Set<ProxyImplContent> proxyImplContents;
-      if (implMap.containsKey(proxyClassName)) {
-        proxyImplContents = implMap.get(proxyClassName);
+      if (implMap.containsKey(handlerAndTask)) {
+        proxyImplContents = implMap.get(handlerAndTask);
       } else {
         proxyImplContents = new HashSet<ProxyImplContent>();
-        implMap.put(proxyClassName, proxyImplContents);
+        implMap.put(handlerAndTask, proxyImplContents);
       }
 
       ProxyImplContent proxyImplContent = new ProxyImplContent();
       proxyImplContent.annotation = annotationElement.toString();
       proxyImplContent.paramNames = getParamNames(callbackMethod);
       proxyImplContent.methodName = callbackMethod.getSimpleName().toString();
-      proxyImplContent.fullTargetClassName = callbackElement.toString();
+      proxyImplContent.callbackElement = handlerElement;
+      proxyImplContent.taskElement = taskElement;
+      proxyImplContent.fullTargetClassName = handlerElement.toString();
       proxyImplContent.callbackName = callbackName != null ? callbackName.toString() : null;
       proxyImplContent.originatingElement = annotationElement;
+
+      LOGGER.info("Adding proxy implementation: " + proxyImplContent);
 
       proxyImplContents.add(proxyImplContent);
     }
   }
 
+  public class SuperClassVisitor extends ElementKindVisitor6<Void, Set<Element>> {
+    @Override
+    public Void visitType(TypeElement typeElement, Set<Element> elements) {
+      final TypeMirror superclass = typeElement.getSuperclass();
+      Types types = processingEnv.getTypeUtils();
+      final Element superElement = types.asElement(superclass);
+      if (superElement != null && !isObjectElement(superElement)) {
+        elements.add(superElement);
+        superElement.accept(this, elements);
+      }
+      return null;
+    }
+  }
+
+  private static boolean isObjectElement(Element element) {
+    if (element == null) {
+      return false;
+    }
+    if (element instanceof Symbol.ClassSymbol) {
+      Symbol.ClassSymbol classSymbol = (Symbol.ClassSymbol) element;
+      return classSymbol.getQualifiedName().contentEquals("java.lang.Object");
+    }
+    return "java.lang.Object".equals(element.toString());
+  }
+
   private Object getAnnotationValue(Element callbackMethod, Element annotationElement,
-      String executable) {
+                                    String executable) {
     AnnotationMirror annotation = null;
     for (AnnotationMirror annotationMirror : callbackMethod.getAnnotationMirrors()) {
       if (annotationMirror.getAnnotationType().equals(annotationElement.asType())) {
@@ -171,7 +306,7 @@ public class GroundyCodeGen extends AbstractProcessor {
     return null;
   }
 
-  private void generateProxy(String proxyClassName, Set<ProxyImplContent> callbacks) {
+  private void generateProxy(HandlerAndTask handlerAndTask, Set<ProxyImplContent> callbacks) {
     StringWriter classContent = new StringWriter();
     JavaWriter javaWriter = new JavaWriter(classContent);
     try {
@@ -185,6 +320,7 @@ public class GroundyCodeGen extends AbstractProcessor {
       javaWriter.emitImports("android.os.Bundle", Annotation.class.getName(),
           "com.telly.groundy.*");
 
+      String proxyClassName = handlerAndTask.generateClassName();
       javaWriter.beginType(proxyClassName, "class", EnumSet.of(Modifier.PUBLIC), null,
           "ResultProxy");
 
@@ -212,7 +348,7 @@ public class GroundyCodeGen extends AbstractProcessor {
         if (proxyImpl.callbackName != null) {
           if (!alreadySetCallbackName) {
             javaWriter.emitStatement("String callbackName = "
-                    + "resultData.getString(\"" + Groundy.KEY_CALLBACK_NAME + "\")");
+                + "resultData.getString(\"" + Groundy.KEY_CALLBACK_NAME + "\")");
             alreadySetCallbackName = true;
           }
           String callbackNameCheck = '\"' + proxyImpl.callbackName + "\".equals(callbackName)";
@@ -306,7 +442,9 @@ public class GroundyCodeGen extends AbstractProcessor {
     return type;
   }
 
-  /** Makes sure method is public, returns void and all its parameters are annotated too. */
+  /**
+   * Makes sure method is public, returns void and all its parameters are annotated too.
+   */
   private static List<NameAndType> getParamNames(Element callbackMethod) {
     Element parentClass = callbackMethod.getEnclosingElement();
     String methodFullInfo = parentClass + "#" + callbackMethod;
@@ -343,7 +481,8 @@ public class GroundyCodeGen extends AbstractProcessor {
     for (Handler handler : logger.getParent().getHandlers()) {
       if (handler instanceof ConsoleHandler) {
         SimpleFormatter newFormatter = new SimpleFormatter() {
-          @Override public synchronized String format(LogRecord r) {
+          @Override
+          public synchronized String format(LogRecord r) {
             return "[GROUNDY] " + r.getMessage() + "\n";
           }
         };
@@ -361,6 +500,14 @@ public class GroundyCodeGen extends AbstractProcessor {
       this.name = n;
       this.type = t;
     }
+
+    @Override
+    public String toString() {
+      return "NameAndType{" +
+          "name='" + name + '\'' +
+          ", type='" + type + '\'' +
+          '}';
+    }
   }
 
   private static class ProxyImplContent {
@@ -370,6 +517,8 @@ public class GroundyCodeGen extends AbstractProcessor {
     String fullTargetClassName;
     String callbackName;
     Element originatingElement;
+    Element callbackElement;
+    Element taskElement;
 
     @Override
     public boolean equals(Object o) {
@@ -390,7 +539,8 @@ public class GroundyCodeGen extends AbstractProcessor {
       return result;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
       return "ProxyImplContent{" +
           "annotation='" + annotation + '\'' +
           ", paramNames=" + paramNames +
@@ -399,6 +549,48 @@ public class GroundyCodeGen extends AbstractProcessor {
           ", callbackName='" + callbackName + '\'' +
           ", originatingElement=" + originatingElement +
           '}';
+    }
+  }
+
+  private static class HandlerAndTask {
+    final Element handler;
+    final Element task;
+
+    private HandlerAndTask(Element handler, Element task) {
+      this.handler = handler;
+      this.task = task;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      HandlerAndTask that = (HandlerAndTask) o;
+
+      return !(handler != null ? !handler.equals(that.handler) : that.handler != null) &&
+          !(task != null ? !task.equals(that.task) : that.task != null);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = handler != null ? handler.hashCode() : 0;
+      result = 31 * result + (task != null ? task.hashCode() : 0);
+      return result;
+    }
+
+    @Override
+    public String toString() {
+      return "HandlerAndTask{" +
+          "handler=" + handler +
+          ", task=" + task +
+          '}';
+    }
+
+    public String generateClassName() {
+      String genClassName = handler.getSimpleName().toString();
+      String groundyTaskName = task.toString().replaceAll("\\.", "\\$");
+      return genClassName + "$" + groundyTaskName + "$Proxy";
     }
   }
 

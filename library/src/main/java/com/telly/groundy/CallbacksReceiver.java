@@ -88,14 +88,16 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
     }
   }
 
-  @Override public void appendCallbackHandlers(Object... handlers) {
+  @Override
+  public void appendCallbackHandlers(Object... handlers) {
     if (handlers != null) {
       Collections.addAll(callbackHandlers, handlers);
     }
   }
 
-  @Override public void removeCallbackHandlers(Class<? extends GroundyTask> groundyTaskClass,
-      Object... handlers) {
+  @Override
+  public void removeCallbackHandlers(Class<? extends GroundyTask> groundyTaskClass,
+                                     Object... handlers) {
     if (handlers != null) {
       for (Object callbackHandler : handlers) {
         callbackHandlers.remove(callbackHandler);
@@ -103,7 +105,8 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
     }
   }
 
-  @Override public void clearHandlers() {
+  @Override
+  public void clearHandlers() {
     callbackHandlers.clear();
   }
 
@@ -149,26 +152,8 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
       }
       resultProxy = new ReflectProxy(groundyTaskType, handlerType);
     } else {
-      try {
-        String pkg = "com.telly.groundy.generated.";
-        String callbackClassName = handlerType.getSimpleName();
-        if(handlerType.getSuperclass() != Object.class){
-          callbackClassName = handlerType.getSuperclass().getSimpleName();
-        }
-        String taskName = groundyTaskType.getName().replaceAll("\\.", "\\$");
-        String fullProxyClassName = pkg + callbackClassName + "$" + taskName + "$Proxy";
-        Class<?> proxyClass = Class.forName(fullProxyClassName);
-        resultProxy = (ResultProxy) proxyClass.newInstance();
-        if (resultProxy == null) {
-          throw new NullPointerException("Could not create proxy: " + proxyClass);
-        }
-        L.d(TAG, "Using fast proxy for: " + handlerType);
-      } catch (Exception e) {
-        if (e instanceof ClassNotFoundException) {
-          L.e(TAG, "Could not load generated proxy. Did you add groundy-compiler dependency?", e);
-        } else {
-          e.printStackTrace();
-        }
+      resultProxy = getProxyFromGeneratedClass(handlerType);
+      if (resultProxy == null) {
         resultProxy = new ReflectProxy(groundyTaskType, handlerType);
         L.d(TAG, "Using reflection proxy for " + handlerType);
       }
@@ -176,6 +161,36 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
 
     PROXIES.put(taskAndHandler, resultProxy);
     return resultProxy;
+  }
+
+  private ResultProxy getProxyFromGeneratedClass(Class<?> handlerType) {
+    ResultProxy resultProxy = null;
+    Class<?> taskType = groundyTaskType;
+    while (taskType != Object.class) {
+      try {
+        String pkg = "com.telly.groundy.generated.";
+        String handlerClassName = handlerType.getSimpleName();
+        String taskName = taskType.getName().replaceAll("\\.", "\\$");
+        String fullProxyClassName = pkg + handlerClassName + "$" + taskName + "$Proxy";
+        Class<?> proxyClass = Class.forName(fullProxyClassName);
+        resultProxy = (ResultProxy) proxyClass.newInstance();
+        if (resultProxy == null) {
+          throw new NullPointerException("Could not create proxy: " + proxyClass);
+        }
+        L.d(TAG, "Using fast proxy: " + fullProxyClassName);
+      } catch (Exception e) {
+        if (e instanceof ClassNotFoundException) {
+          L.e(TAG, "Could not load generated proxy: " + e.getMessage());
+        } else {
+          e.printStackTrace();
+        }
+      }
+      if (resultProxy != null) {
+        return resultProxy;
+      }
+      taskType = taskType.getSuperclass();
+    }
+    return null;
   }
 
   private static boolean isInner(Class<?> type) {

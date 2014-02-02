@@ -2,7 +2,11 @@ allprojects {
   apply plugin: 'maven'
 
   group = 'com.telly'
-  version = '1.4'
+  version = '1.5'
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '1.10'
 }
 
 configure(subprojects.findAll {it.name != 'examples'}) {

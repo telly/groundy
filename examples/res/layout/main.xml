@@ -93,6 +93,12 @@
       android:layout_height="wrap_content"
       android:onClick="onButtonClick"
       android:text="@string/inheritance_test" />
+    <Button
+      android:id="@+id/inheritance_callback_test"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:onClick="onButtonClick"
+      android:text="@string/inheritance_callback_test" />
 
     <Button
       android:id="@+id/attach_callback_test"

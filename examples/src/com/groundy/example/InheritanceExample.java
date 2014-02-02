@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
+
 import com.groundy.example.tasks.AnimalTask;
 import com.groundy.example.tasks.CatTask;
 import com.groundy.example.tasks.DogTask;
@@ -36,7 +37,7 @@ public class InheritanceExample extends Activity {
   }
 
   // we are using AnimalTask (super class of CatTask and DogTask)
-  @OnSuccess({ AnimalTask.class, DogTask.class })
+  @OnSuccess(AnimalTask.class)
   public void onSuccess(@Param("sound") String sound,
       @Param(Groundy.TASK_IMPLEMENTATION) Class<?> impl) {
     if (impl == DogTask.class) findViewById(R.id.send_random_task).setEnabled(true);

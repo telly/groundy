@@ -69,7 +69,11 @@
   <string name="inheritance_explanation">Each time you click the button, two different tasks will
     get executed, but the result will be processed in just one callback.
   </string>
+  <string name="inheritance_callback_explanation">In this case, one task is executed but two callbacks
+    are invoked: one for the task and one of a super class of the task.
+  </string>
   <string name="inheritance_test">Task inheritance example</string>
+  <string name="inheritance_callback_test">Callback inheritance example</string>
   <string name="attach_callback_explanation">This example shows how to attach a callback to an already running task.</string>
   <string name="attach_toast">Will run download task and finish the activity in 5 ses. Re-open
     activity afterwards.
@@ -77,4 +81,5 @@
   <string name="callback_attached">Callback attached</string>
   <string name="attached_callback_test">Attach Callback example</string>
   <string name="task_cancelled">Task cancelled</string>
+  <string name="starting_animal">Starting animal task</string>
 </resources>
