@@ -94,8 +94,6 @@ public class GroundyCodeGen extends AbstractProcessor {
     String groundyVerbose = System.getenv(GROUNDY_VERBOSE);
     verboseMode = String.valueOf(Boolean.TRUE).equals(groundyVerbose);
 
-    final Map<Element, Set<Element>> elementsHierarchy = new HashMap<Element, Set<Element>>();
-
     for (TypeElement annotationElement : typeElements) {
 
       Set<? extends Element> annotatedElements = env.getElementsAnnotatedWith(annotationElement);
@@ -103,9 +101,6 @@ public class GroundyCodeGen extends AbstractProcessor {
         if (annotatedElement instanceof ExecutableElement) {
           // get class hierarchy
           Element callbackElement = annotatedElement.getEnclosingElement();
-          if (!elementsHierarchy.containsKey(callbackElement)) {
-            elementsHierarchy.put(callbackElement, getSuperClasses(callbackElement));
-          }
 
           // populate the proxy impl map
           ExecutableElement callbackMethod = (ExecutableElement) annotatedElement;

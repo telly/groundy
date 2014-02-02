@@ -99,7 +99,7 @@ compile 'com.telly:groundy:(insert latest version)'
 compile 'com.telly:groundy-compiler:(insert latest version)'
 ```
 
-At this point latest version is `1.4`.
+At this point latest version is `1.5`.
 
 Proguard
 ========
