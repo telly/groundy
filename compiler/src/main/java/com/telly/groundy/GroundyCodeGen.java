@@ -99,9 +99,6 @@ public class GroundyCodeGen extends AbstractProcessor {
       Set<? extends Element> annotatedElements = env.getElementsAnnotatedWith(annotationElement);
       for (Element annotatedElement : annotatedElements) {
         if (annotatedElement instanceof ExecutableElement) {
-          // get class hierarchy
-          Element callbackElement = annotatedElement.getEnclosingElement();
-
           // populate the proxy impl map
           ExecutableElement callbackMethod = (ExecutableElement) annotatedElement;
           processCallback(annotationElement, callbackMethod);
