@@ -99,4 +99,24 @@ compile 'com.telly:groundy:(insert latest version)'
 compile 'com.telly:groundy-compiler:(insert latest version)'
 ```
 
+Proguard
+========
+
+If you are using proguard, please add these rules
+
+```txt
+-keepattributes *Annotation*
+
+-keepclassmembers,allowobfuscation class * {
+    @com.telly.groundy.annotations.* *;
+    <init>();
+}
+
+-keepnames class com.telly.groundy.generated.*
+-keep class com.telly.groundy.generated.*
+-keep class com.telly.groundy.ResultProxy
+-keepnames class * extends com.telly.groundy.ResultProxy
+-keep class * extends com.telly.groundy.GroundyTask
+```
+
 At this point latest version is `1.4`.

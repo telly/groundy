@@ -48,7 +48,7 @@ public final class Groundy implements Parcelable {
    *
    * <pre>{@code
    *
-   * @OnFailure public void onFail(@Param(Groundy.CRASH_MESSAGE) crashMessage) {
+   * @OnFailure public void onFail(@Param(Groundy.CRASH_MESSAGE) String crashMessage) {
    * // do something nice
    * }
    * }</pre>

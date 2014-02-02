@@ -162,7 +162,7 @@ class CallbacksReceiver extends ResultReceiver implements HandlersHolder {
         L.d(TAG, "Using fast proxy for: " + handlerType);
       } catch (Exception e) {
         if (e instanceof ClassNotFoundException) {
-          L.e(TAG, "Could not load generated proxy. Did you add groundy-compiler dependency?");
+          L.e(TAG, "Could not load generated proxy. Did you add groundy-compiler dependency?", e);
         } else {
           e.printStackTrace();
         }

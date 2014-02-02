@@ -63,7 +63,11 @@ public class AttachReceiverExample extends Activity {
 
     mAttachToastBtn = (ToggleButton) findViewById(R.id.attach_toast);
     mAttachToastBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-      @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+      @Override
+      public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (mTaskHandler == null) {
+          return;
+        }
         if (isChecked) {
           mTaskHandler.appendCallbacks(mToastCallback);
         } else {

@@ -4,32 +4,46 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:0.6.+'
+    classpath 'com.android.tools.build:gradle:0.8.+'
+    classpath 'com.neenbedankt.gradle.plugins:android-apt:1.1'
   }
 }
 
+task wrapper(type: Wrapper) {
+  gradleVersion = '1.10'
+}
+
 apply plugin: 'android'
+apply plugin: 'android-apt'
 
 repositories {
   mavenLocal()
   mavenCentral()
-  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+  maven { url "https://os.sonatype.org/content/repositories/snapshots/" }
 }
 
 dependencies {
-  compile project(':groundy')
-  compile project(':groundy-compiler')
+  compile "com.telly:groundy:1.4"
+  apt "com.telly:groundy-compiler:1.4"
   compile 'com.github.kevinsawicki:http-request:4.0'
 }
 
 android {
   compileSdkVersion 18
-  buildToolsVersion "18.1.1"
+  buildToolsVersion "19.0.0"
 
   defaultConfig {
     minSdkVersion 8
     targetSdkVersion 18
   }
+
+//  buildTypes {
+//    debug {
+//      runProguard true
+//      proguardFile getDefaultProguardFile('proguard-android.txt')
+//      proguardFile 'proguard-groundy.txt'
+//    }
+//  }
 
   sourceSets {
     main {
