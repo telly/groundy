@@ -96,8 +96,9 @@ For **Gradle** projects use:
 
 ```groovy
 compile 'com.telly:groundy:(insert latest version)'
-compile 'com.telly:groundy-compiler:(insert latest version)'
+provided 'com.telly:groundy-compiler:(insert latest version)'
 ```
+Note: `provided` dependencies are supported by android gradle plugin v0.8 or later.
 
 At this point latest version is `1.5`.
 
