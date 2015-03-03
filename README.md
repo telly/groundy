@@ -2,6 +2,7 @@ Groundy library for Android
 ===========================
 
 `@Deprecated`
+=============
 
 Unfortunatenly this library is no longer maintained, we encourage you to use other widely supported solutions like [RxJava](https://github.com/ReactiveX/RxJava).
 
