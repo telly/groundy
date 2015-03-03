@@ -1,6 +1,10 @@
 Groundy library for Android
 ===========================
 
+`@Deprecated`
+
+Unfortunatenly this library is no longer maintained, we encourage you to use other widely supported solutions like [RxJava](https://github.com/ReactiveX/RxJava).
+
 ![Groundy](http://i.imgur.com/2xg2weE.png)
 
 Groundy is a fun, sexy way to do background work on your Android app; it's specially useful for
